@@ -13,7 +13,7 @@ export function Navbar() {
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/escola" className="flex items-center gap-2 text-white font-bold">
           <span className="text-xl">🎵</span>
-          <span className="hidden sm:inline">HarmoniaFlow</span>
+          <span className="hidden sm:inline">Cavaquinho</span>
         </Link>
 
         <nav className="flex items-center gap-1">

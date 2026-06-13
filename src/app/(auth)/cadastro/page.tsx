@@ -37,7 +37,7 @@ export default function CadastroPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">🎵</div>
-          <h1 className="text-2xl font-bold text-white">HarmoniaFlow</h1>
+          <h1 className="text-2xl font-bold text-white">Cavaquinho</h1>
           <p className="text-slate-400 text-sm mt-1">Escola de Música Online</p>
         </div>
 

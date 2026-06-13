@@ -6,7 +6,7 @@ import { Providers } from "./providers"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "HarmoniaFlow — Escola de Música",
+  title: "Cavaquinho — Escola de Música",
   description: "Aprenda harmonia, escalas, acordes e cifras de pagode e samba.",
 }
 
