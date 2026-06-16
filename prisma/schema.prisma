@@ -16,7 +16,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  progress UserProgress[]
+  progress    UserProgress[]
+  favoritos   CifraFavorito[]
+  repertorios Repertorio[]
 }
 
 enum Role {
@@ -38,4 +40,61 @@ model UserProgress {
 
   @@unique([userId, moduleId, lessonId])
   @@index([userId])
+}
+
+model Cifra {
+  id         String   @id @default(cuid())
+  titulo     String
+  artista    String?
+  tom        String?
+  conteudo   String   @db.Text
+  progressao String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  favoritos CifraFavorito[]
+  itens     RepertorioItem[]
+
+  @@index([titulo])
+}
+
+model CifraFavorito {
+  id        String   @id @default(cuid())
+  userId    String
+  cifraId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cifra Cifra @relation(fields: [cifraId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cifraId])
+  @@index([userId])
+}
+
+model Repertorio {
+  id        String   @id @default(cuid())
+  userId    String
+  nome      String
+  descricao String?
+  cor       String   @default("violet")
+  emoji     String   @default("🎵")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itens RepertorioItem[]
+
+  @@index([userId])
+}
+
+model RepertorioItem {
+  id           String @id @default(cuid())
+  repertorioId String
+  cifraId      String
+  ordem        Int    @default(0)
+
+  repertorio Repertorio @relation(fields: [repertorioId], references: [id], onDelete: Cascade)
+  cifra      Cifra      @relation(fields: [cifraId], references: [id], onDelete: Cascade)
+
+  @@unique([repertorioId, cifraId])
+  @@index([repertorioId])
 }
