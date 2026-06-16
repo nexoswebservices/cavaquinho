@@ -283,3 +283,62 @@ export function detectCadences(degrees: DegreeInfo[]): Cadence[] {
 
   return cadences
 }
+
+// Campo harmônico: generate the 7 diatonic chords for a key
+export interface CampoChord {
+  degree: string
+  root: string
+  quality: Quality
+  label: string
+  example: string
+}
+
+const QUALITY_LABEL: Record<Quality, string> = {
+  M: 'maior',
+  m: 'menor',
+  d7: 'dom7',
+  dim: 'diminuto',
+  hdim: 'meio-dim',
+  aug: 'aum',
+  sus: 'sus',
+}
+
+// Preferred display names (sharps → flats for common keys)
+const FLAT_KEYS = new Set(['F', 'A#', 'D#', 'G#', 'C#', 'F#'])
+const FLAT_MAP: Record<string, string> = {
+  'A#': 'Bb', 'D#': 'Eb', 'G#': 'Ab', 'C#': 'Db', 'F#': 'Gb',
+}
+
+function displayNote(n: string, keyRoot: string): string {
+  if (FLAT_KEYS.has(keyRoot) && FLAT_MAP[n]) return FLAT_MAP[n]
+  return n
+}
+
+export function campoHarmonico(root: string, mode: Mode): CampoChord[] {
+  const intervals = mode === 'major' ? MAJOR : NAT_MINOR
+  const scale = scaleOf(root, intervals)
+  const dQ = mode === 'major' ? MAJ_Q : MIN_Q
+  const romans = ROMAN
+  const fns = mode === 'major' ? MAJ_FN : MIN_FN
+
+  return scale.map((note, i) => {
+    const quality = dQ[i]
+    const isMin = quality === 'm' || quality === 'dim' || quality === 'hdim'
+    const roman = isMin ? romans[i].toLowerCase() : romans[i]
+
+    const displayRoot = displayNote(note, root)
+    const suffix = quality === 'm' ? 'm'
+      : quality === 'd7' ? '7'
+      : quality === 'dim' ? 'º'
+      : quality === 'hdim' ? 'm7(5-)'
+      : ''
+
+    return {
+      degree: roman,
+      root: displayRoot,
+      quality,
+      label: QUALITY_LABEL[quality],
+      example: displayRoot + suffix,
+    }
+  })
+}

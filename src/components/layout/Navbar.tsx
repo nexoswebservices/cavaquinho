@@ -50,6 +50,17 @@ export function Navbar() {
             Análise
           </Link>
 
+          <Link
+            href="/biblioteca"
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+              pathname.startsWith("/biblioteca")
+                ? "bg-violet-600/20 text-violet-300"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Biblioteca
+          </Link>
+
           {session && (
             <div className="flex items-center gap-2 ml-3 pl-3 border-l border-white/10">
               <span className="text-xs text-slate-500 hidden sm:inline">
