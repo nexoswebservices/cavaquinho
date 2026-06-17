@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { MODULES } from "@/lib/escola-content"
 import { ModuleGrid } from "@/components/escola/ModuleGrid"
+import { EscolaSubNav } from "@/components/escola/EscolaSubNav"
 
 export const dynamic = "force-dynamic"
 
@@ -15,11 +16,14 @@ const COLOR_MAP: Record<string, string> = {
 
 export default async function EscolaPage() {
   const session = await getServerSession(authOptions)
+  const userId = session?.user?.id
 
-  const progressRecords = await prisma.userProgress.findMany({
-    where: { userId: session!.user!.id, completed: true },
-    select: { moduleId: true, lessonId: true },
-  })
+  const progressRecords = userId
+    ? await prisma.userProgress.findMany({
+        where: { userId, completed: true },
+        select: { moduleId: true, lessonId: true },
+      })
+    : []
 
   const completedSet = new Set(progressRecords.map((r) => `${r.moduleId}:${r.lessonId}`))
 
@@ -33,6 +37,7 @@ export default async function EscolaPage() {
 
   return (
     <div>
+      <EscolaSubNav />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white mb-1">Escola de Música</h1>

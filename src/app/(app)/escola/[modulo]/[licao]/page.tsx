@@ -19,16 +19,20 @@ export default async function LicaoPage({
   if (!mod || !lesson) notFound()
 
   const session = await getServerSession(authOptions)
-  const progress = await prisma.userProgress.findUnique({
-    where: {
-      userId_moduleId_lessonId: {
-        userId: session!.user!.id,
-        moduleId: mod.id,
-        lessonId: lesson.id,
-      },
-    },
-  })
+  const userId = session?.user?.id
+  const progress = userId
+    ? await prisma.userProgress.findUnique({
+        where: {
+          userId_moduleId_lessonId: {
+            userId,
+            moduleId: mod.id,
+            lessonId: lesson.id,
+          },
+        },
+      })
+    : null
   const isCompleted = progress?.completed ?? false
+  const isLoggedIn = !!userId
 
   const lessonIndex = mod.lessons.findIndex((l) => l.id === lesson.id)
   const prevLesson = lessonIndex > 0 ? mod.lessons[lessonIndex - 1] : null
@@ -107,6 +111,7 @@ export default async function LicaoPage({
         moduleId={mod.id}
         lessonId={lesson.id}
         isCompleted={isCompleted}
+        isLoggedIn={isLoggedIn}
         prevLesson={prevLesson ? { id: prevLesson.id, title: prevLesson.title } : null}
         nextLesson={nextLesson ? { id: nextLesson.id, title: nextLesson.title } : null}
         moduleHref={`/escola/${mod.id}`}

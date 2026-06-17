@@ -8,16 +8,19 @@ export const dynamic = "force-dynamic"
 
 export default async function CifrasPage() {
   const session = await getServerSession(authOptions)
+  const userId = session?.user?.id
 
   const [cifras, favoritos] = await Promise.all([
     prisma.cifra.findMany({
       select: { id: true, titulo: true, artista: true, tom: true },
       orderBy: { titulo: "asc" },
     }),
-    prisma.cifraFavorito.findMany({
-      where: { userId: session!.user!.id },
-      select: { cifraId: true },
-    }),
+    userId
+      ? prisma.cifraFavorito.findMany({
+          where: { userId },
+          select: { cifraId: true },
+        })
+      : [],
   ])
 
   const favoritoSet = new Set(favoritos.map((f) => f.cifraId))

@@ -34,7 +34,7 @@ O intervalo entre as notas não é sempre igual. Existem dois tamanhos básicos:
 - **Tom (T)** = 2 semitons — distância maior
 - **Semitom (st)** = 1 semitom — distância mínima
 
-No violão, um semitom = 1 traste. Dois trastes = 1 tom.
+No cavaquinho, um semitom = 1 traste. Dois trastes = 1 tom.
 
 ### Por que estudar escalas?
 
@@ -47,7 +47,7 @@ No violão, um semitom = 1 traste. Dois trastes = 1 tom.
         `,
         tips: [
           "Memorize as notas: C D E F G A B C",
-          "No violão: 1 traste = 1 semitom, 2 trastes = 1 tom",
+          "No cavaquinho: 1 traste = 1 semitom, 2 trastes = 1 tom",
           "Prática diária de 10 minutos já faz diferença",
         ],
       },
@@ -95,15 +95,13 @@ G - A - B - C - D - E - F# - G
 
 Note o **F#** (fá sustenido) — necessário para manter a fórmula T-T-st-T-T-T-st.
 
-### No violão (C Maior aberto)
+### No cavaquinho (C Maior — afinação D-G-B-D)
 
 \`\`\`
-e |---0---1---3---
+D |---0---2---3---
 B |---0---1---3---
 G |---0---2-------
 D |---0---2---3---
-A |---0---2---3---
-E |---0---1---3---
 \`\`\`
         `,
         tips: [
@@ -190,15 +188,13 @@ Ao remover os graus mais "tensos", sobram apenas as notas mais consonantes. Isso
 - Riffs de pagode e samba
 - Melodias de música infantil (Brilha Brilha Estrelinha usa pentatônica!)
 
-### Padrão no violão (C Pentatônica Maior, posição aberta)
+### No cavaquinho (C Pentatônica Maior — afinação D-G-B-D)
 
 \`\`\`
-e |---0---2---3---
+D |---0---3---5---
 B |---0---1---3---
-G |---0---2-------
+G |---0---2---5---
 D |---0---2---3---
-A |---0---2---3---
-E |---0---2---3---
 \`\`\`
         `,
         tips: [
@@ -229,15 +225,13 @@ Pegue a escala menor natural e **remova o 2° e o 6° graus**:
 
 A pentatônica menor de **A** e a pentatônica maior de **C** usam as mesmas notas — são relativas entre si, igual acontece com as escalas maiores e menores.
 
-### Box position no violão (Am Pentatônica — 5° posição)
+### No cavaquinho (Am Pentatônica — 5ª posição)
 
 \`\`\`
-e |---5---8---
+D |---5---8---
 B |---5---8---
 G |---5---7---
 D |---5---7---
-A |---5---7---
-E |---5---8---
 \`\`\`
 
 Esse padrão se repete em qualquer tom — só mude a posição inicial!
@@ -306,7 +300,7 @@ Uma forma fácil: todos os modos de **C maior** usam as mesmas notas (C D E F G 
     id: "acordes",
     title: "Acordes",
     description: "De tríades simples a acordes estendidos: construa a base harmônica do pagode e do samba.",
-    icon: "🎸",
+    icon: "🎶",
     color: "indigo",
     lessons: [
       {
@@ -495,7 +489,7 @@ A **9ª** é a mesma nota que a 2ª, mas uma oitava acima.
 | Cadd9  | C E G D |
 | Am9    | A C E G B |
 
-> **Dica:** No violão, o acorde Cadd9 (C com 9ª adicionada) é muito mais rico que o C simples e não muito mais difícil de tocar.
+> **Dica:** No cavaquinho, o acorde Cadd9 (C com 9ª adicionada) é muito mais rico que o C simples e não muito mais difícil de tocar.
 
 ### 11ª (Décima Primeira)
 
@@ -520,14 +514,14 @@ Essa sequência II9 - V13 - Imaj9 é o "II-V-I estendido" — coração do samba
 
 ### Regra prática
 
-Não é necessário tocar todas as notas. Nos acordes de guitarra/violão, geralmente omitimos a **5ª justa** (ela não adiciona cor) e mantemos:
+Não é necessário tocar todas as notas. No cavaquinho (4 cordas), geralmente omitimos a **5ª justa** (ela não adiciona cor) e mantemos:
 - Tônica (no baixo)
 - 3ª (define maior/menor)
 - 7ª (define o tipo)
 - Extensão desejada (9, 11 ou 13)
         `,
         tips: [
-          "Omita a 5ª para encaixar extensões no violão",
+          "Omita a 5ª para encaixar extensões no cavaquinho",
           "Cadd9 é mais bonito que C simples e quase igual de tocar",
           "G13 → Cmaj9: o II-V-I estendido é o coração da bossa nova",
         ],

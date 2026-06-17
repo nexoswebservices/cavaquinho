@@ -1,15 +1,5 @@
-import { QuizGame } from "@/components/quiz/QuizGame"
+import { redirect } from "next/navigation"
 
-export default function QuizPage() {
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-1">Quiz</h1>
-        <p className="text-slate-400">
-          Teste seus conhecimentos de harmonia, acordes e cadências do samba e pagode.
-        </p>
-      </div>
-      <QuizGame />
-    </div>
-  )
+export default function QuizRedirect() {
+  redirect("/escola/quiz")
 }

@@ -1,12 +1,10 @@
 "use client"
 
-import { useState } from "react"
 import { campoHarmonico } from "@/lib/teoria"
 import type { Mode } from "@/lib/teoria"
 
 const NOTAS_DISPLAY = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
 
-// Map display note → teoria.ts norm
 const TO_NORM: Record<string, string> = {
   Eb: 'D#', Ab: 'G#', Bb: 'A#',
 }
@@ -34,10 +32,14 @@ function degreeColor(deg: string): string {
   return DEGREE_COLOR[deg] ?? 'border-slate-500/20 bg-white/5 text-slate-400'
 }
 
-export function CampoHarmonico() {
-  const [nota, setNota] = useState("C")
-  const [mode, setMode] = useState<Mode>("major")
+interface CampoHarmonicoProps {
+  nota: string
+  mode: Mode
+  onNotaChange: (nota: string) => void
+  onModeChange: (mode: Mode) => void
+}
 
+export function CampoHarmonico({ nota, mode, onNotaChange, onModeChange }: CampoHarmonicoProps) {
   const normRoot = TO_NORM[nota] ?? nota
   const campo = campoHarmonico(normRoot, mode)
 
@@ -49,7 +51,7 @@ export function CampoHarmonico() {
           {NOTAS_DISPLAY.map((n) => (
             <button
               key={n}
-              onClick={() => setNota(n)}
+              onClick={() => onNotaChange(n)}
               className={`w-10 h-10 rounded-lg text-sm font-semibold transition-colors ${
                 nota === n
                   ? "bg-violet-600 text-white"
@@ -64,7 +66,7 @@ export function CampoHarmonico() {
           {(["major", "minor"] as Mode[]).map((m) => (
             <button
               key={m}
-              onClick={() => setMode(m)}
+              onClick={() => onModeChange(m)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 mode === m
                   ? "bg-violet-600 text-white"

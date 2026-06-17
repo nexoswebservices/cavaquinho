@@ -9,9 +9,10 @@ export const dynamic = "force-dynamic"
 
 export default async function RepertorioPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
+  const userId = session?.user?.id
 
   const repertorio = await prisma.repertorio.findFirst({
-    where: { id: params.id, userId: session!.user!.id },
+    where: { id: params.id, ...(userId ? { userId } : {}) },
     include: {
       itens: {
         orderBy: { ordem: "asc" },

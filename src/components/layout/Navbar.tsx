@@ -4,6 +4,14 @@ import { signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+const NAV_LINKS = [
+  { href: "/escola", label: "Escola", match: "/escola" },
+  { href: "/cifras", label: "Cifras", match: "/cifras" },
+  { href: "/analise", label: "Análise", match: "/analise" },
+  { href: "/biblioteca", label: "Biblioteca", match: "/biblioteca" },
+  { href: "/cadencias", label: "Cadências", match: "/cadencias" },
+]
+
 export function Navbar() {
   const { data: session } = useSession()
   const pathname = usePathname()
@@ -17,96 +25,42 @@ export function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-1">
-          <Link
-            href="/escola"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              pathname.startsWith("/escola")
-                ? "bg-violet-600/20 text-violet-300"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Escola
-          </Link>
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                pathname.startsWith(link.match)
+                  ? "bg-violet-600/20 text-violet-300"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
 
-          <Link
-            href="/cifras"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              pathname.startsWith("/cifras")
-                ? "bg-violet-600/20 text-violet-300"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Cifras
-          </Link>
-
-          <Link
-            href="/analise"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              pathname.startsWith("/analise")
-                ? "bg-violet-600/20 text-violet-300"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Análise
-          </Link>
-
-          <Link
-            href="/biblioteca"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              pathname.startsWith("/biblioteca")
-                ? "bg-violet-600/20 text-violet-300"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Biblioteca
-          </Link>
-
-          <Link
-            href="/cadencias"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              pathname.startsWith("/cadencias")
-                ? "bg-violet-600/20 text-violet-300"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Cadências
-          </Link>
-
-          <Link
-            href="/quiz"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              pathname.startsWith("/quiz")
-                ? "bg-violet-600/20 text-violet-300"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Quiz
-          </Link>
-
-          <Link
-            href="/estudos"
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              pathname.startsWith("/estudos")
-                ? "bg-violet-600/20 text-violet-300"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            Estudos
-          </Link>
-
-          {session && (
-            <div className="flex items-center gap-2 ml-3 pl-3 border-l border-white/10">
-              <span className="text-xs text-slate-500 hidden sm:inline">
-                {session.user?.name ?? session.user?.email}
-              </span>
-              <button
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                className="text-xs text-slate-500 hover:text-red-400 transition-colors"
+          <div className="flex items-center gap-2 ml-3 pl-3 border-l border-white/10">
+            {session ? (
+              <>
+                <span className="text-xs text-slate-500 hidden sm:inline">
+                  {session.user?.name ?? session.user?.email}
+                </span>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="text-xs text-slate-500 hover:text-red-400 transition-colors"
+                >
+                  Sair
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="text-xs text-violet-300 hover:text-violet-200 transition-colors"
               >
-                Sair
-              </button>
-            </div>
-          )}
+                Entrar
+              </Link>
+            )}
+          </div>
         </nav>
       </div>
     </header>

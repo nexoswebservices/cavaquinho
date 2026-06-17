@@ -20,10 +20,13 @@ export default async function ModulePage({ params }: { params: { modulo: string 
   if (!mod) notFound()
 
   const session = await getServerSession(authOptions)
-  const progressRecords = await prisma.userProgress.findMany({
-    where: { userId: session!.user!.id, moduleId: mod.id, completed: true },
-    select: { lessonId: true },
-  })
+  const userId = session?.user?.id
+  const progressRecords = userId
+    ? await prisma.userProgress.findMany({
+        where: { userId, moduleId: mod.id, completed: true },
+        select: { lessonId: true },
+      })
+    : []
   const completedSet = new Set(progressRecords.map((r) => r.lessonId))
 
   const completed = completedSet.size

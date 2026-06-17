@@ -8,6 +8,7 @@ interface LessonActionsProps {
   moduleId: string
   lessonId: string
   isCompleted: boolean
+  isLoggedIn: boolean
   prevLesson: { id: string; title: string } | null
   nextLesson: { id: string; title: string } | null
   moduleHref: string
@@ -17,6 +18,7 @@ export function LessonActions({
   moduleId,
   lessonId,
   isCompleted,
+  isLoggedIn,
   prevLesson,
   nextLesson,
   moduleHref,
@@ -26,6 +28,10 @@ export function LessonActions({
   const [loading, setLoading] = useState(false)
 
   async function toggleComplete() {
+    if (!isLoggedIn) {
+      router.push("/login")
+      return
+    }
     setLoading(true)
     const newState = !completed
     try {
@@ -48,12 +54,14 @@ export function LessonActions({
         onClick={toggleComplete}
         disabled={loading}
         className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 border ${
-          completed
+          !isLoggedIn
+            ? "bg-[#120d24] border-white/10 text-slate-400 hover:border-violet-500/30 hover:text-violet-300"
+            : completed
             ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
             : "bg-violet-600 border-transparent text-white hover:bg-violet-500"
         } disabled:opacity-50`}
       >
-        {loading ? "Salvando..." : completed ? "✓ Lição concluída — clique para desmarcar" : "Marcar como concluída"}
+        {!isLoggedIn ? "Entrar para marcar progresso" : loading ? "Salvando..." : completed ? "✓ Lição concluída — clique para desmarcar" : "Marcar como concluída"}
       </button>
 
       {/* Navegação entre lições */}

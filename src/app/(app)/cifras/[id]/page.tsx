@@ -11,19 +11,24 @@ export const dynamic = "force-dynamic"
 
 export default async function CifraPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
+  const userId = session?.user?.id
 
   const cifra = await prisma.cifra.findUnique({ where: { id: params.id } })
   if (!cifra) notFound()
 
   const [favorito, repertorios] = await Promise.all([
-    prisma.cifraFavorito.findUnique({
-      where: { userId_cifraId: { userId: session!.user!.id, cifraId: cifra.id } },
-    }),
-    prisma.repertorio.findMany({
-      where: { userId: session!.user!.id },
-      orderBy: { createdAt: "asc" },
-      select: { id: true, nome: true, emoji: true },
-    }),
+    userId
+      ? prisma.cifraFavorito.findUnique({
+          where: { userId_cifraId: { userId, cifraId: cifra.id } },
+        })
+      : null,
+    userId
+      ? prisma.repertorio.findMany({
+          where: { userId },
+          orderBy: { createdAt: "asc" },
+          select: { id: true, nome: true, emoji: true },
+        })
+      : [],
   ])
 
   return (
@@ -47,8 +52,19 @@ export default async function CifraPage({ params }: { params: { id: string } }) 
               Tom: {cifra.tom}
             </span>
           )}
-          <CifraFavoriteButton cifraId={cifra.id} initialFavorito={!!favorito} />
-          <AddToRepertorioButton cifraId={cifra.id} repertorios={repertorios} />
+          {userId ? (
+            <>
+              <CifraFavoriteButton cifraId={cifra.id} initialFavorito={!!favorito} />
+              <AddToRepertorioButton cifraId={cifra.id} repertorios={repertorios} />
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="text-xs bg-[#120d24] border border-white/5 text-slate-400 hover:text-violet-300 hover:border-violet-500/30 px-3 py-1.5 rounded-xl transition-colors"
+            >
+              Entrar para favoritar
+            </Link>
+          )}
         </div>
       </div>
 

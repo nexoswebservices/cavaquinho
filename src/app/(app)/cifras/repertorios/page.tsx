@@ -19,12 +19,15 @@ const COR_MAP: Record<string, string> = {
 
 export default async function RepertoriosPage() {
   const session = await getServerSession(authOptions)
+  const userId = session?.user?.id
 
-  const repertorios = await prisma.repertorio.findMany({
-    where: { userId: session!.user!.id },
-    orderBy: { createdAt: "asc" },
-    include: { _count: { select: { itens: true } } },
-  })
+  const repertorios = userId
+    ? await prisma.repertorio.findMany({
+        where: { userId },
+        orderBy: { createdAt: "asc" },
+        include: { _count: { select: { itens: true } } },
+      })
+    : []
 
   return (
     <div>
