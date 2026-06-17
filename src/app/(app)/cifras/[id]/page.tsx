@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth"
 import Link from "next/link"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { ChordSheet } from "@/components/cifras/ChordSheet"
+import { CifraTabs } from "@/components/cifras/CifraTabs"
 import { CifraFavoriteButton } from "@/components/cifras/CifraFavoriteButton"
 import { AddToRepertorioButton } from "@/components/cifras/AddToRepertorioButton"
 
@@ -68,7 +68,7 @@ export default async function CifraPage({ params }: { params: { id: string } }) 
         </div>
       </div>
 
-      <ChordSheet conteudo={cifra.conteudo} />
+      <CifraTabs conteudo={cifra.conteudo} tom={cifra.tom} />
     </div>
   )
 }
