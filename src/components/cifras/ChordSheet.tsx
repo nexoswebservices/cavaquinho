@@ -2,128 +2,128 @@
 
 import { useState } from "react"
 
-const CHORD_TOKEN =
+const CHORD_RE =
   /^[A-G](#|b)?(maj|min|dim|aug|sus|add|m)?\d*(\([^)]*\))?(\/[A-G](#|b)?\d*)?[ºø+\-]*$/i
-const TAB_LINE = /^[A-Ga-g]\|[-\d xhp/\\|]*\|?$/
+const STD_TAB_LINE = /^[A-Ga-g]\|[-\d xhp/\\|]*\|?$/
+const NUM_TAB_LINE = /^\|?\s*\d{1,3}(-\d{1,3}){2,}/
 const SECTION_RE =
-  /^\[.*\]$|^[\[(].*[\])]$|^(INTRO|REFRÃO|VERSO|BRIDGE|CODA|INTRODUÇÃO|SOLO|PRÉ-REFRÃO|FINAL)[:\s]*$/i
+  /^\[.*\]$|^[\[(].*[\])]$|^(INTRO|REFRÃO|VERSO|BRIDGE|CODA|INTRODUÇÃO|SOLO|PRÉ-REFRÃO|FINAL|REFR)[:\s]*$/i
 
 function isChordToken(t: string): boolean {
   if (!t || t.length > 20) return false
-  const cleaned = t.replace(/^\|+|\|+$/g, "").trim()
+  const cleaned = t.replace(/^\|+|\|+$/g, "").replace(/[()]/g, "").trim()
   if (!cleaned) return false
-  return CHORD_TOKEN.test(cleaned)
+  return CHORD_RE.test(cleaned)
 }
 
-function isChordLine(line: string): boolean {
+function classifyLine(line: string): "chord" | "lyric" | "tab" | "numtab" | "section" | "empty" | "mixed" {
   const trimmed = line.trim()
-  if (!trimmed) return false
-  if (TAB_LINE.test(trimmed)) return false
-  if (SECTION_RE.test(trimmed)) return false
+  if (!trimmed) return "empty"
+  if (SECTION_RE.test(trimmed)) return "section"
+  if (STD_TAB_LINE.test(trimmed)) return "tab"
+  if (NUM_TAB_LINE.test(trimmed)) return "numtab"
+
   const tokens = trimmed
     .split(/\s+/)
-    .filter((t) => t !== "|" && t !== "||" && t.replace(/\|/g, "").trim())
-  if (tokens.length === 0) return false
+    .filter((t) => t !== "|" && t !== "||" && t !== "%" && t.replace(/\|/g, "").trim())
+  if (tokens.length === 0) return "empty"
+
   const chordCount = tokens.filter(isChordToken).length
-  return chordCount / tokens.length >= 0.5
+  const ratio = chordCount / tokens.length
+
+  if (ratio >= 0.5 && chordCount > 0) return "chord"
+  if (/[a-záàâãéêíóôõúüçA-ZÁÀÂÃÉÊÍÓÔÕÚÜÇ]{2,}/.test(trimmed) && ratio < 0.5) return "lyric"
+  if (chordCount > 0 && /[a-záàâãéêíóôõúüç]{3,}/i.test(trimmed)) return "mixed"
+
+  return "lyric"
 }
 
-function isTabLine(line: string): boolean {
-  return TAB_LINE.test(line.trim())
-}
-
-function isSectionLine(line: string): boolean {
-  return SECTION_RE.test(line.trim())
-}
-
-function isLyricLine(line: string): boolean {
-  const trimmed = line.trim()
-  if (!trimmed) return false
-  if (isChordLine(line) || isTabLine(trimmed) || isSectionLine(trimmed)) return false
-  return /[a-záàâãéêíóôõúüç]/i.test(trimmed)
-}
-
-interface ParsedLine {
+interface ParsedBlock {
   type: "chord-lyric" | "chord-only" | "lyric" | "section" | "tab" | "empty"
-  chordLine?: string
-  lyricLine?: string
+  chords?: string
+  lyrics?: string
   text?: string
 }
 
-function parseLines(conteudo: string): ParsedLine[] {
+function parseContent(conteudo: string): ParsedBlock[] {
   const raw = conteudo.split("\n")
-  const result: ParsedLine[] = []
+  const result: ParsedBlock[] = []
   let i = 0
 
   while (i < raw.length) {
     const line = raw[i]
-    const trimmed = line.trim()
+    const cls = classifyLine(line)
 
-    if (!trimmed) {
+    if (cls === "empty") {
       result.push({ type: "empty" })
       i++
       continue
     }
 
-    if (isSectionLine(trimmed)) {
-      result.push({ type: "section", text: trimmed })
+    if (cls === "section") {
+      result.push({ type: "section", text: line.trim() })
       i++
       continue
     }
 
-    if (isTabLine(trimmed)) {
+    if (cls === "tab" || cls === "numtab") {
       result.push({ type: "tab", text: line })
       i++
       continue
     }
 
-    if (isChordLine(line)) {
+    if (cls === "mixed") {
+      result.push({ type: "lyric", text: line })
+      i++
+      continue
+    }
+
+    if (cls === "chord") {
       // Collect consecutive chord lines
-      const chordLines: string[] = [trimmed]
+      const chordLines: string[] = [line.trim()]
       let j = i + 1
       while (j < raw.length) {
-        const nextTrimmed = raw[j].trim()
-        if (!nextTrimmed) { j++; continue }
-        if (isChordLine(raw[j]) && !isSectionLine(nextTrimmed)) {
-          chordLines.push(nextTrimmed)
+        const nextCls = classifyLine(raw[j])
+        if (nextCls === "empty") { j++; continue }
+        if (nextCls === "chord") {
+          chordLines.push(raw[j].trim())
           j++
         } else {
           break
         }
       }
 
-      // Check if next non-empty line is a lyric
-      let nextLyricIdx = j
-      while (nextLyricIdx < raw.length && !raw[nextLyricIdx].trim()) {
-        nextLyricIdx++
-      }
+      // Find next non-empty line
+      let nextIdx = j
+      while (nextIdx < raw.length && !raw[nextIdx].trim()) nextIdx++
 
-      const nextLine = nextLyricIdx < raw.length ? raw[nextLyricIdx] : ""
-      const hasLyricNext = nextLine && isLyricLine(nextLine)
+      const nextLine = nextIdx < raw.length ? raw[nextIdx] : ""
+      const nextCls = classifyLine(nextLine)
 
-      if (hasLyricNext && chordLines.length >= 1) {
+      if ((nextCls === "lyric" || nextCls === "mixed") && chordLines.length >= 1) {
         // Emit earlier chord lines as chord-only
         for (let k = 0; k < chordLines.length - 1; k++) {
-          result.push({ type: "chord-only", chordLine: chordLines[k] })
+          result.push({ type: "chord-only", chords: chordLines[k] })
         }
-        // Pair the last chord line with the lyric
+        // Pair last chord line with lyric
         result.push({
           type: "chord-lyric",
-          chordLine: chordLines[chordLines.length - 1],
-          lyricLine: nextLine,
+          chords: chordLines[chordLines.length - 1],
+          lyrics: nextLine,
         })
-        i = nextLyricIdx + 1
+        i = nextIdx + 1
         continue
       }
 
-      // No lyric follows — emit all as chord-only
+      // No lyric follows
       for (const cl of chordLines) {
-        result.push({ type: "chord-only", chordLine: cl })
+        result.push({ type: "chord-only", chords: cl })
       }
       i = j
       continue
     }
 
+    // lyric
     result.push({ type: "lyric", text: line })
     i++
   }
@@ -131,13 +131,9 @@ function parseLines(conteudo: string): ParsedLine[] {
   return result
 }
 
-interface ChordSheetProps {
-  conteudo: string
-}
-
-export function ChordSheet({ conteudo }: ChordSheetProps) {
+export function ChordSheet({ conteudo }: { conteudo: string }) {
   const [fontSize, setFontSize] = useState(14)
-  const parsed = parseLines(conteudo)
+  const blocks = parseContent(conteudo)
 
   return (
     <div>
@@ -164,49 +160,51 @@ export function ChordSheet({ conteudo }: ChordSheetProps) {
         className="font-mono overflow-x-auto bg-[#0d0920] border border-white/5 rounded-2xl px-5 py-6 select-text"
         style={{ fontSize: `${fontSize}px` }}
       >
-        {parsed.map((line, i) => {
-          switch (line.type) {
+        {blocks.map((b, i) => {
+          switch (b.type) {
             case "empty":
-              return <div key={i} className="h-4" />
+              return <div key={i} className="h-3" />
 
             case "section":
               return (
                 <div
                   key={i}
-                  className="text-slate-400 font-semibold text-[0.9em] mt-6 mb-2 first:mt-0 border-b border-white/5 pb-1"
+                  className="text-amber-400/90 font-bold text-[0.95em] mt-7 mb-3 first:mt-0 uppercase tracking-wide"
                 >
-                  {line.text}
+                  {b.text}
                 </div>
               )
 
             case "tab":
               return (
-                <div key={i} className="text-emerald-400/70 whitespace-pre text-[0.85em] leading-tight">
-                  {line.text}
+                <div key={i} className="text-emerald-400/60 whitespace-pre text-[0.8em] leading-snug">
+                  {b.text}
                 </div>
               )
 
             case "chord-lyric":
               return (
-                <div key={i} className="leading-relaxed mb-1">
-                  <div className="text-violet-300 font-bold whitespace-pre text-[0.85em] leading-tight select-all">
-                    {line.chordLine}
+                <div key={i} className="mb-2">
+                  <div className="text-violet-400 font-bold whitespace-pre text-[0.9em] leading-tight">
+                    {b.chords}
                   </div>
-                  <div className="text-slate-200 whitespace-pre-wrap">{line.lyricLine}</div>
+                  <div className="text-slate-100 whitespace-pre-wrap leading-relaxed">
+                    {b.lyrics}
+                  </div>
                 </div>
               )
 
             case "chord-only":
               return (
-                <div key={i} className="mb-1">
-                  <span className="text-violet-300 font-bold whitespace-pre">{line.chordLine}</span>
+                <div key={i} className="text-violet-400 font-bold whitespace-pre mb-0.5">
+                  {b.chords}
                 </div>
               )
 
             case "lyric":
               return (
-                <div key={i} className="text-slate-200 whitespace-pre-wrap mb-1">
-                  {line.text}
+                <div key={i} className="text-slate-100 whitespace-pre-wrap leading-relaxed mb-1">
+                  {b.text}
                 </div>
               )
 
