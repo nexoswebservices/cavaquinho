@@ -29,17 +29,24 @@ async function main() {
       role: "admin",
     },
   })
-  console.log("Seed concluído — admin@harmoniaflow.com / admin123")
+  console.log("Admin: admin@harmoniaflow.com / admin123")
 
-  const cifraCount = await prisma.cifra.count()
-  if (cifraCount === 0) {
-    for (const c of CIFRAS) {
-      await prisma.cifra.create({ data: c })
-    }
-    console.log(`Seed concluído — ${CIFRAS.length} cifras importadas`)
-  } else {
-    console.log(`Cifras já existem (${cifraCount}), seed pulado`)
+  // Clear existing cifras and related data
+  await prisma.repertorioItem.deleteMany()
+  await prisma.cifraFavorito.deleteMany()
+  await prisma.cifra.deleteMany()
+  console.log("Cifras anteriores removidas")
+
+  // Insert all cifras in batches
+  const BATCH = 50
+  let inserted = 0
+  for (let i = 0; i < CIFRAS.length; i += BATCH) {
+    const batch = CIFRAS.slice(i, i + BATCH)
+    await prisma.cifra.createMany({ data: batch })
+    inserted += batch.length
+    process.stdout.write(`\r  ${inserted}/${CIFRAS.length} cifras...`)
   }
+  console.log(`\nSeed concluído — ${CIFRAS.length} cifras importadas (88 artistas)`)
 }
 
 main()
