@@ -104,33 +104,40 @@ def position_chords_over_lyric(chords, lyric):
     if len(chords) == 1:
         return chords[0], lyric_stripped
 
-    # Find word boundary positions for placing chords
+    # Distribute chords evenly across the lyric length
+    # Use character-based spacing for even distribution
+    total_chord_width = sum(len(c) for c in chords)
+    available = max(lyric_len, total_chord_width + len(chords) * 2)
+
+    # Calculate even spacing
+    spacing = available / len(chords)
+
+    # Find word boundaries to snap positions to
     word_starts = [0]
     for m in re.finditer(r'\s+\S', lyric_stripped):
         word_starts.append(m.start() + len(m.group()) - 1)
 
-    # Distribute chords across the lyric
     positions = []
-    if len(chords) <= len(word_starts):
-        # Place at evenly spaced word boundaries
-        step = max(1, len(word_starts) // len(chords))
-        for i, chord in enumerate(chords):
-            idx = min(i * step, len(word_starts) - 1)
-            positions.append((word_starts[idx], chord))
-    else:
-        # More chords than words - space evenly by character position
-        step = max(1, lyric_len // len(chords))
-        for i, chord in enumerate(chords):
-            positions.append((i * step, chord))
+    for i, chord in enumerate(chords):
+        target_pos = int(i * spacing)
+        # Snap to nearest word boundary if close
+        best_pos = target_pos
+        for ws in word_starts:
+            if abs(ws - target_pos) < spacing * 0.3:
+                best_pos = ws
+                break
+        positions.append((best_pos, chord))
 
-    # Build chord line with proper spacing
-    chord_line = list(' ' * (lyric_len + 20))
+    # Build chord line, avoiding overlaps
+    chord_line = list(' ' * (available + 20))
+    last_end = 0
     for pos, chord in positions:
+        pos = max(pos, last_end)
         pos = min(pos, len(chord_line) - len(chord))
-        # Don't overlap with previous chord
         for ci, ch in enumerate(chord):
             if pos + ci < len(chord_line):
                 chord_line[pos + ci] = ch
+        last_end = pos + len(chord) + 1
 
     return ''.join(chord_line).rstrip(), lyric_stripped
 
