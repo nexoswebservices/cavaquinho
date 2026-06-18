@@ -7,9 +7,10 @@ import { CifraAnalise } from "./CifraAnalise"
 interface CifraTabsProps {
   conteudo: string
   tom?: string | null
+  titulo?: string
 }
 
-export function CifraTabs({ conteudo, tom }: CifraTabsProps) {
+export function CifraTabs({ conteudo, tom, titulo }: CifraTabsProps) {
   const [tab, setTab] = useState<"cifra" | "analise">("cifra")
 
   return (
@@ -40,7 +41,7 @@ export function CifraTabs({ conteudo, tom }: CifraTabsProps) {
       {tab === "cifra" ? (
         <ChordSheet conteudo={conteudo} />
       ) : (
-        <CifraAnalise conteudo={conteudo} tom={tom} />
+        <CifraAnalise conteudo={conteudo} tom={tom} titulo={titulo} />
       )}
     </div>
   )

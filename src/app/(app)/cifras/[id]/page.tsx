@@ -68,7 +68,7 @@ export default async function CifraPage({ params }: { params: { id: string } }) 
         </div>
       </div>
 
-      <CifraTabs conteudo={cifra.conteudo} tom={cifra.tom} />
+      <CifraTabs conteudo={cifra.conteudo} tom={cifra.tom} titulo={cifra.titulo} />
     </div>
   )
 }

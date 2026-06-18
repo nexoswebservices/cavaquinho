@@ -1,6 +1,13 @@
+"use client"
+
+import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 import { AnalisadorHarmonico } from "@/components/analise/AnalisadorHarmonico"
 
-export default function AnalisePage() {
+function AnaliseContent() {
+  const searchParams = useSearchParams()
+  const preload = searchParams.get("p") ?? undefined
+
   return (
     <div>
       <div className="mb-8">
@@ -9,7 +16,15 @@ export default function AnalisePage() {
           Cole uma progressão de acordes e descubra a tonalidade, graus e cadências.
         </p>
       </div>
-      <AnalisadorHarmonico />
+      <AnalisadorHarmonico preloadText={preload} />
     </div>
+  )
+}
+
+export default function AnalisePage() {
+  return (
+    <Suspense>
+      <AnaliseContent />
+    </Suspense>
   )
 }

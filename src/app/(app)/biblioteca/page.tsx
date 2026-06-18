@@ -1,9 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { CampoHarmonico } from "@/components/biblioteca/CampoHarmonico"
 import { campoHarmonico } from "@/lib/teoria"
 import type { Mode } from "@/lib/teoria"
+
+interface SavedProgression {
+  progression: string
+  key: string
+  date: string
+}
 
 const TO_NORM: Record<string, string> = {
   Eb: "D#", Ab: "G#", Bb: "A#",
@@ -98,8 +105,26 @@ function buildExemplo(
 }
 
 export default function BibliotecaPage() {
+  const router = useRouter()
   const [nota, setNota] = useState("C")
   const [mode, setMode] = useState<Mode>("major")
+  const [savedProgs, setSavedProgs] = useState<SavedProgression[]>([])
+
+  useEffect(() => {
+    const raw = localStorage.getItem("savedProgressions")
+    if (raw) setSavedProgs(JSON.parse(raw))
+  }, [])
+
+  function removeSaved(index: number) {
+    const updated = savedProgs.filter((_, i) => i !== index)
+    setSavedProgs(updated)
+    localStorage.setItem("savedProgressions", JSON.stringify(updated))
+  }
+
+  function openInAnalise(progression: string) {
+    const encoded = encodeURIComponent(progression.replace(/\s*\|\s*/g, " "))
+    router.push(`/analise?p=${encoded}`)
+  }
 
   const normRoot = TO_NORM[nota] ?? nota
   const campo = campoHarmonico(normRoot, mode)
@@ -146,6 +171,43 @@ export default function BibliotecaPage() {
           ))}
         </div>
       </section>
+
+      {/* Progressões salvas */}
+      {savedProgs.length > 0 && (
+        <section>
+          <h2 className="text-lg font-semibold text-white mb-1">Minhas Progressões</h2>
+          <p className="text-slate-400 text-sm mb-5">
+            Progressões salvas a partir do Analisador Harmônico.
+          </p>
+          <div className="space-y-3">
+            {savedProgs.map((sp, i) => (
+              <div key={i} className="bg-[#120d24] border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-mono text-sm truncate">{sp.progression}</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Tom: <span className="text-violet-300">{sp.key}</span>
+                    <span className="ml-3">{new Date(sp.date).toLocaleDateString("pt-BR")}</span>
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => openInAnalise(sp.progression)}
+                    className="text-xs bg-violet-600/20 border border-violet-500/30 text-violet-300 hover:bg-violet-600/30 px-2.5 py-1.5 rounded-lg transition-colors"
+                  >
+                    Analisar
+                  </button>
+                  <button
+                    onClick={() => removeSaved(i)}
+                    className="text-xs text-slate-600 hover:text-rose-400 transition-colors px-1.5 py-1"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Intervalos */}
       <section>

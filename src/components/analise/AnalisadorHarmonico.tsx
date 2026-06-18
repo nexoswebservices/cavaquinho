@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import {
   parseProgression,
   detectKey,
@@ -44,10 +45,16 @@ function confidence(k: KeyResult, minScore: number, maxScore: number): number {
   return Math.round(((k.score - minScore) / (maxScore - minScore)) * 100)
 }
 
-export function AnalisadorHarmonico() {
-  const [text, setText] = useState("")
+interface Props {
+  preloadText?: string
+}
+
+export function AnalisadorHarmonico({ preloadText }: Props) {
+  const router = useRouter()
+  const [text, setText] = useState(preloadText ?? "")
   const [resultado, setResultado] = useState<Resultado | null>(null)
   const [error, setError] = useState("")
+  const [saved, setSaved] = useState(false)
 
   const analisar = useCallback(() => {
     const chords = parseProgression(text)
@@ -56,8 +63,16 @@ export function AnalisadorHarmonico() {
       return
     }
     setError("")
+    setSaved(false)
     setResultado(buildResultado(text) ?? null)
   }, [text])
+
+  useEffect(() => {
+    if (preloadText) {
+      const r = buildResultado(preloadText)
+      if (r) { setResultado(r); setError("") }
+    }
+  }, [preloadText])
 
   function selectKey(key: KeyResult) {
     if (!resultado) return
@@ -71,6 +86,17 @@ export function AnalisadorHarmonico() {
     setText(EXEMPLO)
     const r = buildResultado(EXEMPLO)
     if (r) { setResultado(r); setError("") }
+  }
+
+  function salvarNaBiblioteca() {
+    if (!resultado) return
+    const progressionStr = resultado.degrees.map((d) => d.chord.original).join(" | ")
+    const key = resultado.selectedKey.label
+    const entry = { progression: progressionStr, key, date: new Date().toISOString() }
+    const existing = JSON.parse(localStorage.getItem("savedProgressions") ?? "[]")
+    existing.push(entry)
+    localStorage.setItem("savedProgressions", JSON.stringify(existing))
+    setSaved(true)
   }
 
   const conf = resultado
@@ -92,7 +118,7 @@ export function AnalisadorHarmonico() {
           className="w-full bg-[#120d24] border border-white/10 rounded-xl px-4 py-3 text-white font-mono text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors resize-none"
         />
         {error && <p className="text-rose-400 text-sm">{error}</p>}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={analisar}
             className="bg-violet-600 hover:bg-violet-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
@@ -125,7 +151,7 @@ export function AnalisadorHarmonico() {
             <div className="flex flex-wrap gap-2">
               {resultado.keys.slice(0, 6).map((k) => {
                 const c = confidence(k, resultado.minScore, resultado.maxScore)
-                const active = k === resultado.selectedKey
+                const active = k.root === resultado.selectedKey.root && k.mode === resultado.selectedKey.mode
                 return (
                   <button
                     key={`${k.root}${k.mode}`}
@@ -207,6 +233,29 @@ export function AnalisadorHarmonico() {
               Nenhuma cadência clássica detectada nessa sequência.
             </p>
           )}
+
+          {/* Salvar na biblioteca */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={salvarNaBiblioteca}
+              disabled={saved}
+              className={`text-sm px-4 py-2 rounded-xl font-medium transition-colors ${
+                saved
+                  ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400"
+                  : "bg-[#120d24] border border-white/10 text-slate-300 hover:border-violet-500/30 hover:text-violet-300"
+              }`}
+            >
+              {saved ? "✓ Salvo na Biblioteca" : "Salvar na Biblioteca"}
+            </button>
+            {saved && (
+              <button
+                onClick={() => router.push("/biblioteca")}
+                className="text-xs text-violet-300 hover:text-violet-200 transition-colors"
+              >
+                Ver na Biblioteca →
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
