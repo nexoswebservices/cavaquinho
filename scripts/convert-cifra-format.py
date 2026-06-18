@@ -167,6 +167,13 @@ def convert_cifra(conteudo):
 
     while i < len(lines):
         line = lines[i]
+        trimmed_raw = line.strip()
+
+        # Skip standalone page numbers (1-3 digits alone on a line)
+        if re.match(r'^\d{1,3}$', trimmed_raw):
+            i += 1
+            continue
+
         cls = classify_line(line)
 
         if cls == 'empty':
@@ -247,12 +254,14 @@ def convert_cifra(conteudo):
             # CASE 2: Chords followed by lyric (inside verses — NO pipes)
             if next_cls == 'lyric' and all_chords:
                 found_first_lyric = True
-                if len(all_chords) <= 4:
+                if len(all_chords) <= 6:
+                    # Position all over lyric
                     chord_line, lyric_line = position_chords_over_lyric(all_chords, next_line)
                     if chord_line:
                         output.append(chord_line)
                     output.append(lyric_line)
                 else:
+                    # Too many: split — earlier as standalone, last group over lyric
                     for g in chord_groups[:-1]:
                         output.append('  '.join(g))
                     last_chords = chord_groups[-1]
