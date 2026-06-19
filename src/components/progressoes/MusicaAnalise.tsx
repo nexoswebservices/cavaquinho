@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import type { MusicaProgressao } from "@/lib/progressions-data"
+import type { MusicaProgressao, AcordeGrau } from "@/lib/progressions-data"
 
 const DEGREE_COLOR: Record<string, string> = {
   I: "bg-violet-500/30 border-violet-400/60 text-violet-100",
@@ -14,15 +14,36 @@ const DEGREE_COLOR: Record<string, string> = {
   V7: "bg-amber-500/30 border-amber-400/60 text-amber-100",
   vi: "bg-emerald-500/25 border-emerald-400/50 text-emerald-100",
   vii: "bg-rose-500/20 border-rose-400/40 text-rose-200",
-  "viio": "bg-rose-500/20 border-rose-400/40 text-rose-200",
+  viio: "bg-rose-500/20 border-rose-400/40 text-rose-200",
+  "viiº": "bg-rose-500/20 border-rose-400/40 text-rose-200",
+  i: "bg-violet-500/30 border-violet-400/60 text-violet-100",
+  iv: "bg-sky-500/25 border-sky-400/50 text-sky-100",
+  III: "bg-violet-500/20 border-violet-400/40 text-violet-200",
+  VI: "bg-emerald-500/20 border-emerald-400/40 text-emerald-200",
+  VII: "bg-slate-500/25 border-slate-400/40 text-slate-200",
 }
 
 function getDegreeColor(deg: string): string {
   if (deg.startsWith("V7/")) return "bg-orange-500/30 border-orange-400/60 text-orange-100"
+  if (deg.startsWith("♭") || deg.startsWith("#")) return "bg-rose-500/20 border-rose-400/40 text-rose-200"
   return DEGREE_COLOR[deg] ?? "bg-slate-500/20 border-slate-400/40 text-slate-200"
 }
 
-const INACTIVE_COLOR = "bg-slate-800/40 border-slate-700/20 text-slate-500"
+const INACTIVE = "bg-slate-800/40 border-slate-700/20 text-slate-500"
+
+function ChordBlock({ ag, highlighted }: { ag: AcordeGrau; highlighted: boolean }) {
+  const color = highlighted ? getDegreeColor(ag.grau) : INACTIVE
+  return (
+    <div className="flex flex-col gap-0.5">
+      <div className={`border-2 rounded-lg px-2.5 py-1.5 min-w-[44px] text-center font-mono text-sm font-bold ${color}`}>
+        {ag.acorde}
+      </div>
+      <div className={`border-2 rounded-lg px-2.5 py-1 min-w-[44px] text-center font-mono text-[0.65rem] font-bold ${color}`}>
+        {ag.grau}
+      </div>
+    </div>
+  )
+}
 
 interface MusicaAnaliseProps {
   musica: MusicaProgressao
@@ -37,7 +58,8 @@ export function MusicaAnalise({ musica, grausDestaque }: MusicaAnaliseProps) {
     router.push(`/analise?p=${encoded}`)
   }
 
-  const acordesGraus = musica.acordes_graus ?? []
+  const secoes = musica.secoes ?? []
+  const hasSections = secoes.length > 0
 
   return (
     <div className="bg-[#120d24] border border-white/5 rounded-2xl p-5">
@@ -60,23 +82,30 @@ export function MusicaAnalise({ musica, grausDestaque }: MusicaAnaliseProps) {
         </div>
       </div>
 
-      {/* Acordes + Graus — dois blocos empilhados, mesma cor */}
-      <div className="flex flex-wrap gap-1.5">
-        {acordesGraus.map((ag, i) => {
-          const isHighlighted = grausDestaque.includes(ag.grau)
-          const color = isHighlighted ? getDegreeColor(ag.grau) : INACTIVE_COLOR
-          return (
-            <div key={i} className="flex flex-col gap-0.5">
-              <div className={`border-2 rounded-lg px-2.5 py-1.5 min-w-[44px] text-center font-mono text-sm font-bold ${color}`}>
-                {ag.acorde}
-              </div>
-              <div className={`border-2 rounded-lg px-2.5 py-1 min-w-[44px] text-center font-mono text-[0.65rem] font-bold ${color}`}>
-                {ag.grau}
+      {/* Com seções */}
+      {hasSections ? (
+        <div className="space-y-4">
+          {secoes.map((secao, si) => (
+            <div key={si}>
+              <p className="text-xs text-amber-400/80 font-semibold uppercase tracking-wider mb-2">
+                {secao.nome}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {secao.acordes_graus.map((ag, i) => (
+                  <ChordBlock key={i} ag={ag} highlighted={grausDestaque.includes(ag.grau)} />
+                ))}
               </div>
             </div>
-          )
-        })}
-      </div>
+          ))}
+        </div>
+      ) : (
+        /* Sem seções — mostra todos os acordes */
+        <div className="flex flex-wrap gap-1.5">
+          {(musica.acordes_graus ?? []).map((ag, i) => (
+            <ChordBlock key={i} ag={ag} highlighted={grausDestaque.includes(ag.grau)} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

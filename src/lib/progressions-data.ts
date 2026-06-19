@@ -5,6 +5,12 @@ export interface AcordeGrau {
   grau: string
 }
 
+export interface SecaoAnalise {
+  nome: string
+  acordes_str: string
+  acordes_graus: AcordeGrau[]
+}
+
 export interface MusicaProgressao {
   titulo: string
   artista: string
@@ -14,6 +20,7 @@ export interface MusicaProgressao {
   todos_acordes: string
   graus_completos: string[]
   acordes_graus: AcordeGrau[]
+  secoes?: SecaoAnalise[]
 }
 
 export interface Progressao {
