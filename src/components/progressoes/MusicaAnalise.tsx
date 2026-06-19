@@ -22,6 +22,8 @@ function getDegreeColor(deg: string): string {
   return DEGREE_COLOR[deg] ?? "bg-slate-500/20 border-slate-400/40 text-slate-200"
 }
 
+const INACTIVE_COLOR = "bg-slate-800/40 border-slate-700/20 text-slate-500"
+
 interface MusicaAnaliseProps {
   musica: MusicaProgressao
   grausDestaque: string[]
@@ -58,27 +60,19 @@ export function MusicaAnalise({ musica, grausDestaque }: MusicaAnaliseProps) {
         </div>
       </div>
 
-      {/* Acordes com graus coloridos */}
+      {/* Acordes + Graus — dois blocos empilhados, mesma cor */}
       <div className="flex flex-wrap gap-1.5">
         {acordesGraus.map((ag, i) => {
           const isHighlighted = grausDestaque.includes(ag.grau)
+          const color = isHighlighted ? getDegreeColor(ag.grau) : INACTIVE_COLOR
           return (
-            <div
-              key={i}
-              className={`border-2 rounded-xl px-2.5 py-2 min-w-[48px] text-center transition-all ${
-                isHighlighted
-                  ? getDegreeColor(ag.grau)
-                  : "bg-slate-800/40 border-slate-700/20 text-slate-400"
-              }`}
-            >
-              <p className="text-sm font-bold font-mono leading-none mb-1">
+            <div key={i} className="flex flex-col gap-0.5">
+              <div className={`border-2 rounded-lg px-2.5 py-1.5 min-w-[44px] text-center font-mono text-sm font-bold ${color}`}>
                 {ag.acorde}
-              </p>
-              <p className={`text-[0.6rem] font-semibold leading-none ${
-                isHighlighted ? "opacity-80" : "opacity-50"
-              }`}>
+              </div>
+              <div className={`border-2 rounded-lg px-2.5 py-1 min-w-[44px] text-center font-mono text-[0.65rem] font-bold ${color}`}>
                 {ag.grau}
-              </p>
+              </div>
             </div>
           )
         })}
