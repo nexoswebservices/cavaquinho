@@ -1,7 +1,21 @@
 import { PROGRESSOES } from "@/lib/progressions-data"
 import { ProgressaoCard } from "@/components/progressoes/ProgressaoCard"
 
+const ORDER = [
+  "sequencia-I",
+  "sequencia-II",
+  "sequencia-III",
+  "sequencia-IV",
+  "sequencia-V",
+]
+
 export default function ProgressoesPage() {
+  const sorted = [...PROGRESSOES].sort((a, b) => {
+    const ai = ORDER.indexOf(a.slug)
+    const bi = ORDER.indexOf(b.slug)
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
+  })
+
   return (
     <div>
       <div className="mb-8">
@@ -11,8 +25,8 @@ export default function ProgressoesPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {PROGRESSOES.map((p) => (
+      <div className="space-y-4">
+        {sorted.map((p) => (
           <ProgressaoCard key={p.slug} progressao={p} />
         ))}
       </div>
@@ -20,7 +34,7 @@ export default function ProgressoesPage() {
       <div className="mt-8 bg-[#120d24] border border-white/5 rounded-2xl p-5 text-center">
         <p className="text-slate-500 text-sm">
           {PROGRESSOES.reduce((sum, p) => sum + p.musicas.length, 0)} análises de músicas em{" "}
-          {PROGRESSOES.length} progressões • Baseado em 448 cifras do repertório
+          {PROGRESSOES.length} progressões • Baseado em 20 cifras curadas do repertório
         </p>
       </div>
     </div>
