@@ -3,23 +3,23 @@
 import { useRouter } from "next/navigation"
 import type { MusicaProgressao } from "@/lib/progressions-data"
 
-const FN_DEGREE_COLOR: Record<string, string> = {
+const DEGREE_COLOR: Record<string, string> = {
   I: "bg-violet-500/30 border-violet-400/60 text-violet-100",
+  I7: "bg-violet-500/25 border-violet-400/50 text-violet-100",
   ii: "bg-sky-500/25 border-sky-400/50 text-sky-100",
   iii: "bg-violet-500/20 border-violet-400/40 text-violet-200",
   IV: "bg-sky-500/30 border-sky-400/60 text-sky-100",
-  V7: "bg-amber-500/30 border-amber-400/60 text-amber-100",
-  V: "bg-amber-500/25 border-amber-400/50 text-amber-100",
-  vi: "bg-violet-500/20 border-violet-400/40 text-violet-200",
-  vii: "bg-rose-500/20 border-rose-400/40 text-rose-200",
-  I7: "bg-violet-500/25 border-violet-400/50 text-violet-100",
   IV7: "bg-sky-500/25 border-sky-400/50 text-sky-100",
+  V: "bg-amber-500/25 border-amber-400/50 text-amber-100",
+  V7: "bg-amber-500/30 border-amber-400/60 text-amber-100",
+  vi: "bg-emerald-500/25 border-emerald-400/50 text-emerald-100",
+  vii: "bg-rose-500/20 border-rose-400/40 text-rose-200",
+  "viio": "bg-rose-500/20 border-rose-400/40 text-rose-200",
 }
 
-function degreeColor(deg: string): string {
+function getDegreeColor(deg: string): string {
   if (deg.startsWith("V7/")) return "bg-orange-500/30 border-orange-400/60 text-orange-100"
-  if (deg.includes("?")) return "bg-slate-500/15 border-slate-500/30 text-slate-300"
-  return FN_DEGREE_COLOR[deg] ?? "bg-slate-500/20 border-slate-400/40 text-slate-200"
+  return DEGREE_COLOR[deg] ?? "bg-slate-500/20 border-slate-400/40 text-slate-200"
 }
 
 interface MusicaAnaliseProps {
@@ -34,6 +34,8 @@ export function MusicaAnalise({ musica, grausDestaque }: MusicaAnaliseProps) {
     const encoded = encodeURIComponent(musica.todos_acordes)
     router.push(`/analise?p=${encoded}`)
   }
+
+  const acordesGraus = musica.acordes_graus ?? []
 
   return (
     <div className="bg-[#120d24] border border-white/5 rounded-2xl p-5">
@@ -56,35 +58,27 @@ export function MusicaAnalise({ musica, grausDestaque }: MusicaAnaliseProps) {
         </div>
       </div>
 
-      {/* Acordes reais da progressão */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs text-slate-500">Progressão:</span>
-        <div className="flex gap-1">
-          {musica.acordes_reais.map((a, i) => (
-            <span
-              key={i}
-              className="bg-violet-600/20 border border-violet-500/30 text-violet-200 font-mono text-sm font-bold px-2.5 py-1 rounded-lg"
-            >
-              {a}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Graus completos em blocos coloridos */}
-      <div className="flex flex-wrap gap-1">
-        {musica.graus_completos.map((g, i) => {
-          const isHighlighted = grausDestaque.includes(g)
+      {/* Acordes com graus coloridos */}
+      <div className="flex flex-wrap gap-1.5">
+        {acordesGraus.map((ag, i) => {
+          const isHighlighted = grausDestaque.includes(ag.grau)
           return (
             <div
               key={i}
-              className={`border-2 rounded-lg px-2 py-1.5 min-w-[40px] text-center text-xs font-bold font-mono transition-all ${
+              className={`border-2 rounded-xl px-2.5 py-2 min-w-[48px] text-center transition-all ${
                 isHighlighted
-                  ? degreeColor(g) + " scale-110"
-                  : "bg-slate-800/50 border-slate-700/30 text-slate-400"
+                  ? getDegreeColor(ag.grau)
+                  : "bg-slate-800/40 border-slate-700/20 text-slate-400"
               }`}
             >
-              {g}
+              <p className="text-sm font-bold font-mono leading-none mb-1">
+                {ag.acorde}
+              </p>
+              <p className={`text-[0.6rem] font-semibold leading-none ${
+                isHighlighted ? "opacity-80" : "opacity-50"
+              }`}>
+                {ag.grau}
+              </p>
             </div>
           )
         })}

@@ -217,6 +217,16 @@ if __name__ == '__main__':
                 acordes_reais = get_real_chords_for_pattern(prog['graus'], key)
                 todos_acordes = list(dict.fromkeys(ch[2] for ch in chords))
 
+                # Build acorde+grau pairs (unique chords with their degrees)
+                acordes_graus = []
+                seen_chords = set()
+                for ch in chords:
+                    if ch[2] not in seen_chords:
+                        seen_chords.add(ch[2])
+                        deg = get_degree(ch, key)
+                        if deg != '?':
+                            acordes_graus.append({'acorde': ch[2], 'grau': deg})
+
                 prog_data['musicas'].append({
                     'titulo': c['titulo'],
                     'artista': c['artista'],
@@ -225,6 +235,7 @@ if __name__ == '__main__':
                     'acordes_reais': acordes_reais,
                     'todos_acordes': ' '.join(todos_acordes[:20]),
                     'graus_completos': unique_degrees[:15],
+                    'acordes_graus': acordes_graus[:15],
                 })
 
         prog_data['musicas'].sort(key=lambda m: (m['artista'].lower(), m['titulo'].lower()))

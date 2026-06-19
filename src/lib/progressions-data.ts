@@ -1,5 +1,10 @@
 import data from "./progressions-data.json"
 
+export interface AcordeGrau {
+  acorde: string
+  grau: string
+}
+
 export interface MusicaProgressao {
   titulo: string
   artista: string
@@ -8,6 +13,7 @@ export interface MusicaProgressao {
   acordes_reais: string[]
   todos_acordes: string
   graus_completos: string[]
+  acordes_graus: AcordeGrau[]
 }
 
 export interface Progressao {
