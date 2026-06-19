@@ -1,129 +1,17 @@
 [
   {
-    "titulo": "Mina de Fé",
-    "artista": "Reinaldo",
-    "tom": "Gm",
-    "secoes": [
-      { "nome": "Progressão", "acordes": "Gm | Dm | Eb7+ | Cm | D7" }
-    ]
-  },
-  {
-    "titulo": "Deixa Alagar",
-    "artista": "Grupo Intimistas",
-    "tom": "Gm",
-    "secoes": [
-      { "nome": "Progressão", "acordes": "Gm | Fm | Bb7 | Eb7+ | Cm | D7" }
-    ]
-  },
-  {
-    "titulo": "Que Se Chama Amor",
-    "artista": "Ferrugem",
-    "tom": "G",
-    "secoes": [
-      { "nome": "Progressão", "acordes": "G7+ | Bm | C | D7" }
-    ]
-  },
-  {
     "titulo": "A Minha Fantasia",
     "artista": "Alexandre Pires",
     "tom": "A",
     "secoes": [
-      { "nome": "Parte 1", "acordes": "A | E | A7 | D" },
-      { "nome": "Parte 2", "acordes": "F | G | A" }
-    ]
-  },
-  {
-    "titulo": "Clareou",
-    "artista": "Grupo Clareou",
-    "tom": "G",
-    "secoes": [
-      { "nome": "Verso", "acordes": "G | Dm | C" },
-      { "nome": "Refrão", "acordes": "G | C" }
-    ]
-  },
-  {
-    "titulo": "Diferenão",
-    "artista": "Turma do Pagode",
-    "tom": "F#m",
-    "secoes": [
-      { "nome": "Progressão", "acordes": "F#m7 | B7 | G#m7 | C#Sus4 | C#" }
-    ]
-  },
-  {
-    "titulo": "Desencana",
-    "artista": "Sorriso Maroto",
-    "tom": "D",
-    "secoes": [
-      { "nome": "Progressão", "acordes": "D | C | G" }
-    ]
-  },
-  {
-    "titulo": "Amiga da Minha Mulher",
-    "artista": "Seu Jorge",
-    "tom": "Em",
-    "secoes": [
-      { "nome": "Progressão", "acordes": "Em | E7 | Am" }
-    ]
-  },
-  {
-    "titulo": "Identidade",
-    "artista": "Jorge Aragão",
-    "tom": "Em",
-    "secoes": [
-      { "nome": "Parte 1", "acordes": "Em7 | Bm7" },
-      { "nome": "Parte 2", "acordes": "Em7 | C | G | F# | F" }
-    ]
-  },
-  {
-    "titulo": "Pimpolho",
-    "artista": "Grupo Revelação",
-    "tom": "G",
-    "secoes": [
-      { "nome": "Verso", "acordes": "G | D | Em | Am | D" },
-      { "nome": "Ponte", "acordes": "D | Gm" }
-    ]
-  },
-  {
-    "titulo": "Lancinho",
-    "artista": "Turma do Pagode",
-    "tom": "Bb",
-    "secoes": [
-      { "nome": "Intro", "acordes": "Bb | C | Bb | C | D7" },
-      { "nome": "Verso", "acordes": "Gm7 | Am7 | D7 | Bb7+ | Am7 | Bb | C7" },
-      { "nome": "Refrão", "acordes": "Gm7 | Am7 | D7" }
-    ]
-  },
-  {
-    "titulo": "Esquema Preferido",
-    "artista": "Thiaguinho",
-    "tom": "F",
-    "secoes": [
-      { "nome": "Progressão", "acordes": "Dm | Bb | F | C" }
-    ]
-  },
-  {
-    "titulo": "Deixa em Off",
-    "artista": "Turma do Pagode",
-    "tom": "Bm",
-    "secoes": [
-      { "nome": "Progressão", "acordes": "Bm7 | G | Em7 | A | F#7" }
-    ]
-  },
-  {
-    "titulo": "Nem de Graça",
-    "artista": "Ferrugem",
-    "tom": "Gm",
-    "secoes": [
-      { "nome": "Progressão", "acordes": "Eb | F | Dm | Gm" }
-    ]
-  },
-  {
-    "titulo": "Inigualável Paixão",
-    "artista": "Reinaldo",
-    "tom": "E",
-    "secoes": [
-      { "nome": "Parte 1", "acordes": "E6/9 | G#m7 | Bm7 | E7 | A7+ | D7/9 | G#m7 | C#7 | F#7 | F#m7 | B7" },
-      { "nome": "Parte 2", "acordes": "E6/9 | G#7 | C#m | Cm7 | Bm7 | E7 | A7+ | A#º | E | C#7 | F#7/9 | B7 | E | B7" }
+      {
+        "nome": "Parte 1",
+        "acordes": "A | E | A7 | D"
+      },
+      {
+        "nome": "Parte 2",
+        "acordes": "F | G | A"
+      }
     ]
   },
   {
@@ -131,29 +19,123 @@
     "artista": "Exaltasamba",
     "tom": "G",
     "secoes": [
-      { "nome": "Intro", "acordes": "C7+ | G7+ | G7/5+" },
-      { "nome": "Verso", "acordes": "C7+ | Am7 | Bm7 | Em7 | C#m7/5- | C7+ | Cm6 | G7+" },
-      { "nome": "Refrão", "acordes": "G7/5+ | C7+ | D7 | G | Bm7 | C7+ | D7 | D#° | Em7 | Bm7 | C7+ | F#m7/5- | B7 | Em7 | Bm7 | C | D7 | G | C7+" }
+      {
+        "nome": "Intro",
+        "acordes": "C7+ | G7+ | G7/5+"
+      },
+      {
+        "nome": "Verso",
+        "acordes": "C7+ | Am7 | Bm7 | Em7 | C#m7/5- | C7+ | Cm6 | G7+"
+      },
+      {
+        "nome": "Refrão",
+        "acordes": "G7/5+ | C7+ | D7 | G | Bm7 | C7+ | D7 | D#° | Em7 | Bm7 | C7+ | F#m7/5- | B7 | Em7 | Bm7 | C | D7 | G | C7+"
+      }
     ]
   },
   {
-    "titulo": "Velocidade da Luz",
-    "artista": "Reinaldo",
+    "titulo": "Nem de Graça",
+    "artista": "Ferrugem",
     "tom": "Gm",
     "secoes": [
-      { "nome": "Parte 1", "acordes": "Gm | D | Cm | F7 | Bb | D7 | F7 | F#7 | G7" },
-      { "nome": "Parte 2", "acordes": "Cm | F7 | Bb | D7 | Gm7 | Ab7M | Am7(b5) | D7" },
-      { "nome": "Refrão", "acordes": "Gm | Cm | F7 | Bb | D7 | Gm | Ab7M | Am7(b5) | D7 | Gm | D7" }
+      {
+        "nome": "Progressão",
+        "acordes": "Eb | F | Dm | Gm"
+      }
     ]
   },
   {
-    "titulo": "Derê",
-    "artista": "Reinaldo",
-    "tom": "Am",
+    "titulo": "Que Se Chama Amor",
+    "artista": "Ferrugem",
+    "tom": "G",
     "secoes": [
-      { "nome": "Refrão", "acordes": "E7 | Am | G7 | C7+" },
-      { "nome": "Parte 1", "acordes": "Cm7 | Fm7 | G7 | Cm7 | Dm7/5- | G7" },
-      { "nome": "Parte 2", "acordes": "C7+ | E7 | Am7 | Gm7 | C7 | F7+ | G7 | F7+" }
+      {
+        "nome": "Progressão",
+        "acordes": "G7+ | Bm | C | D7"
+      }
+    ]
+  },
+  {
+    "titulo": "Clareou",
+    "artista": "Grupo Clareou",
+    "tom": "G",
+    "secoes": [
+      {
+        "nome": "Verso",
+        "acordes": "G | Dm | C"
+      },
+      {
+        "nome": "Refrão",
+        "acordes": "G | C"
+      }
+    ]
+  },
+  {
+    "titulo": "Deixa Alagar",
+    "artista": "Grupo Intimistas",
+    "tom": "Gm",
+    "secoes": [
+      {
+        "nome": "Progressão",
+        "acordes": "Gm | Fm | Bb7 | Eb7+ | Cm | D7"
+      }
+    ]
+  },
+  {
+    "titulo": "Pimpolho",
+    "artista": "Grupo Revelação",
+    "tom": "G",
+    "secoes": [
+      {
+        "nome": "Verso",
+        "acordes": "G | D | Em | Am | D"
+      },
+      {
+        "nome": "Ponte",
+        "acordes": "D | Gm"
+      }
+    ]
+  },
+  {
+    "titulo": "Identidade",
+    "artista": "Jorge Aragão",
+    "tom": "Em",
+    "secoes": [
+      {
+        "nome": "Parte 1",
+        "acordes": "Em7 | Bm7"
+      },
+      {
+        "nome": "Parte 2",
+        "acordes": "Em7 | C | G | F# | F"
+      }
+    ]
+  },
+  {
+    "titulo": "Cheia de Manias",
+    "artista": "Raça Negra",
+    "tom": "Gm",
+    "secoes": [
+      {
+        "nome": "Intro",
+        "acordes": "Gm | Eb | Cm | C#° | D7"
+      },
+      {
+        "nome": "Verso",
+        "acordes": "Gm | F"
+      },
+      {
+        "nome": "Refrão",
+        "acordes": "Gm | F"
+      },
+      {
+        "nome": "Solo",
+        "acordes": "Gm | F | Eb | F"
+      },
+      {
+        "nome": "Final",
+        "acordes": "Gm | F | Eb | F | Gm"
+      }
     ]
   },
   {
@@ -161,9 +143,156 @@
     "artista": "Reinaldo",
     "tom": "G",
     "secoes": [
-      { "nome": "Refrão", "acordes": "G/B | Bbº | Am7 | D7(4/9)" },
-      { "nome": "Parte 1", "acordes": "G7M | Gº | G7M | Gº | F7M | F6 | Am7 | D7(9)" },
-      { "nome": "Parte 2", "acordes": "Gm7 | Am7(5-) | D7(9-) | Gm7 | Gm7/F | Cm7 | F7 | Dm7(5-) | G7 | Cm7 | F7 | Bb7M | Eb7M | Am7(5-) | D7(9-)" }
+      {
+        "nome": "Refrão",
+        "acordes": "G/B | Bbº | Am7 | D7(4/9)"
+      },
+      {
+        "nome": "Parte 1",
+        "acordes": "G7M | Gº | G7M | Gº | F7M | F6 | Am7 | D7(9)"
+      },
+      {
+        "nome": "Parte 2",
+        "acordes": "Gm7 | Am7(5-) | D7(9-) | Gm7 | Gm7/F | Cm7 | F7 | Dm7(5-) | G7 | Cm7 | F7 | Bb7M | Eb7M | Am7(5-) | D7(9-)"
+      }
+    ]
+  },
+  {
+    "titulo": "Derê",
+    "artista": "Reinaldo",
+    "tom": "Am",
+    "secoes": [
+      {
+        "nome": "Refrão",
+        "acordes": "E7 | Am | G7 | C7+"
+      },
+      {
+        "nome": "Parte 1",
+        "acordes": "Cm7 | Fm7 | G7 | Cm7 | Dm7/5- | G7"
+      },
+      {
+        "nome": "Parte 2",
+        "acordes": "C7+ | E7 | Am7 | Gm7 | C7 | F7+ | G7 | F7+"
+      }
+    ]
+  },
+  {
+    "titulo": "Inigualável Paixão",
+    "artista": "Reinaldo",
+    "tom": "E",
+    "secoes": [
+      {
+        "nome": "Parte 1",
+        "acordes": "E6/9 | G#m7 | Bm7 | E7 | A7+ | D7/9 | G#m7 | C#7 | F#7 | F#m7 | B7"
+      },
+      {
+        "nome": "Parte 2",
+        "acordes": "E6/9 | G#7 | C#m | Cm7 | Bm7 | E7 | A7+ | A#º | E | C#7 | F#7/9 | B7 | E | B7"
+      }
+    ]
+  },
+  {
+    "titulo": "Mina de Fé",
+    "artista": "Reinaldo",
+    "tom": "Gm",
+    "secoes": [
+      {
+        "nome": "Progressão",
+        "acordes": "Gm | Dm | Eb7+ | Cm | D7"
+      }
+    ]
+  },
+  {
+    "titulo": "Velocidade da Luz",
+    "artista": "Reinaldo",
+    "tom": "Gm",
+    "secoes": [
+      {
+        "nome": "Parte 1",
+        "acordes": "Gm | D | Cm | F7 | Bb | D7 | F7 | F#7 | G7"
+      },
+      {
+        "nome": "Parte 2",
+        "acordes": "Cm | F7 | Bb | D7 | Gm7 | Ab7M | Am7(b5) | D7"
+      },
+      {
+        "nome": "Refrão",
+        "acordes": "Gm | Cm | F7 | Bb | D7 | Gm | Ab7M | Am7(b5) | D7 | Gm | D7"
+      }
+    ]
+  },
+  {
+    "titulo": "Amiga da Minha Mulher",
+    "artista": "Seu Jorge",
+    "tom": "Em",
+    "secoes": [
+      {
+        "nome": "Progressão",
+        "acordes": "Em | E7 | Am"
+      }
+    ]
+  },
+  {
+    "titulo": "Desencana",
+    "artista": "Sorriso Maroto",
+    "tom": "D",
+    "secoes": [
+      {
+        "nome": "Progressão",
+        "acordes": "D | C | G"
+      }
+    ]
+  },
+  {
+    "titulo": "Esquema Preferido",
+    "artista": "Thiaguinho",
+    "tom": "F",
+    "secoes": [
+      {
+        "nome": "Progressão",
+        "acordes": "Dm | Bb | F | C"
+      }
+    ]
+  },
+  {
+    "titulo": "Deixa em Off",
+    "artista": "Turma do Pagode",
+    "tom": "Bm",
+    "secoes": [
+      {
+        "nome": "Progressão",
+        "acordes": "Bm7 | G | Em7 | A | F#7"
+      }
+    ]
+  },
+  {
+    "titulo": "Diferenão",
+    "artista": "Turma do Pagode",
+    "tom": "F#m",
+    "secoes": [
+      {
+        "nome": "Progressão",
+        "acordes": "F#m7 | B7 | G#m7 | C#Sus4 | C#"
+      }
+    ]
+  },
+  {
+    "titulo": "Lancinho",
+    "artista": "Turma do Pagode",
+    "tom": "Bb",
+    "secoes": [
+      {
+        "nome": "Intro",
+        "acordes": "Bb | C | Bb | C | D7"
+      },
+      {
+        "nome": "Verso",
+        "acordes": "Gm7 | Am7 | D7 | Bb7+ | Am7 | Bb | C7"
+      },
+      {
+        "nome": "Refrão",
+        "acordes": "Gm7 | Am7 | D7"
+      }
     ]
   }
 ]
