@@ -118,7 +118,7 @@ export default function ProgressaoPage({ params }: { params: { slug: string } })
       {/* Lista de músicas */}
       <div className="space-y-3">
         {musicasFiltradas.map((m, i) => (
-          <MusicaAnalise key={i} musica={m} grausDestaque={progressao.graus} />
+          <MusicaAnalise key={i} musica={m} />
         ))}
       </div>
 

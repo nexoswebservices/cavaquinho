@@ -4,35 +4,51 @@ import { useRouter } from "next/navigation"
 import type { MusicaProgressao, AcordeGrau } from "@/lib/progressions-data"
 
 const DEGREE_COLOR: Record<string, string> = {
+  // Tônica (violeta)
   I: "bg-violet-500/30 border-violet-400/60 text-violet-100",
   I7: "bg-violet-500/25 border-violet-400/50 text-violet-100",
-  ii: "bg-sky-500/25 border-sky-400/50 text-sky-100",
-  iii: "bg-violet-500/20 border-violet-400/40 text-violet-200",
-  IV: "bg-sky-500/30 border-sky-400/60 text-sky-100",
-  IV7: "bg-sky-500/25 border-sky-400/50 text-sky-100",
-  V: "bg-amber-500/25 border-amber-400/50 text-amber-100",
-  V7: "bg-amber-500/30 border-amber-400/60 text-amber-100",
-  vi: "bg-emerald-500/25 border-emerald-400/50 text-emerald-100",
-  vii: "bg-rose-500/20 border-rose-400/40 text-rose-200",
-  viio: "bg-rose-500/20 border-rose-400/40 text-rose-200",
-  "viiº": "bg-rose-500/20 border-rose-400/40 text-rose-200",
   i: "bg-violet-500/30 border-violet-400/60 text-violet-100",
-  iv: "bg-sky-500/25 border-sky-400/50 text-sky-100",
-  III: "bg-violet-500/20 border-violet-400/40 text-violet-200",
-  VI: "bg-emerald-500/20 border-emerald-400/40 text-emerald-200",
-  VII: "bg-slate-500/25 border-slate-400/40 text-slate-200",
+  // Supertônica (sky)
+  ii: "bg-sky-500/25 border-sky-400/50 text-sky-100",
+  "iiº": "bg-sky-500/20 border-sky-400/40 text-sky-200",
+  // Mediante (teal)
+  iii: "bg-teal-500/25 border-teal-400/50 text-teal-100",
+  III: "bg-teal-500/25 border-teal-400/50 text-teal-100",
+  // Subdominante (cyan)
+  IV: "bg-cyan-500/30 border-cyan-400/60 text-cyan-100",
+  IV7: "bg-cyan-500/25 border-cyan-400/50 text-cyan-100",
+  iv: "bg-cyan-500/25 border-cyan-400/50 text-cyan-100",
+  // Dominante (amber)
+  V: "bg-amber-500/30 border-amber-400/60 text-amber-100",
+  V7: "bg-amber-500/35 border-amber-400/70 text-amber-100",
+  v: "bg-amber-500/20 border-amber-400/40 text-amber-200",
+  // Superdominante (emerald)
+  vi: "bg-emerald-500/30 border-emerald-400/60 text-emerald-100",
+  VI: "bg-emerald-500/30 border-emerald-400/60 text-emerald-100",
+  // Sensível / Subtônica (rose)
+  vii: "bg-rose-500/25 border-rose-400/50 text-rose-100",
+  "viiº": "bg-rose-500/25 border-rose-400/50 text-rose-100",
+  viio: "bg-rose-500/25 border-rose-400/50 text-rose-100",
+  VII: "bg-rose-500/25 border-rose-400/50 text-rose-100",
+  VII7: "bg-rose-500/20 border-rose-400/40 text-rose-200",
+  // Dominantes secundárias (orange)
+  "V7/vi": "bg-orange-500/30 border-orange-400/60 text-orange-100",
+  "V7/ii": "bg-orange-500/30 border-orange-400/60 text-orange-100",
+  "V7/IV": "bg-orange-500/30 border-orange-400/60 text-orange-100",
+  "V7/iii": "bg-orange-500/30 border-orange-400/60 text-orange-100",
+  "V7/V": "bg-orange-500/30 border-orange-400/60 text-orange-100",
 }
 
 function getDegreeColor(deg: string): string {
-  if (deg.startsWith("V7/")) return "bg-orange-500/30 border-orange-400/60 text-orange-100"
-  if (deg.startsWith("♭") || deg.startsWith("#")) return "bg-rose-500/20 border-rose-400/40 text-rose-200"
-  return DEGREE_COLOR[deg] ?? "bg-slate-500/20 border-slate-400/40 text-slate-200"
+  if (DEGREE_COLOR[deg]) return DEGREE_COLOR[deg]
+  if (deg.startsWith("V7/") || deg.startsWith("V/")) return "bg-orange-500/30 border-orange-400/60 text-orange-100"
+  if (deg.startsWith("♭") || deg.startsWith("#")) return "bg-pink-500/25 border-pink-400/50 text-pink-100"
+  if (deg === "?") return "bg-slate-500/15 border-slate-500/30 text-slate-400"
+  return "bg-slate-500/20 border-slate-400/40 text-slate-200"
 }
 
-const INACTIVE = "bg-slate-800/40 border-slate-700/20 text-slate-500"
-
-function ChordBlock({ ag, highlighted }: { ag: AcordeGrau; highlighted: boolean }) {
-  const color = highlighted ? getDegreeColor(ag.grau) : INACTIVE
+function ChordBlock({ ag }: { ag: AcordeGrau }) {
+  const color = getDegreeColor(ag.grau)
   return (
     <div className="flex flex-col gap-0.5">
       <div className={`border-2 rounded-lg px-2.5 py-1.5 min-w-[44px] text-center font-mono text-sm font-bold ${color}`}>
@@ -47,10 +63,9 @@ function ChordBlock({ ag, highlighted }: { ag: AcordeGrau; highlighted: boolean 
 
 interface MusicaAnaliseProps {
   musica: MusicaProgressao
-  grausDestaque: string[]
 }
 
-export function MusicaAnalise({ musica, grausDestaque }: MusicaAnaliseProps) {
+export function MusicaAnalise({ musica }: MusicaAnaliseProps) {
   const router = useRouter()
 
   function openInAnalise() {
@@ -92,7 +107,7 @@ export function MusicaAnalise({ musica, grausDestaque }: MusicaAnaliseProps) {
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {secao.acordes_graus.map((ag, i) => (
-                  <ChordBlock key={i} ag={ag} highlighted={grausDestaque.includes(ag.grau)} />
+                  <ChordBlock key={i} ag={ag} />
                 ))}
               </div>
             </div>
@@ -102,7 +117,7 @@ export function MusicaAnalise({ musica, grausDestaque }: MusicaAnaliseProps) {
         /* Sem seções — mostra todos os acordes */
         <div className="flex flex-wrap gap-1.5">
           {(musica.acordes_graus ?? []).map((ag, i) => (
-            <ChordBlock key={i} ag={ag} highlighted={grausDestaque.includes(ag.grau)} />
+            <ChordBlock key={i} ag={ag} />
           ))}
         </div>
       )}
