@@ -4,15 +4,59 @@ import { useState, useMemo } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getProgressao } from "@/lib/progressions-data"
-import { campoHarmonico, normNote } from "@/lib/teoria"
-import type { Mode } from "@/lib/teoria"
 import { MusicaAnalise } from "@/components/progressoes/MusicaAnalise"
 
 const NOTAS_DISPLAY = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
-const TO_NORM: Record<string, string> = { Eb: "D#", Ab: "G#", Bb: "A#" }
 
-const DEGREE_TO_INDEX: Record<string, number> = {
-  I: 0, ii: 1, iii: 2, IV: 3, V: 4, V7: 4, vi: 5, vii: 6,
+const NOTES_CHROMATIC = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
+const MAJOR_INTERVALS = [0, 2, 4, 5, 7, 9, 11]
+const NORM_MAP: Record<string, string> = { Eb: "D#", Ab: "G#", Bb: "A#", Db: "C#", Gb: "F#" }
+const FLAT_DISPLAY: Record<string, string> = { "A#":"Bb","D#":"Eb","G#":"Ab","C#":"Db","F#":"Gb" }
+const FLAT_KEYS = new Set(["F","A#","D#","G#","C#","F#"])
+
+function noteAt(root: string, semitones: number): string {
+  const normR = NORM_MAP[root] ?? root
+  const idx = NOTES_CHROMATIC.indexOf(normR)
+  if (idx === -1) return root
+  const note = NOTES_CHROMATIC[(idx + semitones) % 12]
+  if (FLAT_KEYS.has(normR) && FLAT_DISPLAY[note]) return FLAT_DISPLAY[note]
+  return note
+}
+
+function scaleNote(root: string, degree: number): string {
+  return noteAt(root, MAJOR_INTERVALS[degree])
+}
+
+function degreeToChord(grau: string, root: string): string {
+  const r = NORM_MAP[root] ?? root
+  // V7/x — secondary dominant
+  const secMatch = grau.match(/^V7?\/(vi|ii|iii|iv|IV|V|I)/)
+  if (secMatch) {
+    const target = secMatch[1]
+    const targetMap: Record<string, number> = { I:0, ii:1, iii:2, IV:3, iv:3, V:4, vi:5 }
+    const tIdx = targetMap[target]
+    if (tIdx !== undefined) {
+      const targetNote = scaleNote(r, tIdx)
+      const domNote = noteAt(targetNote, 7)
+      return domNote + "7"
+    }
+  }
+  // Direct degree mapping
+  const MAP: Record<string, [number, string]> = {
+    "I": [0, ""], "I7": [0, "7"], "i": [0, "m"],
+    "ii": [1, "m"], "iiº": [1, "m7(b5)"],
+    "iii": [2, "m"], "III": [2, ""],
+    "IV": [3, ""], "IV7": [3, "7"], "iv": [3, "m"],
+    "V": [4, ""], "V7": [4, "7"], "v": [4, "m"],
+    "vi": [5, "m"], "VI": [5, ""],  "VI7": [5, "7"],
+    "vii": [6, "m"], "viiº": [6, "m7(b5)"], "viio": [6, "m7(b5)"], "viiø": [6, "m7(b5)"],
+    "VII": [6, ""], "VII7": [6, "7"],
+  }
+  const entry = MAP[grau]
+  if (entry) {
+    return scaleNote(r, entry[0]) + entry[1]
+  }
+  return grau
 }
 
 export default function ProgressaoPage({ params }: { params: { slug: string } }) {
@@ -21,20 +65,9 @@ export default function ProgressaoPage({ params }: { params: { slug: string } })
 
   const [nota, setNota] = useState("C")
   const [busca, setBusca] = useState("")
-
-  const normRoot = TO_NORM[nota] ?? nota
-  const campo = campoHarmonico(normRoot, "major" as Mode)
-
   const acordesExemplo = useMemo(() => {
-    return progressao.graus.map((g) => {
-      const base = g.replace("7", "").replace("/", "")
-      const idx = DEGREE_TO_INDEX[base] ?? DEGREE_TO_INDEX[g]
-      if (idx !== undefined && campo[idx]) {
-        return campo[idx].example
-      }
-      return g
-    })
-  }, [progressao.graus, campo])
+    return progressao.graus.map((g) => degreeToChord(g, nota))
+  }, [progressao.graus, nota])
 
   const musicasFiltradas = useMemo(() => {
     const q = busca.toLowerCase().trim()
