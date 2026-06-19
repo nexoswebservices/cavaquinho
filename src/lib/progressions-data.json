@@ -1,269 +1,338 @@
 [
   {
-    "slug": "i-iv-V7",
-    "nome": "i – iv – V7",
+    "slug": "sequencia-II",
+    "nome": "Sequência II — I V vi iii IV iii ii V",
     "graus": [
-      "i",
-      "iv",
+      "I",
+      "V",
+      "vi",
+      "iii",
+      "IV",
+      "iii",
+      "ii",
       "V7"
     ],
-    "tipo": "Menor",
-    "descricao": "Progressão menor básica. Tônica menor → subdominante menor → dominante. Presente no samba-canção e pagode dramático.",
+    "tipo": "Intermediária",
+    "descricao": "Progressão expandida que percorre quase todos os graus diatônicos. I → V → vi → iii → IV → iii → ii → V7. Ex em C: C – G – Am – Em – F – Em – Dm – G7. Cria uma narrativa harmônica completa com tensão gradual.",
     "musicas": [
       {
-        "titulo": "Deixa Alagar",
-        "artista": "Grupo Intimistas",
-        "tom": "Gm",
-        "key_detected": "Gm",
+        "titulo": "Tá Vendo Aquela Lua",
+        "artista": "Exaltasamba",
+        "tom": "G",
+        "key_detected": "G",
         "acordes_reais": [],
-        "todos_acordes": "Gm Fm Bb7 Eb7+ Cm D7",
+        "todos_acordes": "C7+ G7+ G7/5+ Am7 Bm7 Em7 C#m7/5 Cm6 D7 G D#° F#m7/5 B7 C",
         "graus_completos": [
-          "i",
+          "IV",
+          "I",
+          "I",
+          "ii",
+          "iii",
+          "vi",
+          "#IV",
+          "iv",
+          "V7",
+          "I",
+          "#V",
           "vii",
           "III7",
-          "VI",
-          "iv",
-          "V7"
+          "IV"
         ],
         "acordes_graus": [
           {
-            "acorde": "Gm",
-            "grau": "i"
+            "acorde": "C7+",
+            "grau": "IV"
           },
           {
-            "acorde": "Fm",
-            "grau": "vii"
+            "acorde": "G7+",
+            "grau": "I"
           },
           {
-            "acorde": "Bb7",
-            "grau": "III7"
+            "acorde": "G7/5+",
+            "grau": "I"
           },
           {
-            "acorde": "Eb7+",
-            "grau": "VI"
+            "acorde": "Am7",
+            "grau": "ii"
           },
           {
-            "acorde": "Cm",
-            "grau": "iv"
+            "acorde": "Bm7",
+            "grau": "iii"
           },
           {
-            "acorde": "D7",
-            "grau": "V7"
-          }
-        ],
-        "secoes": [
-          {
-            "nome": "Progressão",
-            "acordes_str": "Gm | Fm | Bb7 | Eb7+ | Cm | D7",
-            "acordes_graus": [
-              {
-                "acorde": "Gm",
-                "grau": "i"
-              },
-              {
-                "acorde": "Fm",
-                "grau": "vii"
-              },
-              {
-                "acorde": "Bb7",
-                "grau": "III7"
-              },
-              {
-                "acorde": "Eb7+",
-                "grau": "VI"
-              },
-              {
-                "acorde": "Cm",
-                "grau": "iv"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "vii",
-              "III7",
-              "VI",
-              "iv",
-              "V7"
-            ],
-            "cadencias": []
-          }
-        ],
-        "secoes_match": [
-          "Progressão"
-        ]
-      },
-      {
-        "titulo": "Cheia de Manias",
-        "artista": "Raça Negra",
-        "tom": "Gm",
-        "key_detected": "Gm",
-        "acordes_reais": [],
-        "todos_acordes": "Gm Eb Cm C#° D7 F",
-        "graus_completos": [
-          "i",
-          "VI",
-          "iv",
-          "#IV",
-          "V7",
-          "VII"
-        ],
-        "acordes_graus": [
-          {
-            "acorde": "Gm",
-            "grau": "i"
+            "acorde": "Em7",
+            "grau": "vi"
           },
           {
-            "acorde": "Eb",
-            "grau": "VI"
-          },
-          {
-            "acorde": "Cm",
-            "grau": "iv"
-          },
-          {
-            "acorde": "C#°",
+            "acorde": "C#m7/5",
             "grau": "#IV"
           },
           {
+            "acorde": "Cm6",
+            "grau": "iv"
+          },
+          {
             "acorde": "D7",
             "grau": "V7"
           },
           {
-            "acorde": "F",
-            "grau": "VII"
+            "acorde": "G",
+            "grau": "I"
+          },
+          {
+            "acorde": "D#°",
+            "grau": "#V"
+          },
+          {
+            "acorde": "F#m7/5",
+            "grau": "vii"
+          },
+          {
+            "acorde": "B7",
+            "grau": "III7"
+          },
+          {
+            "acorde": "C",
+            "grau": "IV"
           }
         ],
         "secoes": [
           {
             "nome": "Intro",
-            "acordes_str": "Gm | Eb | Cm | C#° | D7",
+            "acordes_str": "C7+ | G7+ | G7/5+",
             "acordes_graus": [
               {
-                "acorde": "Gm",
-                "grau": "i"
+                "acorde": "C7+",
+                "grau": "IV"
               },
               {
-                "acorde": "Eb",
-                "grau": "VI"
+                "acorde": "G7+",
+                "grau": "I"
               },
               {
-                "acorde": "Cm",
-                "grau": "iv"
-              },
-              {
-                "acorde": "C#°",
-                "grau": "#IV"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
+                "acorde": "G7/5+",
+                "grau": "I"
               }
             ],
             "graus_seq": [
-              "i",
-              "VI",
-              "iv",
-              "#IV",
-              "V7"
+              "IV",
+              "I",
+              "I"
             ],
-            "cadencias": []
+            "cadencias": [
+              "IV – I (plagal)"
+            ]
           },
           {
             "nome": "Verso",
-            "acordes_str": "Gm | F",
+            "acordes_str": "C7+ | Am7 | Bm7 | Em7 | C#m7/5- | C7+ | Cm6 | G7+",
             "acordes_graus": [
               {
-                "acorde": "Gm",
-                "grau": "i"
+                "acorde": "C7+",
+                "grau": "IV"
               },
               {
-                "acorde": "F",
-                "grau": "VII"
+                "acorde": "Am7",
+                "grau": "ii"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "Em7",
+                "grau": "vi"
+              },
+              {
+                "acorde": "C#m7/5",
+                "grau": "#IV"
+              },
+              {
+                "acorde": "Cm6",
+                "grau": "iv"
+              },
+              {
+                "acorde": "G7+",
+                "grau": "I"
               }
             ],
             "graus_seq": [
-              "i",
-              "VII"
+              "IV",
+              "ii",
+              "iii",
+              "vi",
+              "#IV",
+              "IV",
+              "iv",
+              "I"
             ],
             "cadencias": []
           },
           {
             "nome": "Refrão",
-            "acordes_str": "Gm | F",
+            "acordes_str": "G7/5+ | C7+ | D7 | G | Bm7 | C7+ | D7 | D#° | Em7 | Bm7 | C7+ | F#m7/5- | B7 | Em7 | Bm7 | C | D7 | G | C7+",
             "acordes_graus": [
               {
-                "acorde": "Gm",
-                "grau": "i"
+                "acorde": "G7/5+",
+                "grau": "I"
               },
               {
-                "acorde": "F",
-                "grau": "VII"
+                "acorde": "C7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "D7",
+                "grau": "V7"
+              },
+              {
+                "acorde": "G",
+                "grau": "I"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "D#°",
+                "grau": "#V"
+              },
+              {
+                "acorde": "Em7",
+                "grau": "vi"
+              },
+              {
+                "acorde": "F#m7/5",
+                "grau": "vii"
+              },
+              {
+                "acorde": "B7",
+                "grau": "III7"
+              },
+              {
+                "acorde": "C",
+                "grau": "IV"
               }
             ],
             "graus_seq": [
-              "i",
-              "VII"
+              "I",
+              "IV",
+              "V7",
+              "I",
+              "iii",
+              "IV",
+              "V7",
+              "#V",
+              "vi",
+              "iii",
+              "IV",
+              "vii",
+              "III7",
+              "vi",
+              "iii",
+              "IV",
+              "V7",
+              "I",
+              "IV"
+            ],
+            "cadencias": [
+              "I – IV – V7",
+              "IV – V7 – I"
+            ]
+          }
+        ],
+        "secoes_match": [
+          "Refrão"
+        ]
+      },
+      {
+        "titulo": "Pimpolho",
+        "artista": "Grupo Revelação",
+        "tom": "G",
+        "key_detected": "G",
+        "acordes_reais": [],
+        "todos_acordes": "G D Em Am Gm",
+        "graus_completos": [
+          "I",
+          "V",
+          "vi",
+          "ii",
+          "i"
+        ],
+        "acordes_graus": [
+          {
+            "acorde": "G",
+            "grau": "I"
+          },
+          {
+            "acorde": "D",
+            "grau": "V"
+          },
+          {
+            "acorde": "Em",
+            "grau": "vi"
+          },
+          {
+            "acorde": "Am",
+            "grau": "ii"
+          },
+          {
+            "acorde": "Gm",
+            "grau": "i"
+          }
+        ],
+        "secoes": [
+          {
+            "nome": "Verso",
+            "acordes_str": "G | D | Em | Am | D",
+            "acordes_graus": [
+              {
+                "acorde": "G",
+                "grau": "I"
+              },
+              {
+                "acorde": "D",
+                "grau": "V"
+              },
+              {
+                "acorde": "Em",
+                "grau": "vi"
+              },
+              {
+                "acorde": "Am",
+                "grau": "ii"
+              }
+            ],
+            "graus_seq": [
+              "I",
+              "V",
+              "vi",
+              "ii",
+              "V"
             ],
             "cadencias": []
           },
           {
-            "nome": "Solo",
-            "acordes_str": "Gm | F | Eb | F",
+            "nome": "Ponte",
+            "acordes_str": "D | Gm",
             "acordes_graus": [
+              {
+                "acorde": "D",
+                "grau": "V"
+              },
               {
                 "acorde": "Gm",
                 "grau": "i"
-              },
-              {
-                "acorde": "F",
-                "grau": "VII"
-              },
-              {
-                "acorde": "Eb",
-                "grau": "VI"
               }
             ],
             "graus_seq": [
-              "i",
-              "VII",
-              "VI",
-              "VII"
-            ],
-            "cadencias": []
-          },
-          {
-            "nome": "Final",
-            "acordes_str": "Gm | F | Eb | F | Gm",
-            "acordes_graus": [
-              {
-                "acorde": "Gm",
-                "grau": "i"
-              },
-              {
-                "acorde": "F",
-                "grau": "VII"
-              },
-              {
-                "acorde": "Eb",
-                "grau": "VI"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "VII",
-              "VI",
-              "VII",
+              "V",
               "i"
             ],
             "cadencias": []
           }
         ],
         "secoes_match": [
-          "Intro"
+          "Verso"
         ]
       },
       {
@@ -511,442 +580,1738 @@
           }
         ],
         "secoes_match": [
+          "Refrão",
+          "Parte 1",
           "Parte 2"
         ]
       },
       {
-        "titulo": "Mina de Fé",
+        "titulo": "Inigualável Paixão",
         "artista": "Reinaldo",
-        "tom": "Gm",
-        "key_detected": "Gm",
+        "tom": "E",
+        "key_detected": "E",
         "acordes_reais": [],
-        "todos_acordes": "Gm Dm Eb7+ Cm D7",
+        "todos_acordes": "E6/9 G#m7 Bm7 E7 A7+ D7/9 C#7 F#7 F#m7 B7 G#7 C#m Cm7 A#º E F#7/9",
         "graus_completos": [
-          "i",
+          "I7",
+          "iii",
           "v",
-          "VI",
-          "iv",
-          "V7"
+          "I7",
+          "IV",
+          "#VI",
+          "VI7",
+          "II7",
+          "ii",
+          "V7",
+          "III7",
+          "vi",
+          "#V",
+          "#IV",
+          "I",
+          "II7"
         ],
         "acordes_graus": [
           {
-            "acorde": "Gm",
-            "grau": "i"
+            "acorde": "E6/9",
+            "grau": "I7"
           },
           {
-            "acorde": "Dm",
+            "acorde": "G#m7",
+            "grau": "iii"
+          },
+          {
+            "acorde": "Bm7",
             "grau": "v"
           },
           {
-            "acorde": "Eb7+",
-            "grau": "VI"
+            "acorde": "E7",
+            "grau": "I7"
           },
           {
-            "acorde": "Cm",
-            "grau": "iv"
+            "acorde": "A7+",
+            "grau": "IV"
           },
           {
-            "acorde": "D7",
+            "acorde": "D7/9",
+            "grau": "#VI"
+          },
+          {
+            "acorde": "C#7",
+            "grau": "VI7"
+          },
+          {
+            "acorde": "F#7",
+            "grau": "II7"
+          },
+          {
+            "acorde": "F#m7",
+            "grau": "ii"
+          },
+          {
+            "acorde": "B7",
             "grau": "V7"
+          },
+          {
+            "acorde": "G#7",
+            "grau": "III7"
+          },
+          {
+            "acorde": "C#m",
+            "grau": "vi"
+          },
+          {
+            "acorde": "Cm7",
+            "grau": "#V"
+          },
+          {
+            "acorde": "A#º",
+            "grau": "#IV"
+          },
+          {
+            "acorde": "E",
+            "grau": "I"
+          },
+          {
+            "acorde": "F#7/9",
+            "grau": "II7"
           }
         ],
         "secoes": [
           {
-            "nome": "Progressão",
-            "acordes_str": "Gm | Dm | Eb7+ | Cm | D7",
+            "nome": "Parte 1",
+            "acordes_str": "E6/9 | G#m7 | Bm7 | E7 | A7+ | D7/9 | G#m7 | C#7 | F#7 | F#m7 | B7",
             "acordes_graus": [
               {
-                "acorde": "Gm",
-                "grau": "i"
+                "acorde": "E6/9",
+                "grau": "I7"
               },
               {
-                "acorde": "Dm",
+                "acorde": "G#m7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "Bm7",
                 "grau": "v"
               },
               {
-                "acorde": "Eb7+",
-                "grau": "VI"
+                "acorde": "E7",
+                "grau": "I7"
               },
               {
-                "acorde": "Cm",
-                "grau": "iv"
+                "acorde": "A7+",
+                "grau": "IV"
               },
               {
-                "acorde": "D7",
+                "acorde": "D7/9",
+                "grau": "#VI"
+              },
+              {
+                "acorde": "C#7",
+                "grau": "VI7"
+              },
+              {
+                "acorde": "F#7",
+                "grau": "II7"
+              },
+              {
+                "acorde": "F#m7",
+                "grau": "ii"
+              },
+              {
+                "acorde": "B7",
                 "grau": "V7"
               }
             ],
             "graus_seq": [
-              "i",
+              "I7",
+              "iii",
               "v",
-              "VI",
-              "iv",
+              "I7",
+              "IV",
+              "#VI",
+              "iii",
+              "VI7",
+              "II7",
+              "ii",
               "V7"
+            ],
+            "cadencias": []
+          },
+          {
+            "nome": "Parte 2",
+            "acordes_str": "E6/9 | G#7 | C#m | Cm7 | Bm7 | E7 | A7+ | A#º | E | C#7 | F#7/9 | B7 | E | B7",
+            "acordes_graus": [
+              {
+                "acorde": "E6/9",
+                "grau": "I7"
+              },
+              {
+                "acorde": "G#7",
+                "grau": "III7"
+              },
+              {
+                "acorde": "C#m",
+                "grau": "vi"
+              },
+              {
+                "acorde": "Cm7",
+                "grau": "#V"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "v"
+              },
+              {
+                "acorde": "E7",
+                "grau": "I7"
+              },
+              {
+                "acorde": "A7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "A#º",
+                "grau": "#IV"
+              },
+              {
+                "acorde": "E",
+                "grau": "I"
+              },
+              {
+                "acorde": "C#7",
+                "grau": "VI7"
+              },
+              {
+                "acorde": "F#7/9",
+                "grau": "II7"
+              },
+              {
+                "acorde": "B7",
+                "grau": "V7"
+              }
+            ],
+            "graus_seq": [
+              "I7",
+              "III7",
+              "vi",
+              "#V",
+              "v",
+              "I7",
+              "IV",
+              "#IV",
+              "I",
+              "VI7",
+              "II7",
+              "V7",
+              "I",
+              "V7"
+            ],
+            "cadencias": [
+              "V7 – I (autêntica)"
+            ]
+          }
+        ],
+        "secoes_match": [
+          "Parte 1"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "sequencia-III",
+    "nome": "Sequência III — I III7 vi v I7 IV V I",
+    "graus": [
+      "I",
+      "V7/vi",
+      "vi",
+      "v",
+      "I7",
+      "IV",
+      "V7",
+      "I"
+    ],
+    "tipo": "Com Dom. Secundária",
+    "descricao": "Introduz a dominante secundária V7/vi (III7) e o empréstimo modal (v menor). Ex em C: C – E7 – Am – Gm – C7 – F – G7 – C. O E7→Am é o movimento V7/vi mais comum do pagode. O Gm e C7→F são empréstimos modais.",
+    "musicas": [
+      {
+        "titulo": "A Minha Fantasia",
+        "artista": "Alexandre Pires",
+        "tom": "A",
+        "key_detected": "A",
+        "acordes_reais": [],
+        "todos_acordes": "A E A7 D F G",
+        "graus_completos": [
+          "I",
+          "V",
+          "I7",
+          "IV",
+          "#V",
+          "#VI"
+        ],
+        "acordes_graus": [
+          {
+            "acorde": "A",
+            "grau": "I"
+          },
+          {
+            "acorde": "E",
+            "grau": "V"
+          },
+          {
+            "acorde": "A7",
+            "grau": "I7"
+          },
+          {
+            "acorde": "D",
+            "grau": "IV"
+          },
+          {
+            "acorde": "F",
+            "grau": "#V"
+          },
+          {
+            "acorde": "G",
+            "grau": "#VI"
+          }
+        ],
+        "secoes": [
+          {
+            "nome": "Parte 1",
+            "acordes_str": "A | E | A7 | D",
+            "acordes_graus": [
+              {
+                "acorde": "A",
+                "grau": "I"
+              },
+              {
+                "acorde": "E",
+                "grau": "V"
+              },
+              {
+                "acorde": "A7",
+                "grau": "I7"
+              },
+              {
+                "acorde": "D",
+                "grau": "IV"
+              }
+            ],
+            "graus_seq": [
+              "I",
+              "V",
+              "I7",
+              "IV"
+            ],
+            "cadencias": []
+          },
+          {
+            "nome": "Parte 2",
+            "acordes_str": "F | G | A",
+            "acordes_graus": [
+              {
+                "acorde": "F",
+                "grau": "#V"
+              },
+              {
+                "acorde": "G",
+                "grau": "#VI"
+              },
+              {
+                "acorde": "A",
+                "grau": "I"
+              }
+            ],
+            "graus_seq": [
+              "#V",
+              "#VI",
+              "I"
             ],
             "cadencias": []
           }
         ],
         "secoes_match": [
-          "Progressão"
+          "Parte 1"
         ]
       },
       {
-        "titulo": "Velocidade da Luz",
-        "artista": "Reinaldo",
-        "tom": "Gm",
-        "key_detected": "Gm",
+        "titulo": "Tá Vendo Aquela Lua",
+        "artista": "Exaltasamba",
+        "tom": "G",
+        "key_detected": "G",
         "acordes_reais": [],
-        "todos_acordes": "Gm D Cm F7 Bb D7 F#7 G7 Gm7 Ab7M Am7(b5)",
+        "todos_acordes": "C7+ G7+ G7/5+ Am7 Bm7 Em7 C#m7/5 Cm6 D7 G D#° F#m7/5 B7 C",
         "graus_completos": [
-          "i",
-          "V",
+          "IV",
+          "I",
+          "I",
+          "ii",
+          "iii",
+          "vi",
+          "#IV",
           "iv",
-          "VII7",
-          "III",
           "V7",
-          "♭I",
-          "i7",
-          "i",
-          "#I",
-          "iiº"
+          "I",
+          "#V",
+          "vii",
+          "III7",
+          "IV"
         ],
         "acordes_graus": [
           {
-            "acorde": "Gm",
-            "grau": "i"
+            "acorde": "C7+",
+            "grau": "IV"
+          },
+          {
+            "acorde": "G7+",
+            "grau": "I"
+          },
+          {
+            "acorde": "G7/5+",
+            "grau": "I"
+          },
+          {
+            "acorde": "Am7",
+            "grau": "ii"
+          },
+          {
+            "acorde": "Bm7",
+            "grau": "iii"
+          },
+          {
+            "acorde": "Em7",
+            "grau": "vi"
+          },
+          {
+            "acorde": "C#m7/5",
+            "grau": "#IV"
+          },
+          {
+            "acorde": "Cm6",
+            "grau": "iv"
+          },
+          {
+            "acorde": "D7",
+            "grau": "V7"
+          },
+          {
+            "acorde": "G",
+            "grau": "I"
+          },
+          {
+            "acorde": "D#°",
+            "grau": "#V"
+          },
+          {
+            "acorde": "F#m7/5",
+            "grau": "vii"
+          },
+          {
+            "acorde": "B7",
+            "grau": "III7"
+          },
+          {
+            "acorde": "C",
+            "grau": "IV"
+          }
+        ],
+        "secoes": [
+          {
+            "nome": "Intro",
+            "acordes_str": "C7+ | G7+ | G7/5+",
+            "acordes_graus": [
+              {
+                "acorde": "C7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "G7+",
+                "grau": "I"
+              },
+              {
+                "acorde": "G7/5+",
+                "grau": "I"
+              }
+            ],
+            "graus_seq": [
+              "IV",
+              "I",
+              "I"
+            ],
+            "cadencias": [
+              "IV – I (plagal)"
+            ]
+          },
+          {
+            "nome": "Verso",
+            "acordes_str": "C7+ | Am7 | Bm7 | Em7 | C#m7/5- | C7+ | Cm6 | G7+",
+            "acordes_graus": [
+              {
+                "acorde": "C7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "Am7",
+                "grau": "ii"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "Em7",
+                "grau": "vi"
+              },
+              {
+                "acorde": "C#m7/5",
+                "grau": "#IV"
+              },
+              {
+                "acorde": "Cm6",
+                "grau": "iv"
+              },
+              {
+                "acorde": "G7+",
+                "grau": "I"
+              }
+            ],
+            "graus_seq": [
+              "IV",
+              "ii",
+              "iii",
+              "vi",
+              "#IV",
+              "IV",
+              "iv",
+              "I"
+            ],
+            "cadencias": []
+          },
+          {
+            "nome": "Refrão",
+            "acordes_str": "G7/5+ | C7+ | D7 | G | Bm7 | C7+ | D7 | D#° | Em7 | Bm7 | C7+ | F#m7/5- | B7 | Em7 | Bm7 | C | D7 | G | C7+",
+            "acordes_graus": [
+              {
+                "acorde": "G7/5+",
+                "grau": "I"
+              },
+              {
+                "acorde": "C7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "D7",
+                "grau": "V7"
+              },
+              {
+                "acorde": "G",
+                "grau": "I"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "D#°",
+                "grau": "#V"
+              },
+              {
+                "acorde": "Em7",
+                "grau": "vi"
+              },
+              {
+                "acorde": "F#m7/5",
+                "grau": "vii"
+              },
+              {
+                "acorde": "B7",
+                "grau": "III7"
+              },
+              {
+                "acorde": "C",
+                "grau": "IV"
+              }
+            ],
+            "graus_seq": [
+              "I",
+              "IV",
+              "V7",
+              "I",
+              "iii",
+              "IV",
+              "V7",
+              "#V",
+              "vi",
+              "iii",
+              "IV",
+              "vii",
+              "III7",
+              "vi",
+              "iii",
+              "IV",
+              "V7",
+              "I",
+              "IV"
+            ],
+            "cadencias": [
+              "I – IV – V7",
+              "IV – V7 – I"
+            ]
+          }
+        ],
+        "secoes_match": [
+          "Refrão"
+        ]
+      },
+      {
+        "titulo": "Inigualável Paixão",
+        "artista": "Reinaldo",
+        "tom": "E",
+        "key_detected": "E",
+        "acordes_reais": [],
+        "todos_acordes": "E6/9 G#m7 Bm7 E7 A7+ D7/9 C#7 F#7 F#m7 B7 G#7 C#m Cm7 A#º E F#7/9",
+        "graus_completos": [
+          "I7",
+          "iii",
+          "v",
+          "I7",
+          "IV",
+          "#VI",
+          "VI7",
+          "II7",
+          "ii",
+          "V7",
+          "III7",
+          "vi",
+          "#V",
+          "#IV",
+          "I",
+          "II7"
+        ],
+        "acordes_graus": [
+          {
+            "acorde": "E6/9",
+            "grau": "I7"
+          },
+          {
+            "acorde": "G#m7",
+            "grau": "iii"
+          },
+          {
+            "acorde": "Bm7",
+            "grau": "v"
+          },
+          {
+            "acorde": "E7",
+            "grau": "I7"
+          },
+          {
+            "acorde": "A7+",
+            "grau": "IV"
+          },
+          {
+            "acorde": "D7/9",
+            "grau": "#VI"
+          },
+          {
+            "acorde": "C#7",
+            "grau": "VI7"
+          },
+          {
+            "acorde": "F#7",
+            "grau": "II7"
+          },
+          {
+            "acorde": "F#m7",
+            "grau": "ii"
+          },
+          {
+            "acorde": "B7",
+            "grau": "V7"
+          },
+          {
+            "acorde": "G#7",
+            "grau": "III7"
+          },
+          {
+            "acorde": "C#m",
+            "grau": "vi"
+          },
+          {
+            "acorde": "Cm7",
+            "grau": "#V"
+          },
+          {
+            "acorde": "A#º",
+            "grau": "#IV"
+          },
+          {
+            "acorde": "E",
+            "grau": "I"
+          },
+          {
+            "acorde": "F#7/9",
+            "grau": "II7"
+          }
+        ],
+        "secoes": [
+          {
+            "nome": "Parte 1",
+            "acordes_str": "E6/9 | G#m7 | Bm7 | E7 | A7+ | D7/9 | G#m7 | C#7 | F#7 | F#m7 | B7",
+            "acordes_graus": [
+              {
+                "acorde": "E6/9",
+                "grau": "I7"
+              },
+              {
+                "acorde": "G#m7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "v"
+              },
+              {
+                "acorde": "E7",
+                "grau": "I7"
+              },
+              {
+                "acorde": "A7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "D7/9",
+                "grau": "#VI"
+              },
+              {
+                "acorde": "C#7",
+                "grau": "VI7"
+              },
+              {
+                "acorde": "F#7",
+                "grau": "II7"
+              },
+              {
+                "acorde": "F#m7",
+                "grau": "ii"
+              },
+              {
+                "acorde": "B7",
+                "grau": "V7"
+              }
+            ],
+            "graus_seq": [
+              "I7",
+              "iii",
+              "v",
+              "I7",
+              "IV",
+              "#VI",
+              "iii",
+              "VI7",
+              "II7",
+              "ii",
+              "V7"
+            ],
+            "cadencias": []
+          },
+          {
+            "nome": "Parte 2",
+            "acordes_str": "E6/9 | G#7 | C#m | Cm7 | Bm7 | E7 | A7+ | A#º | E | C#7 | F#7/9 | B7 | E | B7",
+            "acordes_graus": [
+              {
+                "acorde": "E6/9",
+                "grau": "I7"
+              },
+              {
+                "acorde": "G#7",
+                "grau": "III7"
+              },
+              {
+                "acorde": "C#m",
+                "grau": "vi"
+              },
+              {
+                "acorde": "Cm7",
+                "grau": "#V"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "v"
+              },
+              {
+                "acorde": "E7",
+                "grau": "I7"
+              },
+              {
+                "acorde": "A7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "A#º",
+                "grau": "#IV"
+              },
+              {
+                "acorde": "E",
+                "grau": "I"
+              },
+              {
+                "acorde": "C#7",
+                "grau": "VI7"
+              },
+              {
+                "acorde": "F#7/9",
+                "grau": "II7"
+              },
+              {
+                "acorde": "B7",
+                "grau": "V7"
+              }
+            ],
+            "graus_seq": [
+              "I7",
+              "III7",
+              "vi",
+              "#V",
+              "v",
+              "I7",
+              "IV",
+              "#IV",
+              "I",
+              "VI7",
+              "II7",
+              "V7",
+              "I",
+              "V7"
+            ],
+            "cadencias": [
+              "V7 – I (autêntica)"
+            ]
+          }
+        ],
+        "secoes_match": [
+          "Parte 1",
+          "Parte 2"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "sequencia-IV",
+    "nome": "Sequência IV — I VI7 ii V v I7 IV V I",
+    "graus": [
+      "I",
+      "V7/ii",
+      "ii",
+      "V7",
+      "v",
+      "I7",
+      "IV",
+      "V7",
+      "I"
+    ],
+    "tipo": "Dom. Secundárias",
+    "descricao": "Cadeia de dominantes secundárias: VI7 (V7/ii) prepara o ii, depois V7→I. Em seguida, empréstimo modal v→I7→IV→V7→I. Ex em C: C – A7 – Dm – G7 – Gm – C7 – F – G7 – C. Progressão rica do samba sofisticado.",
+    "musicas": [
+      {
+        "titulo": "Tá Vendo Aquela Lua",
+        "artista": "Exaltasamba",
+        "tom": "G",
+        "key_detected": "G",
+        "acordes_reais": [],
+        "todos_acordes": "C7+ G7+ G7/5+ Am7 Bm7 Em7 C#m7/5 Cm6 D7 G D#° F#m7/5 B7 C",
+        "graus_completos": [
+          "IV",
+          "I",
+          "I",
+          "ii",
+          "iii",
+          "vi",
+          "#IV",
+          "iv",
+          "V7",
+          "I",
+          "#V",
+          "vii",
+          "III7",
+          "IV"
+        ],
+        "acordes_graus": [
+          {
+            "acorde": "C7+",
+            "grau": "IV"
+          },
+          {
+            "acorde": "G7+",
+            "grau": "I"
+          },
+          {
+            "acorde": "G7/5+",
+            "grau": "I"
+          },
+          {
+            "acorde": "Am7",
+            "grau": "ii"
+          },
+          {
+            "acorde": "Bm7",
+            "grau": "iii"
+          },
+          {
+            "acorde": "Em7",
+            "grau": "vi"
+          },
+          {
+            "acorde": "C#m7/5",
+            "grau": "#IV"
+          },
+          {
+            "acorde": "Cm6",
+            "grau": "iv"
+          },
+          {
+            "acorde": "D7",
+            "grau": "V7"
+          },
+          {
+            "acorde": "G",
+            "grau": "I"
+          },
+          {
+            "acorde": "D#°",
+            "grau": "#V"
+          },
+          {
+            "acorde": "F#m7/5",
+            "grau": "vii"
+          },
+          {
+            "acorde": "B7",
+            "grau": "III7"
+          },
+          {
+            "acorde": "C",
+            "grau": "IV"
+          }
+        ],
+        "secoes": [
+          {
+            "nome": "Intro",
+            "acordes_str": "C7+ | G7+ | G7/5+",
+            "acordes_graus": [
+              {
+                "acorde": "C7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "G7+",
+                "grau": "I"
+              },
+              {
+                "acorde": "G7/5+",
+                "grau": "I"
+              }
+            ],
+            "graus_seq": [
+              "IV",
+              "I",
+              "I"
+            ],
+            "cadencias": [
+              "IV – I (plagal)"
+            ]
+          },
+          {
+            "nome": "Verso",
+            "acordes_str": "C7+ | Am7 | Bm7 | Em7 | C#m7/5- | C7+ | Cm6 | G7+",
+            "acordes_graus": [
+              {
+                "acorde": "C7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "Am7",
+                "grau": "ii"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "Em7",
+                "grau": "vi"
+              },
+              {
+                "acorde": "C#m7/5",
+                "grau": "#IV"
+              },
+              {
+                "acorde": "Cm6",
+                "grau": "iv"
+              },
+              {
+                "acorde": "G7+",
+                "grau": "I"
+              }
+            ],
+            "graus_seq": [
+              "IV",
+              "ii",
+              "iii",
+              "vi",
+              "#IV",
+              "IV",
+              "iv",
+              "I"
+            ],
+            "cadencias": []
+          },
+          {
+            "nome": "Refrão",
+            "acordes_str": "G7/5+ | C7+ | D7 | G | Bm7 | C7+ | D7 | D#° | Em7 | Bm7 | C7+ | F#m7/5- | B7 | Em7 | Bm7 | C | D7 | G | C7+",
+            "acordes_graus": [
+              {
+                "acorde": "G7/5+",
+                "grau": "I"
+              },
+              {
+                "acorde": "C7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "D7",
+                "grau": "V7"
+              },
+              {
+                "acorde": "G",
+                "grau": "I"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "D#°",
+                "grau": "#V"
+              },
+              {
+                "acorde": "Em7",
+                "grau": "vi"
+              },
+              {
+                "acorde": "F#m7/5",
+                "grau": "vii"
+              },
+              {
+                "acorde": "B7",
+                "grau": "III7"
+              },
+              {
+                "acorde": "C",
+                "grau": "IV"
+              }
+            ],
+            "graus_seq": [
+              "I",
+              "IV",
+              "V7",
+              "I",
+              "iii",
+              "IV",
+              "V7",
+              "#V",
+              "vi",
+              "iii",
+              "IV",
+              "vii",
+              "III7",
+              "vi",
+              "iii",
+              "IV",
+              "V7",
+              "I",
+              "IV"
+            ],
+            "cadencias": [
+              "I – IV – V7",
+              "IV – V7 – I"
+            ]
+          }
+        ],
+        "secoes_match": [
+          "Refrão"
+        ]
+      },
+      {
+        "titulo": "Inigualável Paixão",
+        "artista": "Reinaldo",
+        "tom": "E",
+        "key_detected": "E",
+        "acordes_reais": [],
+        "todos_acordes": "E6/9 G#m7 Bm7 E7 A7+ D7/9 C#7 F#7 F#m7 B7 G#7 C#m Cm7 A#º E F#7/9",
+        "graus_completos": [
+          "I7",
+          "iii",
+          "v",
+          "I7",
+          "IV",
+          "#VI",
+          "VI7",
+          "II7",
+          "ii",
+          "V7",
+          "III7",
+          "vi",
+          "#V",
+          "#IV",
+          "I",
+          "II7"
+        ],
+        "acordes_graus": [
+          {
+            "acorde": "E6/9",
+            "grau": "I7"
+          },
+          {
+            "acorde": "G#m7",
+            "grau": "iii"
+          },
+          {
+            "acorde": "Bm7",
+            "grau": "v"
+          },
+          {
+            "acorde": "E7",
+            "grau": "I7"
+          },
+          {
+            "acorde": "A7+",
+            "grau": "IV"
+          },
+          {
+            "acorde": "D7/9",
+            "grau": "#VI"
+          },
+          {
+            "acorde": "C#7",
+            "grau": "VI7"
+          },
+          {
+            "acorde": "F#7",
+            "grau": "II7"
+          },
+          {
+            "acorde": "F#m7",
+            "grau": "ii"
+          },
+          {
+            "acorde": "B7",
+            "grau": "V7"
+          },
+          {
+            "acorde": "G#7",
+            "grau": "III7"
+          },
+          {
+            "acorde": "C#m",
+            "grau": "vi"
+          },
+          {
+            "acorde": "Cm7",
+            "grau": "#V"
+          },
+          {
+            "acorde": "A#º",
+            "grau": "#IV"
+          },
+          {
+            "acorde": "E",
+            "grau": "I"
+          },
+          {
+            "acorde": "F#7/9",
+            "grau": "II7"
+          }
+        ],
+        "secoes": [
+          {
+            "nome": "Parte 1",
+            "acordes_str": "E6/9 | G#m7 | Bm7 | E7 | A7+ | D7/9 | G#m7 | C#7 | F#7 | F#m7 | B7",
+            "acordes_graus": [
+              {
+                "acorde": "E6/9",
+                "grau": "I7"
+              },
+              {
+                "acorde": "G#m7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "v"
+              },
+              {
+                "acorde": "E7",
+                "grau": "I7"
+              },
+              {
+                "acorde": "A7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "D7/9",
+                "grau": "#VI"
+              },
+              {
+                "acorde": "C#7",
+                "grau": "VI7"
+              },
+              {
+                "acorde": "F#7",
+                "grau": "II7"
+              },
+              {
+                "acorde": "F#m7",
+                "grau": "ii"
+              },
+              {
+                "acorde": "B7",
+                "grau": "V7"
+              }
+            ],
+            "graus_seq": [
+              "I7",
+              "iii",
+              "v",
+              "I7",
+              "IV",
+              "#VI",
+              "iii",
+              "VI7",
+              "II7",
+              "ii",
+              "V7"
+            ],
+            "cadencias": []
+          },
+          {
+            "nome": "Parte 2",
+            "acordes_str": "E6/9 | G#7 | C#m | Cm7 | Bm7 | E7 | A7+ | A#º | E | C#7 | F#7/9 | B7 | E | B7",
+            "acordes_graus": [
+              {
+                "acorde": "E6/9",
+                "grau": "I7"
+              },
+              {
+                "acorde": "G#7",
+                "grau": "III7"
+              },
+              {
+                "acorde": "C#m",
+                "grau": "vi"
+              },
+              {
+                "acorde": "Cm7",
+                "grau": "#V"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "v"
+              },
+              {
+                "acorde": "E7",
+                "grau": "I7"
+              },
+              {
+                "acorde": "A7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "A#º",
+                "grau": "#IV"
+              },
+              {
+                "acorde": "E",
+                "grau": "I"
+              },
+              {
+                "acorde": "C#7",
+                "grau": "VI7"
+              },
+              {
+                "acorde": "F#7/9",
+                "grau": "II7"
+              },
+              {
+                "acorde": "B7",
+                "grau": "V7"
+              }
+            ],
+            "graus_seq": [
+              "I7",
+              "III7",
+              "vi",
+              "#V",
+              "v",
+              "I7",
+              "IV",
+              "#IV",
+              "I",
+              "VI7",
+              "II7",
+              "V7",
+              "I",
+              "V7"
+            ],
+            "cadencias": [
+              "V7 – I (autêntica)"
+            ]
+          }
+        ],
+        "secoes_match": [
+          "Parte 2"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "sequencia-V",
+    "nome": "Sequência V — I viiø III7 vi v I7 IV iv iii VI7 ii V",
+    "graus": [
+      "I",
+      "viiø",
+      "V7/vi",
+      "vi",
+      "v",
+      "I7",
+      "IV",
+      "iv",
+      "iii",
+      "V7/ii",
+      "ii",
+      "V7"
+    ],
+    "tipo": "Avançada",
+    "descricao": "Ciclo completo: diminuto, dom. secundárias, empréstimos modais e ciclo de quintas. Ex em C: C – Bm7/5 – E7 – Am – Gm – C7 – F – Fm – Em – A7 – Dm – G7. A progressão mais sofisticada do samba e choro.",
+    "musicas": [
+      {
+        "titulo": "A Minha Fantasia",
+        "artista": "Alexandre Pires",
+        "tom": "A",
+        "key_detected": "A",
+        "acordes_reais": [],
+        "todos_acordes": "A E A7 D F G",
+        "graus_completos": [
+          "I",
+          "V",
+          "I7",
+          "IV",
+          "#V",
+          "#VI"
+        ],
+        "acordes_graus": [
+          {
+            "acorde": "A",
+            "grau": "I"
+          },
+          {
+            "acorde": "E",
+            "grau": "V"
+          },
+          {
+            "acorde": "A7",
+            "grau": "I7"
+          },
+          {
+            "acorde": "D",
+            "grau": "IV"
+          },
+          {
+            "acorde": "F",
+            "grau": "#V"
+          },
+          {
+            "acorde": "G",
+            "grau": "#VI"
+          }
+        ],
+        "secoes": [
+          {
+            "nome": "Parte 1",
+            "acordes_str": "A | E | A7 | D",
+            "acordes_graus": [
+              {
+                "acorde": "A",
+                "grau": "I"
+              },
+              {
+                "acorde": "E",
+                "grau": "V"
+              },
+              {
+                "acorde": "A7",
+                "grau": "I7"
+              },
+              {
+                "acorde": "D",
+                "grau": "IV"
+              }
+            ],
+            "graus_seq": [
+              "I",
+              "V",
+              "I7",
+              "IV"
+            ],
+            "cadencias": []
+          },
+          {
+            "nome": "Parte 2",
+            "acordes_str": "F | G | A",
+            "acordes_graus": [
+              {
+                "acorde": "F",
+                "grau": "#V"
+              },
+              {
+                "acorde": "G",
+                "grau": "#VI"
+              },
+              {
+                "acorde": "A",
+                "grau": "I"
+              }
+            ],
+            "graus_seq": [
+              "#V",
+              "#VI",
+              "I"
+            ],
+            "cadencias": []
+          }
+        ],
+        "secoes_match": [
+          "Parte 1"
+        ]
+      },
+      {
+        "titulo": "Inigualável Paixão",
+        "artista": "Reinaldo",
+        "tom": "E",
+        "key_detected": "E",
+        "acordes_reais": [],
+        "todos_acordes": "E6/9 G#m7 Bm7 E7 A7+ D7/9 C#7 F#7 F#m7 B7 G#7 C#m Cm7 A#º E F#7/9",
+        "graus_completos": [
+          "I7",
+          "iii",
+          "v",
+          "I7",
+          "IV",
+          "#VI",
+          "VI7",
+          "II7",
+          "ii",
+          "V7",
+          "III7",
+          "vi",
+          "#V",
+          "#IV",
+          "I",
+          "II7"
+        ],
+        "acordes_graus": [
+          {
+            "acorde": "E6/9",
+            "grau": "I7"
+          },
+          {
+            "acorde": "G#m7",
+            "grau": "iii"
+          },
+          {
+            "acorde": "Bm7",
+            "grau": "v"
+          },
+          {
+            "acorde": "E7",
+            "grau": "I7"
+          },
+          {
+            "acorde": "A7+",
+            "grau": "IV"
+          },
+          {
+            "acorde": "D7/9",
+            "grau": "#VI"
+          },
+          {
+            "acorde": "C#7",
+            "grau": "VI7"
+          },
+          {
+            "acorde": "F#7",
+            "grau": "II7"
+          },
+          {
+            "acorde": "F#m7",
+            "grau": "ii"
+          },
+          {
+            "acorde": "B7",
+            "grau": "V7"
+          },
+          {
+            "acorde": "G#7",
+            "grau": "III7"
+          },
+          {
+            "acorde": "C#m",
+            "grau": "vi"
+          },
+          {
+            "acorde": "Cm7",
+            "grau": "#V"
+          },
+          {
+            "acorde": "A#º",
+            "grau": "#IV"
+          },
+          {
+            "acorde": "E",
+            "grau": "I"
+          },
+          {
+            "acorde": "F#7/9",
+            "grau": "II7"
+          }
+        ],
+        "secoes": [
+          {
+            "nome": "Parte 1",
+            "acordes_str": "E6/9 | G#m7 | Bm7 | E7 | A7+ | D7/9 | G#m7 | C#7 | F#7 | F#m7 | B7",
+            "acordes_graus": [
+              {
+                "acorde": "E6/9",
+                "grau": "I7"
+              },
+              {
+                "acorde": "G#m7",
+                "grau": "iii"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "v"
+              },
+              {
+                "acorde": "E7",
+                "grau": "I7"
+              },
+              {
+                "acorde": "A7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "D7/9",
+                "grau": "#VI"
+              },
+              {
+                "acorde": "C#7",
+                "grau": "VI7"
+              },
+              {
+                "acorde": "F#7",
+                "grau": "II7"
+              },
+              {
+                "acorde": "F#m7",
+                "grau": "ii"
+              },
+              {
+                "acorde": "B7",
+                "grau": "V7"
+              }
+            ],
+            "graus_seq": [
+              "I7",
+              "iii",
+              "v",
+              "I7",
+              "IV",
+              "#VI",
+              "iii",
+              "VI7",
+              "II7",
+              "ii",
+              "V7"
+            ],
+            "cadencias": []
+          },
+          {
+            "nome": "Parte 2",
+            "acordes_str": "E6/9 | G#7 | C#m | Cm7 | Bm7 | E7 | A7+ | A#º | E | C#7 | F#7/9 | B7 | E | B7",
+            "acordes_graus": [
+              {
+                "acorde": "E6/9",
+                "grau": "I7"
+              },
+              {
+                "acorde": "G#7",
+                "grau": "III7"
+              },
+              {
+                "acorde": "C#m",
+                "grau": "vi"
+              },
+              {
+                "acorde": "Cm7",
+                "grau": "#V"
+              },
+              {
+                "acorde": "Bm7",
+                "grau": "v"
+              },
+              {
+                "acorde": "E7",
+                "grau": "I7"
+              },
+              {
+                "acorde": "A7+",
+                "grau": "IV"
+              },
+              {
+                "acorde": "A#º",
+                "grau": "#IV"
+              },
+              {
+                "acorde": "E",
+                "grau": "I"
+              },
+              {
+                "acorde": "C#7",
+                "grau": "VI7"
+              },
+              {
+                "acorde": "F#7/9",
+                "grau": "II7"
+              },
+              {
+                "acorde": "B7",
+                "grau": "V7"
+              }
+            ],
+            "graus_seq": [
+              "I7",
+              "III7",
+              "vi",
+              "#V",
+              "v",
+              "I7",
+              "IV",
+              "#IV",
+              "I",
+              "VI7",
+              "II7",
+              "V7",
+              "I",
+              "V7"
+            ],
+            "cadencias": [
+              "V7 – I (autêntica)"
+            ]
+          }
+        ],
+        "secoes_match": [
+          "Parte 1",
+          "Parte 2"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "sequencia-I",
+    "nome": "Sequência I — I vi ii V",
+    "graus": [
+      "I",
+      "vi",
+      "ii",
+      "V7"
+    ],
+    "tipo": "Fundamental",
+    "descricao": "A progressão mais usada no samba e pagode. I (tônica) → vi (relativa menor) → ii (supertônica) → V7 (dominante). Ex em C: C – Am – Dm – G7. Ciclo de quartas que gera movimento natural e resolução.",
+    "musicas": [
+      {
+        "titulo": "Pimpolho",
+        "artista": "Grupo Revelação",
+        "tom": "G",
+        "key_detected": "G",
+        "acordes_reais": [],
+        "todos_acordes": "G D Em Am Gm",
+        "graus_completos": [
+          "I",
+          "V",
+          "vi",
+          "ii",
+          "i"
+        ],
+        "acordes_graus": [
+          {
+            "acorde": "G",
+            "grau": "I"
           },
           {
             "acorde": "D",
             "grau": "V"
           },
           {
-            "acorde": "Cm",
-            "grau": "iv"
+            "acorde": "Em",
+            "grau": "vi"
           },
           {
-            "acorde": "F7",
-            "grau": "VII7"
+            "acorde": "Am",
+            "grau": "ii"
           },
           {
-            "acorde": "Bb",
-            "grau": "III"
-          },
-          {
-            "acorde": "D7",
-            "grau": "V7"
-          },
-          {
-            "acorde": "F#7",
-            "grau": "♭I"
-          },
-          {
-            "acorde": "G7",
-            "grau": "i7"
-          },
-          {
-            "acorde": "Gm7",
+            "acorde": "Gm",
             "grau": "i"
-          },
-          {
-            "acorde": "Ab7M",
-            "grau": "#I"
-          },
-          {
-            "acorde": "Am7(b5)",
-            "grau": "iiº"
           }
         ],
         "secoes": [
           {
-            "nome": "Parte 1",
-            "acordes_str": "Gm | D | Cm | F7 | Bb | D7 | F7 | F#7 | G7",
+            "nome": "Verso",
+            "acordes_str": "G | D | Em | Am | D",
             "acordes_graus": [
               {
-                "acorde": "Gm",
-                "grau": "i"
+                "acorde": "G",
+                "grau": "I"
               },
               {
                 "acorde": "D",
                 "grau": "V"
               },
               {
-                "acorde": "Cm",
-                "grau": "iv"
+                "acorde": "Em",
+                "grau": "vi"
               },
               {
-                "acorde": "F7",
-                "grau": "VII7"
-              },
-              {
-                "acorde": "Bb",
-                "grau": "III"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
-              },
-              {
-                "acorde": "F#7",
-                "grau": "♭I"
-              },
-              {
-                "acorde": "G7",
-                "grau": "i7"
+                "acorde": "Am",
+                "grau": "ii"
               }
             ],
             "graus_seq": [
-              "i",
+              "I",
               "V",
-              "iv",
-              "VII7",
-              "III",
-              "V7",
-              "VII7",
-              "♭I",
-              "i7"
+              "vi",
+              "ii",
+              "V"
             ],
             "cadencias": []
           },
           {
-            "nome": "Parte 2",
-            "acordes_str": "Cm | F7 | Bb | D7 | Gm7 | Ab7M | Am7(b5) | D7",
+            "nome": "Ponte",
+            "acordes_str": "D | Gm",
             "acordes_graus": [
               {
-                "acorde": "Cm",
-                "grau": "iv"
-              },
-              {
-                "acorde": "F7",
-                "grau": "VII7"
-              },
-              {
-                "acorde": "Bb",
-                "grau": "III"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
-              },
-              {
-                "acorde": "Gm7",
-                "grau": "i"
-              },
-              {
-                "acorde": "Ab7M",
-                "grau": "#I"
-              },
-              {
-                "acorde": "Am7(b5)",
-                "grau": "iiº"
-              }
-            ],
-            "graus_seq": [
-              "iv",
-              "VII7",
-              "III",
-              "V7",
-              "i",
-              "#I",
-              "iiº",
-              "V7"
-            ],
-            "cadencias": [
-              "V7 – i (autêntica menor)"
-            ]
-          },
-          {
-            "nome": "Refrão",
-            "acordes_str": "Gm | Cm | F7 | Bb | D7 | Gm | Ab7M | Am7(b5) | D7 | Gm | D7",
-            "acordes_graus": [
-              {
-                "acorde": "Gm",
-                "grau": "i"
-              },
-              {
-                "acorde": "Cm",
-                "grau": "iv"
-              },
-              {
-                "acorde": "F7",
-                "grau": "VII7"
-              },
-              {
-                "acorde": "Bb",
-                "grau": "III"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
-              },
-              {
-                "acorde": "Ab7M",
-                "grau": "#I"
-              },
-              {
-                "acorde": "Am7(b5)",
-                "grau": "iiº"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "iv",
-              "VII7",
-              "III",
-              "V7",
-              "i",
-              "#I",
-              "iiº",
-              "V7",
-              "i",
-              "V7"
-            ],
-            "cadencias": [
-              "V7 – i (autêntica menor)",
-              "V7 – i (autêntica menor)"
-            ]
-          }
-        ],
-        "secoes_match": [
-          "Parte 1",
-          "Refrão"
-        ]
-      },
-      {
-        "titulo": "Deixa em Off",
-        "artista": "Turma do Pagode",
-        "tom": "Bm",
-        "key_detected": "Bm",
-        "acordes_reais": [],
-        "todos_acordes": "Bm7 G Em7 A F#7",
-        "graus_completos": [
-          "i",
-          "VI",
-          "iv",
-          "VII",
-          "V7"
-        ],
-        "acordes_graus": [
-          {
-            "acorde": "Bm7",
-            "grau": "i"
-          },
-          {
-            "acorde": "G",
-            "grau": "VI"
-          },
-          {
-            "acorde": "Em7",
-            "grau": "iv"
-          },
-          {
-            "acorde": "A",
-            "grau": "VII"
-          },
-          {
-            "acorde": "F#7",
-            "grau": "V7"
-          }
-        ],
-        "secoes": [
-          {
-            "nome": "Progressão",
-            "acordes_str": "Bm7 | G | Em7 | A | F#7",
-            "acordes_graus": [
-              {
-                "acorde": "Bm7",
-                "grau": "i"
-              },
-              {
-                "acorde": "G",
-                "grau": "VI"
-              },
-              {
-                "acorde": "Em7",
-                "grau": "iv"
-              },
-              {
-                "acorde": "A",
-                "grau": "VII"
-              },
-              {
-                "acorde": "F#7",
-                "grau": "V7"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "VI",
-              "iv",
-              "VII",
-              "V7"
-            ],
-            "cadencias": []
-          }
-        ],
-        "secoes_match": [
-          "Progressão"
-        ]
-      }
-    ]
-  },
-  {
-    "slug": "i-VI-VII",
-    "nome": "i – VI – VII",
-    "graus": [
-      "i",
-      "VI",
-      "VII"
-    ],
-    "tipo": "Menor/Modal",
-    "descricao": "Progressão menor com subtônica. Muito usada no pagode e samba — o VII (subtônica) cria movimento descendente natural.",
-    "musicas": [
-      {
-        "titulo": "Nem de Graça",
-        "artista": "Ferrugem",
-        "tom": "Gm",
-        "key_detected": "Gm",
-        "acordes_reais": [],
-        "todos_acordes": "Eb F Dm Gm",
-        "graus_completos": [
-          "VI",
-          "VII",
-          "v",
-          "i"
-        ],
-        "acordes_graus": [
-          {
-            "acorde": "Eb",
-            "grau": "VI"
-          },
-          {
-            "acorde": "F",
-            "grau": "VII"
-          },
-          {
-            "acorde": "Dm",
-            "grau": "v"
-          },
-          {
-            "acorde": "Gm",
-            "grau": "i"
-          }
-        ],
-        "secoes": [
-          {
-            "nome": "Progressão",
-            "acordes_str": "Eb | F | Dm | Gm",
-            "acordes_graus": [
-              {
-                "acorde": "Eb",
-                "grau": "VI"
-              },
-              {
-                "acorde": "F",
-                "grau": "VII"
-              },
-              {
-                "acorde": "Dm",
-                "grau": "v"
+                "acorde": "D",
+                "grau": "V"
               },
               {
                 "acorde": "Gm",
@@ -954,1081 +2319,16 @@
               }
             ],
             "graus_seq": [
-              "VI",
-              "VII",
-              "v",
+              "V",
               "i"
             ],
             "cadencias": []
           }
         ],
         "secoes_match": [
-          "Progressão"
-        ]
-      },
-      {
-        "titulo": "Cheia de Manias",
-        "artista": "Raça Negra",
-        "tom": "Gm",
-        "key_detected": "Gm",
-        "acordes_reais": [],
-        "todos_acordes": "Gm Eb Cm C#° D7 F",
-        "graus_completos": [
-          "i",
-          "VI",
-          "iv",
-          "#IV",
-          "V7",
-          "VII"
-        ],
-        "acordes_graus": [
-          {
-            "acorde": "Gm",
-            "grau": "i"
-          },
-          {
-            "acorde": "Eb",
-            "grau": "VI"
-          },
-          {
-            "acorde": "Cm",
-            "grau": "iv"
-          },
-          {
-            "acorde": "C#°",
-            "grau": "#IV"
-          },
-          {
-            "acorde": "D7",
-            "grau": "V7"
-          },
-          {
-            "acorde": "F",
-            "grau": "VII"
-          }
-        ],
-        "secoes": [
-          {
-            "nome": "Intro",
-            "acordes_str": "Gm | Eb | Cm | C#° | D7",
-            "acordes_graus": [
-              {
-                "acorde": "Gm",
-                "grau": "i"
-              },
-              {
-                "acorde": "Eb",
-                "grau": "VI"
-              },
-              {
-                "acorde": "Cm",
-                "grau": "iv"
-              },
-              {
-                "acorde": "C#°",
-                "grau": "#IV"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "VI",
-              "iv",
-              "#IV",
-              "V7"
-            ],
-            "cadencias": []
-          },
-          {
-            "nome": "Verso",
-            "acordes_str": "Gm | F",
-            "acordes_graus": [
-              {
-                "acorde": "Gm",
-                "grau": "i"
-              },
-              {
-                "acorde": "F",
-                "grau": "VII"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "VII"
-            ],
-            "cadencias": []
-          },
-          {
-            "nome": "Refrão",
-            "acordes_str": "Gm | F",
-            "acordes_graus": [
-              {
-                "acorde": "Gm",
-                "grau": "i"
-              },
-              {
-                "acorde": "F",
-                "grau": "VII"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "VII"
-            ],
-            "cadencias": []
-          },
-          {
-            "nome": "Solo",
-            "acordes_str": "Gm | F | Eb | F",
-            "acordes_graus": [
-              {
-                "acorde": "Gm",
-                "grau": "i"
-              },
-              {
-                "acorde": "F",
-                "grau": "VII"
-              },
-              {
-                "acorde": "Eb",
-                "grau": "VI"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "VII",
-              "VI",
-              "VII"
-            ],
-            "cadencias": []
-          },
-          {
-            "nome": "Final",
-            "acordes_str": "Gm | F | Eb | F | Gm",
-            "acordes_graus": [
-              {
-                "acorde": "Gm",
-                "grau": "i"
-              },
-              {
-                "acorde": "F",
-                "grau": "VII"
-              },
-              {
-                "acorde": "Eb",
-                "grau": "VI"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "VII",
-              "VI",
-              "VII",
-              "i"
-            ],
-            "cadencias": []
-          }
-        ],
-        "secoes_match": [
-          "Solo",
-          "Final"
-        ]
-      },
-      {
-        "titulo": "Deixa em Off",
-        "artista": "Turma do Pagode",
-        "tom": "Bm",
-        "key_detected": "Bm",
-        "acordes_reais": [],
-        "todos_acordes": "Bm7 G Em7 A F#7",
-        "graus_completos": [
-          "i",
-          "VI",
-          "iv",
-          "VII",
-          "V7"
-        ],
-        "acordes_graus": [
-          {
-            "acorde": "Bm7",
-            "grau": "i"
-          },
-          {
-            "acorde": "G",
-            "grau": "VI"
-          },
-          {
-            "acorde": "Em7",
-            "grau": "iv"
-          },
-          {
-            "acorde": "A",
-            "grau": "VII"
-          },
-          {
-            "acorde": "F#7",
-            "grau": "V7"
-          }
-        ],
-        "secoes": [
-          {
-            "nome": "Progressão",
-            "acordes_str": "Bm7 | G | Em7 | A | F#7",
-            "acordes_graus": [
-              {
-                "acorde": "Bm7",
-                "grau": "i"
-              },
-              {
-                "acorde": "G",
-                "grau": "VI"
-              },
-              {
-                "acorde": "Em7",
-                "grau": "iv"
-              },
-              {
-                "acorde": "A",
-                "grau": "VII"
-              },
-              {
-                "acorde": "F#7",
-                "grau": "V7"
-              }
-            ],
-            "graus_seq": [
-              "i",
-              "VI",
-              "iv",
-              "VII",
-              "V7"
-            ],
-            "cadencias": []
-          }
-        ],
-        "secoes_match": [
-          "Progressão"
+          "Verso"
         ]
       }
     ]
-  },
-  {
-    "slug": "I-IV-V7",
-    "nome": "I – IV – V7",
-    "graus": [
-      "I",
-      "IV",
-      "V7"
-    ],
-    "tipo": "Básica",
-    "descricao": "A progressão mais fundamental da música popular. Tônica → subdominante → dominante. Base de centenas de sambas e pagodes.",
-    "musicas": [
-      {
-        "titulo": "Tá Vendo Aquela Lua",
-        "artista": "Exaltasamba",
-        "tom": "G",
-        "key_detected": "G",
-        "acordes_reais": [],
-        "todos_acordes": "C7+ G7+ G7/5+ Am7 Bm7 Em7 C#m7/5 Cm6 D7 G D#° F#m7/5 B7 C",
-        "graus_completos": [
-          "IV",
-          "I",
-          "I",
-          "ii",
-          "iii",
-          "vi",
-          "#IV",
-          "iv",
-          "V7",
-          "I",
-          "#V",
-          "vii",
-          "III7",
-          "IV"
-        ],
-        "acordes_graus": [
-          {
-            "acorde": "C7+",
-            "grau": "IV"
-          },
-          {
-            "acorde": "G7+",
-            "grau": "I"
-          },
-          {
-            "acorde": "G7/5+",
-            "grau": "I"
-          },
-          {
-            "acorde": "Am7",
-            "grau": "ii"
-          },
-          {
-            "acorde": "Bm7",
-            "grau": "iii"
-          },
-          {
-            "acorde": "Em7",
-            "grau": "vi"
-          },
-          {
-            "acorde": "C#m7/5",
-            "grau": "#IV"
-          },
-          {
-            "acorde": "Cm6",
-            "grau": "iv"
-          },
-          {
-            "acorde": "D7",
-            "grau": "V7"
-          },
-          {
-            "acorde": "G",
-            "grau": "I"
-          },
-          {
-            "acorde": "D#°",
-            "grau": "#V"
-          },
-          {
-            "acorde": "F#m7/5",
-            "grau": "vii"
-          },
-          {
-            "acorde": "B7",
-            "grau": "III7"
-          },
-          {
-            "acorde": "C",
-            "grau": "IV"
-          }
-        ],
-        "secoes": [
-          {
-            "nome": "Intro",
-            "acordes_str": "C7+ | G7+ | G7/5+",
-            "acordes_graus": [
-              {
-                "acorde": "C7+",
-                "grau": "IV"
-              },
-              {
-                "acorde": "G7+",
-                "grau": "I"
-              },
-              {
-                "acorde": "G7/5+",
-                "grau": "I"
-              }
-            ],
-            "graus_seq": [
-              "IV",
-              "I",
-              "I"
-            ],
-            "cadencias": [
-              "IV – I (plagal)"
-            ]
-          },
-          {
-            "nome": "Verso",
-            "acordes_str": "C7+ | Am7 | Bm7 | Em7 | C#m7/5- | C7+ | Cm6 | G7+",
-            "acordes_graus": [
-              {
-                "acorde": "C7+",
-                "grau": "IV"
-              },
-              {
-                "acorde": "Am7",
-                "grau": "ii"
-              },
-              {
-                "acorde": "Bm7",
-                "grau": "iii"
-              },
-              {
-                "acorde": "Em7",
-                "grau": "vi"
-              },
-              {
-                "acorde": "C#m7/5",
-                "grau": "#IV"
-              },
-              {
-                "acorde": "Cm6",
-                "grau": "iv"
-              },
-              {
-                "acorde": "G7+",
-                "grau": "I"
-              }
-            ],
-            "graus_seq": [
-              "IV",
-              "ii",
-              "iii",
-              "vi",
-              "#IV",
-              "IV",
-              "iv",
-              "I"
-            ],
-            "cadencias": []
-          },
-          {
-            "nome": "Refrão",
-            "acordes_str": "G7/5+ | C7+ | D7 | G | Bm7 | C7+ | D7 | D#° | Em7 | Bm7 | C7+ | F#m7/5- | B7 | Em7 | Bm7 | C | D7 | G | C7+",
-            "acordes_graus": [
-              {
-                "acorde": "G7/5+",
-                "grau": "I"
-              },
-              {
-                "acorde": "C7+",
-                "grau": "IV"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
-              },
-              {
-                "acorde": "G",
-                "grau": "I"
-              },
-              {
-                "acorde": "Bm7",
-                "grau": "iii"
-              },
-              {
-                "acorde": "D#°",
-                "grau": "#V"
-              },
-              {
-                "acorde": "Em7",
-                "grau": "vi"
-              },
-              {
-                "acorde": "F#m7/5",
-                "grau": "vii"
-              },
-              {
-                "acorde": "B7",
-                "grau": "III7"
-              },
-              {
-                "acorde": "C",
-                "grau": "IV"
-              }
-            ],
-            "graus_seq": [
-              "I",
-              "IV",
-              "V7",
-              "I",
-              "iii",
-              "IV",
-              "V7",
-              "#V",
-              "vi",
-              "iii",
-              "IV",
-              "vii",
-              "III7",
-              "vi",
-              "iii",
-              "IV",
-              "V7",
-              "I",
-              "IV"
-            ],
-            "cadencias": [
-              "I – IV – V7",
-              "IV – V7 – I"
-            ]
-          }
-        ],
-        "secoes_match": [
-          "Refrão"
-        ]
-      },
-      {
-        "titulo": "Que Se Chama Amor",
-        "artista": "Ferrugem",
-        "tom": "G",
-        "key_detected": "G",
-        "acordes_reais": [],
-        "todos_acordes": "G7+ Bm C D7",
-        "graus_completos": [
-          "I",
-          "iii",
-          "IV",
-          "V7"
-        ],
-        "acordes_graus": [
-          {
-            "acorde": "G7+",
-            "grau": "I"
-          },
-          {
-            "acorde": "Bm",
-            "grau": "iii"
-          },
-          {
-            "acorde": "C",
-            "grau": "IV"
-          },
-          {
-            "acorde": "D7",
-            "grau": "V7"
-          }
-        ],
-        "secoes": [
-          {
-            "nome": "Progressão",
-            "acordes_str": "G7+ | Bm | C | D7",
-            "acordes_graus": [
-              {
-                "acorde": "G7+",
-                "grau": "I"
-              },
-              {
-                "acorde": "Bm",
-                "grau": "iii"
-              },
-              {
-                "acorde": "C",
-                "grau": "IV"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
-              }
-            ],
-            "graus_seq": [
-              "I",
-              "iii",
-              "IV",
-              "V7"
-            ],
-            "cadencias": []
-          }
-        ],
-        "secoes_match": [
-          "Progressão"
-        ]
-      }
-    ]
-  },
-  {
-    "slug": "I-vi-IV-V",
-    "nome": "I – vi – IV – V",
-    "graus": [
-      "I",
-      "vi",
-      "IV",
-      "V7"
-    ],
-    "tipo": "Clássica",
-    "descricao": "A \"progressão dos anos 50\" — presente em inúmeros clássicos do pagode e pop.",
-    "musicas": [
-      {
-        "titulo": "Tá Vendo Aquela Lua",
-        "artista": "Exaltasamba",
-        "tom": "G",
-        "key_detected": "G",
-        "acordes_reais": [],
-        "todos_acordes": "C7+ G7+ G7/5+ Am7 Bm7 Em7 C#m7/5 Cm6 D7 G D#° F#m7/5 B7 C",
-        "graus_completos": [
-          "IV",
-          "I",
-          "I",
-          "ii",
-          "iii",
-          "vi",
-          "#IV",
-          "iv",
-          "V7",
-          "I",
-          "#V",
-          "vii",
-          "III7",
-          "IV"
-        ],
-        "acordes_graus": [
-          {
-            "acorde": "C7+",
-            "grau": "IV"
-          },
-          {
-            "acorde": "G7+",
-            "grau": "I"
-          },
-          {
-            "acorde": "G7/5+",
-            "grau": "I"
-          },
-          {
-            "acorde": "Am7",
-            "grau": "ii"
-          },
-          {
-            "acorde": "Bm7",
-            "grau": "iii"
-          },
-          {
-            "acorde": "Em7",
-            "grau": "vi"
-          },
-          {
-            "acorde": "C#m7/5",
-            "grau": "#IV"
-          },
-          {
-            "acorde": "Cm6",
-            "grau": "iv"
-          },
-          {
-            "acorde": "D7",
-            "grau": "V7"
-          },
-          {
-            "acorde": "G",
-            "grau": "I"
-          },
-          {
-            "acorde": "D#°",
-            "grau": "#V"
-          },
-          {
-            "acorde": "F#m7/5",
-            "grau": "vii"
-          },
-          {
-            "acorde": "B7",
-            "grau": "III7"
-          },
-          {
-            "acorde": "C",
-            "grau": "IV"
-          }
-        ],
-        "secoes": [
-          {
-            "nome": "Intro",
-            "acordes_str": "C7+ | G7+ | G7/5+",
-            "acordes_graus": [
-              {
-                "acorde": "C7+",
-                "grau": "IV"
-              },
-              {
-                "acorde": "G7+",
-                "grau": "I"
-              },
-              {
-                "acorde": "G7/5+",
-                "grau": "I"
-              }
-            ],
-            "graus_seq": [
-              "IV",
-              "I",
-              "I"
-            ],
-            "cadencias": [
-              "IV – I (plagal)"
-            ]
-          },
-          {
-            "nome": "Verso",
-            "acordes_str": "C7+ | Am7 | Bm7 | Em7 | C#m7/5- | C7+ | Cm6 | G7+",
-            "acordes_graus": [
-              {
-                "acorde": "C7+",
-                "grau": "IV"
-              },
-              {
-                "acorde": "Am7",
-                "grau": "ii"
-              },
-              {
-                "acorde": "Bm7",
-                "grau": "iii"
-              },
-              {
-                "acorde": "Em7",
-                "grau": "vi"
-              },
-              {
-                "acorde": "C#m7/5",
-                "grau": "#IV"
-              },
-              {
-                "acorde": "Cm6",
-                "grau": "iv"
-              },
-              {
-                "acorde": "G7+",
-                "grau": "I"
-              }
-            ],
-            "graus_seq": [
-              "IV",
-              "ii",
-              "iii",
-              "vi",
-              "#IV",
-              "IV",
-              "iv",
-              "I"
-            ],
-            "cadencias": []
-          },
-          {
-            "nome": "Refrão",
-            "acordes_str": "G7/5+ | C7+ | D7 | G | Bm7 | C7+ | D7 | D#° | Em7 | Bm7 | C7+ | F#m7/5- | B7 | Em7 | Bm7 | C | D7 | G | C7+",
-            "acordes_graus": [
-              {
-                "acorde": "G7/5+",
-                "grau": "I"
-              },
-              {
-                "acorde": "C7+",
-                "grau": "IV"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
-              },
-              {
-                "acorde": "G",
-                "grau": "I"
-              },
-              {
-                "acorde": "Bm7",
-                "grau": "iii"
-              },
-              {
-                "acorde": "D#°",
-                "grau": "#V"
-              },
-              {
-                "acorde": "Em7",
-                "grau": "vi"
-              },
-              {
-                "acorde": "F#m7/5",
-                "grau": "vii"
-              },
-              {
-                "acorde": "B7",
-                "grau": "III7"
-              },
-              {
-                "acorde": "C",
-                "grau": "IV"
-              }
-            ],
-            "graus_seq": [
-              "I",
-              "IV",
-              "V7",
-              "I",
-              "iii",
-              "IV",
-              "V7",
-              "#V",
-              "vi",
-              "iii",
-              "IV",
-              "vii",
-              "III7",
-              "vi",
-              "iii",
-              "IV",
-              "V7",
-              "I",
-              "IV"
-            ],
-            "cadencias": [
-              "I – IV – V7",
-              "IV – V7 – I"
-            ]
-          }
-        ],
-        "secoes_match": [
-          "Refrão"
-        ]
-      }
-    ]
-  },
-  {
-    "slug": "I-V-vi-IV",
-    "nome": "I – V – vi – IV",
-    "graus": [
-      "I",
-      "V7",
-      "vi",
-      "IV"
-    ],
-    "tipo": "Pop/Pagode",
-    "descricao": "A progressão do pop e pagode moderno. Ciclo hipnótico que domina o pagode dos anos 2000.",
-    "musicas": [
-      {
-        "titulo": "Tá Vendo Aquela Lua",
-        "artista": "Exaltasamba",
-        "tom": "G",
-        "key_detected": "G",
-        "acordes_reais": [],
-        "todos_acordes": "C7+ G7+ G7/5+ Am7 Bm7 Em7 C#m7/5 Cm6 D7 G D#° F#m7/5 B7 C",
-        "graus_completos": [
-          "IV",
-          "I",
-          "I",
-          "ii",
-          "iii",
-          "vi",
-          "#IV",
-          "iv",
-          "V7",
-          "I",
-          "#V",
-          "vii",
-          "III7",
-          "IV"
-        ],
-        "acordes_graus": [
-          {
-            "acorde": "C7+",
-            "grau": "IV"
-          },
-          {
-            "acorde": "G7+",
-            "grau": "I"
-          },
-          {
-            "acorde": "G7/5+",
-            "grau": "I"
-          },
-          {
-            "acorde": "Am7",
-            "grau": "ii"
-          },
-          {
-            "acorde": "Bm7",
-            "grau": "iii"
-          },
-          {
-            "acorde": "Em7",
-            "grau": "vi"
-          },
-          {
-            "acorde": "C#m7/5",
-            "grau": "#IV"
-          },
-          {
-            "acorde": "Cm6",
-            "grau": "iv"
-          },
-          {
-            "acorde": "D7",
-            "grau": "V7"
-          },
-          {
-            "acorde": "G",
-            "grau": "I"
-          },
-          {
-            "acorde": "D#°",
-            "grau": "#V"
-          },
-          {
-            "acorde": "F#m7/5",
-            "grau": "vii"
-          },
-          {
-            "acorde": "B7",
-            "grau": "III7"
-          },
-          {
-            "acorde": "C",
-            "grau": "IV"
-          }
-        ],
-        "secoes": [
-          {
-            "nome": "Intro",
-            "acordes_str": "C7+ | G7+ | G7/5+",
-            "acordes_graus": [
-              {
-                "acorde": "C7+",
-                "grau": "IV"
-              },
-              {
-                "acorde": "G7+",
-                "grau": "I"
-              },
-              {
-                "acorde": "G7/5+",
-                "grau": "I"
-              }
-            ],
-            "graus_seq": [
-              "IV",
-              "I",
-              "I"
-            ],
-            "cadencias": [
-              "IV – I (plagal)"
-            ]
-          },
-          {
-            "nome": "Verso",
-            "acordes_str": "C7+ | Am7 | Bm7 | Em7 | C#m7/5- | C7+ | Cm6 | G7+",
-            "acordes_graus": [
-              {
-                "acorde": "C7+",
-                "grau": "IV"
-              },
-              {
-                "acorde": "Am7",
-                "grau": "ii"
-              },
-              {
-                "acorde": "Bm7",
-                "grau": "iii"
-              },
-              {
-                "acorde": "Em7",
-                "grau": "vi"
-              },
-              {
-                "acorde": "C#m7/5",
-                "grau": "#IV"
-              },
-              {
-                "acorde": "Cm6",
-                "grau": "iv"
-              },
-              {
-                "acorde": "G7+",
-                "grau": "I"
-              }
-            ],
-            "graus_seq": [
-              "IV",
-              "ii",
-              "iii",
-              "vi",
-              "#IV",
-              "IV",
-              "iv",
-              "I"
-            ],
-            "cadencias": []
-          },
-          {
-            "nome": "Refrão",
-            "acordes_str": "G7/5+ | C7+ | D7 | G | Bm7 | C7+ | D7 | D#° | Em7 | Bm7 | C7+ | F#m7/5- | B7 | Em7 | Bm7 | C | D7 | G | C7+",
-            "acordes_graus": [
-              {
-                "acorde": "G7/5+",
-                "grau": "I"
-              },
-              {
-                "acorde": "C7+",
-                "grau": "IV"
-              },
-              {
-                "acorde": "D7",
-                "grau": "V7"
-              },
-              {
-                "acorde": "G",
-                "grau": "I"
-              },
-              {
-                "acorde": "Bm7",
-                "grau": "iii"
-              },
-              {
-                "acorde": "D#°",
-                "grau": "#V"
-              },
-              {
-                "acorde": "Em7",
-                "grau": "vi"
-              },
-              {
-                "acorde": "F#m7/5",
-                "grau": "vii"
-              },
-              {
-                "acorde": "B7",
-                "grau": "III7"
-              },
-              {
-                "acorde": "C",
-                "grau": "IV"
-              }
-            ],
-            "graus_seq": [
-              "I",
-              "IV",
-              "V7",
-              "I",
-              "iii",
-              "IV",
-              "V7",
-              "#V",
-              "vi",
-              "iii",
-              "IV",
-              "vii",
-              "III7",
-              "vi",
-              "iii",
-              "IV",
-              "V7",
-              "I",
-              "IV"
-            ],
-            "cadencias": [
-              "I – IV – V7",
-              "IV – V7 – I"
-            ]
-          }
-        ],
-        "secoes_match": [
-          "Refrão"
-        ]
-      }
-    ]
-  },
-  {
-    "slug": "ii-V7-I",
-    "nome": "ii – V7 – I",
-    "graus": [
-      "ii",
-      "V7",
-      "I"
-    ],
-    "tipo": "Jazz/Samba",
-    "descricao": "O turnaround mais importante do samba e do jazz. O ii prepara o V7, que resolve no I. Movimento de quartas ascendentes que cria momentum harmônico irresistível.",
-    "musicas": []
-  },
-  {
-    "slug": "dom-secundarios",
-    "nome": "Dominantes Secundários",
-    "graus": [
-      "V7/x"
-    ],
-    "tipo": "Avançada",
-    "descricao": "Acordes dominantes que preparam graus que não são o I. Cria tensão direcionada e drama harmônico.",
-    "musicas": []
   }
 ]
