@@ -1,7 +1,7 @@
 [
   {
-    "slug": "sequencia-II",
-    "nome": "Sequência II — I V vi iii IV iii ii V",
+    "slug": "passeio-diatonico",
+    "nome": "Passeio Diatônico — I V vi iii IV iii ii V",
     "graus": [
       "I",
       "V",
@@ -818,8 +818,8 @@
     ]
   },
   {
-    "slug": "sequencia-III",
-    "nome": "Sequência III — I III7 vi v I7 IV V I",
+    "slug": "dominante-secundaria",
+    "nome": "Dominante Secundária — I III7 vi v I7 IV V I",
     "graus": [
       "I",
       "V7/vi",
@@ -1396,8 +1396,8 @@
     ]
   },
   {
-    "slug": "sequencia-IV",
-    "nome": "Sequência IV — I VI7 ii V v I7 IV V I",
+    "slug": "cadeia-de-dominantes",
+    "nome": "Cadeia de Dominantes — I VI7 ii V v I7 IV V I",
     "graus": [
       "I",
       "V7/ii",
@@ -1874,8 +1874,8 @@
     ]
   },
   {
-    "slug": "sequencia-V",
-    "nome": "Sequência V — I viiø III7 vi v I7 IV iv iii VI7 ii V",
+    "slug": "ciclo-completo",
+    "nome": "Ciclo Completo — I viiø III7 vi v I7 IV iv iii VI7 ii V",
     "graus": [
       "I",
       "viiø",
@@ -2227,8 +2227,8 @@
     ]
   },
   {
-    "slug": "sequencia-I",
-    "nome": "Sequência I — I vi ii V",
+    "slug": "roda-de-samba",
+    "nome": "Roda de Samba — I vi ii V",
     "graus": [
       "I",
       "vi",

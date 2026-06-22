@@ -249,10 +249,10 @@ export function AnalisadorHarmonico({ preloadText }: Props) {
             </button>
             {saved && (
               <button
-                onClick={() => router.push("/biblioteca")}
+                onClick={() => router.push("/progressoes")}
                 className="text-xs text-violet-300 hover:text-violet-200 transition-colors"
               >
-                Ver na Biblioteca →
+                Ver nas Progressões →
               </button>
             )}
           </div>

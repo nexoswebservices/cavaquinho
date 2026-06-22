@@ -8,8 +8,6 @@ const NAV_LINKS = [
   { href: "/escola", label: "Escola", match: "/escola" },
   { href: "/progressoes", label: "Progressões", match: "/progressoes" },
   { href: "/analise", label: "Análise", match: "/analise" },
-  { href: "/biblioteca", label: "Biblioteca", match: "/biblioteca" },
-  { href: "/cadencias", label: "Cadências", match: "/cadencias" },
 ]
 
 export function Navbar() {
