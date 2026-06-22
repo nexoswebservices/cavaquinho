@@ -7,6 +7,8 @@ import { campoHarmonico } from "@/lib/teoria"
 import type { Mode } from "@/lib/teoria"
 import { PROGRESSOES } from "@/lib/progressions-data"
 import { ProgressaoCard } from "@/components/progressoes/ProgressaoCard"
+import { PlayButton } from "@/components/ui/PlayButton"
+import { FormacaoAcordes } from "@/components/progressoes/FormacaoAcordes"
 
 interface SavedProgression {
   progression: string
@@ -18,6 +20,7 @@ const TABS = [
   { id: "campo", label: "Campo Harmônico" },
   { id: "cadencias", label: "Cadências" },
   { id: "sequencias", label: "Sequências" },
+  { id: "acordes", label: "Formação de Acordes" },
   { id: "minhas", label: "Minhas Progressões" },
 ] as const
 
@@ -482,6 +485,9 @@ export default function ProgressoesPage() {
           </div>
         </div>
       )}
+
+      {/* ═══ Tab: Formação de Acordes ═══ */}
+      {tab === "acordes" && <FormacaoAcordes />}
 
       {/* ═══ Tab: Minhas Progressões ═══ */}
       {tab === "minhas" && (
