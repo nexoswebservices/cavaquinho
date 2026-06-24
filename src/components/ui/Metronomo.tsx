@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
+import { Afinador } from "@/components/ui/Afinador"
 
 const TIME_SIGNATURES = [
   { label: "4/4", beats: 4 },
@@ -12,8 +13,11 @@ const TIME_SIGNATURES = [
 const MIN_BPM = 40
 const MAX_BPM = 220
 
+type PanelTab = "metronomo" | "afinador"
+
 export function Metronomo() {
   const [open, setOpen] = useState(false)
+  const [panelTab, setPanelTab] = useState<PanelTab>("metronomo")
   const [playing, setPlaying] = useState(false)
   const [bpm, setBpm] = useState(120)
   const [timeSigIdx, setTimeSigIdx] = useState(0)
@@ -150,6 +154,33 @@ export function Metronomo() {
       {/* Panel */}
       {open && (
         <div className="bg-[#120d24] border border-violet-500/30 rounded-2xl p-5 shadow-2xl shadow-violet-900/30 w-72">
+          {/* Panel tabs */}
+          <div className="flex gap-1.5 mb-4">
+            <button
+              onClick={() => setPanelTab("metronomo")}
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                panelTab === "metronomo"
+                  ? "bg-violet-600 text-white"
+                  : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              Metrônomo
+            </button>
+            <button
+              onClick={() => setPanelTab("afinador")}
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                panelTab === "afinador"
+                  ? "bg-violet-600 text-white"
+                  : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              Afinador
+            </button>
+          </div>
+
+          {panelTab === "afinador" && <Afinador />}
+
+          {panelTab === "metronomo" && (<>
           {/* BPM display */}
           <div className="text-center mb-4">
             <p className="text-xs text-slate-500 mb-1">BPM</p>
@@ -248,6 +279,7 @@ export function Metronomo() {
           >
             {playing ? "PARAR" : "INICIAR"}
           </button>
+          </>)}
         </div>
       )}
 
@@ -261,7 +293,7 @@ export function Metronomo() {
               ? "bg-violet-600 text-white shadow-violet-600/30"
               : "bg-[#120d24] border border-violet-500/30 text-violet-300 hover:bg-violet-600/20 shadow-black/30"
         }`}
-        title="Metrônomo"
+        title="Metrônomo / Afinador"
       >
         <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
           <path d="M12 1.5L6 22.5h12L12 1.5zM11 6l1.5-2L14 6l-1 10h-1L11 6zm1 12a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" />
