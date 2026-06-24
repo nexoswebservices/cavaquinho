@@ -25,6 +25,8 @@ export function Metronomo() {
   const nextBeatTimeRef = useRef(0)
   const beatRef = useRef(0)
   const playingRef = useRef(false)
+  const volumeRef = useRef(volume)
+  volumeRef.current = volume
 
   const timeSig = TIME_SIGNATURES[timeSigIdx]
 
@@ -43,14 +45,14 @@ export function Metronomo() {
     osc.connect(gain)
     gain.connect(ctx.destination)
 
-    const vol = volume / 100
+    const vol = volumeRef.current / 100
     osc.frequency.value = isAccent ? 1000 : 700
     gain.gain.value = (isAccent ? 0.5 : 0.3) * vol
 
     osc.start(time)
     gain.gain.exponentialRampToValueAtTime(0.001, time + 0.08)
     osc.stop(time + 0.08)
-  }, [getAudioCtx, volume])
+  }, [getAudioCtx])
 
   const scheduler = useCallback(() => {
     const ctx = getAudioCtx()
