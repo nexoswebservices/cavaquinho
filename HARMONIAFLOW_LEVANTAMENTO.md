@@ -4,23 +4,25 @@
 **App reconstruído:** https://cavaquinho.nexoswebservices.com  
 **Repositório local:** `c:\Users\renat\Downloads\Hamonico`  
 **Data do levantamento inicial:** 2026-06-09  
-**Última atualização:** 2026-06-18
+**Última atualização:** 2026-06-25
 
 ---
 
 ## 1. Status Geral
 
-**✅ TODAS AS 6 FASES + ANÁLISE VISUAL + BASE EXPANDIDA**
+**✅ TODAS AS 6 FASES + ANÁLISE VISUAL + BASE EXPANDIDA + FERRAMENTAS DE ÁUDIO**
 
 | Fase | Feature | Status |
 |---|---|---|
 | 1 | Cifras + Favoritos + Repertórios | ✅ Live (448 cifras, 88 artistas) |
-| 2 | Análise Harmônica | ✅ Live (+ fluxo cifra→análise→biblioteca) |
-| 3 | Biblioteca (Campo Harmônico) | ✅ Live (progressões dinâmicas + salvas) |
-| 4 | Treino de Cadências | ✅ Live |
+| 2 | Análise Harmônica | ✅ Live (+ fluxo cifra→análise→progressões) |
+| 3 | Progressões (unificada) | ✅ Live (campo harmônico + cadências + sequências + formação de acordes) |
+| 4 | Treino de Cadências | ✅ Live (9 padrões, integrado em /progressoes) |
 | 5 | Quiz | ✅ Live (em `/escola/quiz`) |
 | 6 | Meu Progresso (gamificação) | ✅ Live (em `/escola/meu-progresso`) |
 | 7 | Análise Visual TheoryTab | ✅ Live (blocos coloridos por função) |
+| 8 | Formação de Acordes + Sampler | ✅ Live (19 tipos, 3 formas, som real cavaquinho) |
+| 9 | Metrônomo + Afinador | ✅ Live (flutuante, acessível em todas as páginas) |
 
 **Modo atual:** Acesso público read-only (login desativado para avaliação da comunidade)
 
@@ -36,6 +38,7 @@
 | ORM | Prisma 5.x |
 | Banco de dados | MySQL (Hostinger `srv1804.hstgr.io`) |
 | Autenticação | NextAuth v4 (credentials + Prisma Adapter, JWT) — temporariamente bypass |
+| Áudio | Web Audio API (sampler + metrônomo + afinador) |
 | Deploy | Vercel (auto-deploy no push para `main`) |
 | Domínio | `cavaquinho.nexoswebservices.com` |
 
@@ -72,6 +75,7 @@ DATABASE_URL="mysql://u828037891_cavaquinho:I9c3UhVlw5pMdiWCqoMb@srv1804.hstgr.i
 - **Playwright MCP** — navegador automatizado para testar o site em produção (screenshots, cliques, snapshots)
 - **rtk (Rust Token Killer)** — proxy de CLI para economia de tokens no Claude Code
 - **pymupdf** — extração de cifras dos PDFs de cadernos musicais
+- **lameenc** — encoding MP3 para samples de cavaquinho (usado no script de conversão)
 
 ### Workflow típico de desenvolvimento
 1. Claude Code planeja (plan mode) → usuário aprova
@@ -158,15 +162,27 @@ Hamonico/
 │   └── data/
 │       ├── cifras.json                  ← 448 cifras (extraídas dos PDFs)
 │       └── cifras.ts
+├── public/
+│   └── samples/
+│       └── cavaquinho/                  ← 17 samples WAV de cavaquinho real (~4.4MB)
+│           ├── D3.wav, D4.wav, D5.wav   ← 3 oitavas de Ré
+│           ├── E3.wav, E4.wav, E5.wav   ← 3 oitavas de Mi
+│           ├── F#3.wav, F#4.wav, F#5.wav
+│           ├── G3.wav, G#3.wav
+│           ├── A3.wav, A#3.wav
+│           ├── B3.wav, B4.wav
+│           ├── C#4.wav, C#5.wav
+│           └── map.json                 ← Mapeamento nota→arquivo
 ├── scripts/
-│   └── extract-cifras.py               ← Extrator Python dos PDFs
+│   ├── extract-cifras.py               ← Extrator Python dos PDFs
+│   └── convert-samples.py              ← WAV 24-bit stereo → WAV 16-bit mono
 ├── src/
 │   ├── app/
 │   │   ├── (auth)/
 │   │   │   ├── login/page.tsx
 │   │   │   └── cadastro/page.tsx
 │   │   ├── (app)/
-│   │   │   ├── layout.tsx                    ← Navbar (sem auth gate)
+│   │   │   ├── layout.tsx                    ← Navbar + Metrônomo/Afinador flutuante
 │   │   │   ├── escola/page.tsx               ← Dashboard + sub-nav
 │   │   │   ├── escola/[modulo]/page.tsx
 │   │   │   ├── escola/[modulo]/[licao]/page.tsx
@@ -177,14 +193,20 @@ Hamonico/
 │   │   │   ├── cifras/repertorios/page.tsx
 │   │   │   ├── cifras/repertorios/[id]/page.tsx
 │   │   │   ├── analise/page.tsx              ← Aceita ?p= query param
-│   │   │   ├── biblioteca/page.tsx           ← Progressões dinâmicas + salvas
-│   │   │   ├── cadencias/page.tsx
+│   │   │   ├── progressoes/page.tsx          ← Página unificada com 5 tabs
+│   │   │   ├── progressoes/[slug]/page.tsx   ← Detalhe de sequência com músicas
+│   │   │   ├── biblioteca/page.tsx           ← Redirect → /progressoes
+│   │   │   ├── cadencias/page.tsx            ← Redirect → /progressoes
 │   │   │   ├── quiz/page.tsx                 ← redirect → /escola/quiz
 │   │   │   └── estudos/page.tsx              ← redirect → /escola/meu-progresso
 │   │   ├── api/ (...)
 │   │   ├── layout.tsx, page.tsx, providers.tsx, globals.css
 │   ├── components/
-│   │   ├── layout/Navbar.tsx
+│   │   ├── layout/Navbar.tsx                 ← 3 links: Escola | Progressões | Análise
+│   │   ├── ui/
+│   │   │   ├── Metronomo.tsx                 ← Painel flutuante com tabs Metrônomo | Afinador
+│   │   │   ├── Afinador.tsx                  ← Detecção de pitch via microfone (autocorrelação)
+│   │   │   └── PlayButton.tsx                ← Botão play reutilizável (Web Audio)
 │   │   ├── escola/
 │   │   │   ├── EscolaSubNav.tsx
 │   │   │   ├── ModuleGrid.tsx, ProgressBar.tsx, LessonActions.tsx
@@ -197,9 +219,14 @@ Hamonico/
 │   │   │   ├── NovoRepertorioForm.tsx, DeleteRepertorioButton.tsx
 │   │   │   └── RepertorioItens.tsx
 │   │   ├── analise/
-│   │   │   └── AnalisadorHarmonico.tsx       ← Preload via ?p=, salvar na biblioteca
+│   │   │   └── AnalisadorHarmonico.tsx       ← Preload via ?p=, salvar nas progressões
 │   │   ├── biblioteca/
 │   │   │   └── CampoHarmonico.tsx
+│   │   ├── progressoes/
+│   │   │   ├── ProgressaoCard.tsx            ← Cards com grau/acorde/notas formadoras
+│   │   │   ├── MusicaAnalise.tsx             ← Análise de música por seções
+│   │   │   ├── FormacaoAcordes.tsx           ← Enciclopédia: 19 tipos × 12 notas × 3 formas
+│   │   │   └── BracoCavaquinho.tsx           ← Diagrama SVG do braço (D-G-B-D)
 │   │   ├── cadencias/
 │   │   │   └── TreinoCadencias.tsx
 │   │   └── quiz/
@@ -208,6 +235,8 @@ Hamonico/
 │   │   ├── auth.ts, db.ts
 │   │   ├── escola-content.ts                 ← 24 lições (cavaquinho)
 │   │   ├── markdown.ts, teoria.ts, quiz.ts
+│   │   ├── sampler.ts                        ← Engine Web Audio API (pitch-shift, playChord)
+│   │   └── progressions-data.ts / .json      ← 5 sequências com músicas analisadas
 │   └── types/
 │       ├── index.ts
 │       └── next-auth.d.ts
@@ -241,7 +270,7 @@ Hamonico/
   - **Cifra**: ChordSheet estilo CifraClub (acordes acima das letras, seções estilizadas, controle de fonte)
   - **Análise Harmônica**: visualização TheoryTab com blocos coloridos
 
-### 6.4 Fluxo Cifra → Análise → Biblioteca
+### 6.4 Fluxo Cifra → Análise → Progressões
 Fluxo completo implementado e testado em produção:
 
 ```
@@ -256,7 +285,7 @@ Cifra (/cifras/[id])
                  ├─ Tabela de graus em C menor
                  ├─ Cadências detectadas
                  └→ Botão "Salvar na Biblioteca"
-                      └→ /biblioteca → seção "Minhas Progressões"
+                      └→ /progressoes → tab "Minhas Progressões"
                            ├─ Progressão salva (localStorage)
                            ├─ Botão "Analisar" (volta ao analisador)
                            └─ Botão "✕" (remover)
@@ -277,37 +306,89 @@ Cifra (/cifras/[id])
 - Textarea + botão Analisar (Ctrl+Enter)
 - **Aceita `?p=` query param** para pré-carregar progressão (vindo das cifras)
 - Engine client-side: 24 tonalidades, graus, cadências
-- **Botão "Salvar na Biblioteca"** (persiste em localStorage)
-- Link "Ver na Biblioteca →" após salvar
+- **Botão "Salvar nas Progressões"** (persiste em localStorage)
+- Link "Ver nas Progressões →" após salvar
 
-### 6.7 Biblioteca — Progressões Dinâmicas + Salvas
-- Campo Harmônico interativo (12 notas × maior/menor)
-- 8 progressões comuns transpostas para a tonalidade selecionada
-- Tabela de graus dinâmica
-- **Seção "Minhas Progressões"** — progressões salvas do analisador com botão re-analisar e remover
+### 6.7 Progressões (`/progressoes`) — Página Unificada com 5 Tabs
 
-### 6.8 Treino de Cadências (`/cadencias`)
-- 8 padrões, 12 tonalidades, botão Embaralhar
-- Acordes reais calculados + campo harmônico inline
+Unificação das antigas páginas `/biblioteca`, `/cadencias` e `/progressoes` em uma única página com tabs:
 
-### 6.9 Quiz (`/escola/quiz`)
+| Tab | Conteúdo |
+|-----|----------|
+| **Campo Harmônico** | 12 notas × maior/menor, 7 acordes diatônicos, 8 progressões comuns transpostas, tabela de intervalos e graus |
+| **Cadências** | 9 padrões de treino (merge das 8 cadências + Ciclo de Quintas), seletor de tonalidade, embaralhar, descrições e dicas, campo harmônico inline |
+| **Sequências** | 5 sequências com nomes descritivos (Roda de Samba, Passeio Diatônico, Dominante Secundária, Cadeia de Dominantes, Ciclo Completo), cards com grau/acorde/notas formadoras em C maior, link para detalhe com músicas |
+| **Formação de Acordes** | 19 tipos de acorde × 12 notas raiz, fórmula + notas + intervalos, 3 formas com diagrama SVG do braço do cavaquinho (D-G-B-D), play com som real de cavaquinho via Web Audio API |
+| **Minhas Progressões** | Progressões salvas do Analisador Harmônico (localStorage) |
+
+- `/biblioteca` e `/cadencias` redirecionam para `/progressoes`
+- `/progressoes/[slug]` — detalhe de cada sequência com seletor de tom, busca, e análise por música
+
+### 6.8 Formação de Acordes + Sampler de Cavaquinho
+- **19 tipos de acorde:** Maior, Menor, Dim, Aug, 7, m7, maj7, dim7, m7(b5), Sus4, Sus2, 6, m6, 9, m9, 11, 13, Add9, Power(5)
+- **Cálculo dinâmico:** fórmula, notas e intervalos calculados em tempo real para qualquer raiz + tipo
+- **3 formas** com voicings diferentes no braço do cavaquinho
+- **Diagrama SVG do braço** (`BracoCavaquinho.tsx`): 4 cordas D-G-B-D, trastes, pontos com nome da nota, corda solta (O) / muda (X)
+- **Sampler real** (`sampler.ts`): 17 samples WAV extraídos do pack Kitdepontos, Web Audio API, pitch-shift para cobertura cromática completa (notas faltantes C, D#, F cobertas via playbackRate ≤ 1 semitom)
+- **PlayButton** reutilizável: lazy loading do AudioContext, ícone com animação
+
+### 6.9 Metrônomo + Afinador (flutuante)
+Botão flutuante no canto inferior direito, acessível em todas as páginas do app:
+
+**Metrônomo:**
+- BPM 40–220, slider + botões −/+
+- Tap Tempo (detecta BPM por toques)
+- Controle de volume (ref em tempo real)
+- Compassos: 4/4, 3/4, 2/4, 6/8
+- Indicadores visuais de beat (acento no 1º tempo)
+- Som via Web Audio API (oscilador)
+
+**Afinador:**
+- Detecção de pitch via microfone (getUserMedia + autocorrelação)
+- 4 cordas do cavaquinho: D4 (293.66Hz), B3 (246.94Hz), G3 (196Hz), D3 (146.83Hz)
+- Gauge visual SVG com agulha (−50 a +50 cents)
+- Indicador de cor: verde (≤5 cents), amarelo (≤15), vermelho (>15)
+- Status "Afinado!" quando ≤5 cents da nota alvo
+
+### 6.10 Sequências Harmônicas — 5 com Músicas Reais
+| Sequência | Graus | Tipo | Músicas |
+|---|---|---|---|
+| Roda de Samba | I – vi – ii – V7 | Fundamental | 1 |
+| Passeio Diatônico | I – V – vi – iii – IV – iii – ii – V7 | Intermediária | 4 |
+| Dominante Secundária | I – V7/vi – vi – v – I7 – IV – V7 – I | Com Dom. Secundária | 3 |
+| Cadeia de Dominantes | I – V7/ii – ii – V7 – v – I7 – IV – V7 – I | Dom. Secundárias | 2 |
+| Ciclo Completo | I – viiø – V7/vi – vi – v – I7 – IV – iv – iii – V7/ii – ii – V7 | Avançada | 2 |
+
+### 6.11 Quiz (`/escola/quiz`)
 - 10 perguntas dinâmicas, 7 tipos, feedback imediato, estrelas
 
-### 6.10 Meu Progresso (`/escola/meu-progresso`)
+### 6.12 Meu Progresso (`/escola/meu-progresso`)
 - XP, níveis, ranks, conquistas — calculados do UserProgress
 
 ---
 
 ## 7. Navegação
 
-### Navbar principal (5 links)
+### Navbar principal (3 links)
 | Link | Rota | Escopo |
 |---|---|---|
 | Escola | `/escola` | Lições, Quiz, Meu Progresso (sub-nav) |
-| Cifras | `/cifras` | 448 cifras agrupadas por artista |
+| Progressões | `/progressoes` | Campo harmônico, cadências, sequências, formação de acordes, minhas progressões (5 tabs) |
 | Análise | `/analise` | Analisador harmônico (aceita ?p=) |
-| Biblioteca | `/biblioteca` | Campo harmônico + progressões + salvas |
-| Cadências | `/cadencias` | Treino de progressões |
+
+### Elemento flutuante
+| Elemento | Posição | Escopo |
+|---|---|---|
+| Metrônomo / Afinador | Canto inferior direito | Todas as páginas do app |
+
+### Redirects
+| URL antiga | Destino |
+|---|---|
+| `/biblioteca` | `/progressoes` |
+| `/cadencias` | `/progressoes` |
+| `/cifras` | `/cifras` (mantido) |
+| `/quiz` | `/escola/quiz` |
+| `/estudos` | `/escola/meu-progresso` |
 
 ### API Routes
 | Rota | Métodos | Auth | Descrição |
@@ -347,11 +428,20 @@ Cifra (/cifras/[id])
 
 ---
 
-## 9. `src/lib/teoria.ts` — Engine de Teoria Musical
+## 9. Engine de Áudio
 
-Módulo client-side reutilizado em `/analise`, `/biblioteca`, `/cadencias` e `CifraAnalise`.
+### 9.1 `src/lib/sampler.ts` — Sampler de Cavaquinho
+- **Fonte:** Pack Kitdepontos.com.br (17 samples WAV 24-bit stereo → 16-bit mono)
+- **Conversão:** `scripts/convert-samples.py` (Python, lameenc)
+- **Notas amostradas:** C#, D, E, F#, G, G#, A, A#, B (9 de 12 cromáticas)
+- **Cobertura completa:** C, D#, F via pitch-shift (playbackRate, max 1 semitom)
+- **Oitavas:** 3 a 5 (D/E/F# têm 3 oitavas, B/C# têm 2, restante 1)
+- **API:** `initSampler()`, `playNote(note, octave)`, `playChord(notes)`, `stopAll()`
+- **Lazy loading:** AudioContext criado no primeiro clique (respeita autoplay policy)
 
-### Funções exportadas
+### 9.2 `src/lib/teoria.ts` — Engine de Teoria Musical
+Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
+
 | Função | Descrição |
 |---|---|
 | `parseChord(token)` | Parseia acorde brasileiro → `{root, quality, original}` |
@@ -378,6 +468,7 @@ Módulo client-side reutilizado em `/analise`, `/biblioteca`, `/cadencias` e `Ci
 - **Reativar login** após avaliação da comunidade
 - **Novos módulos na Escola** — aguardando conteúdo dos cursos Hotmart (Layon Bacelar)
 - **Melhoria do formato das cifras** — padronizar para formato CifraClub canônico (acordes posicionados sobre sílabas)
+- **Ampliar base de samples** — mais velocidades, mais oitavas para melhor cobertura
 
 ### Histórico de revisões
 | Data | Mudanças |
@@ -387,6 +478,13 @@ Módulo client-side reutilizado em `/analise`, `/biblioteca`, `/cadencias` e `Ci
 | 2026-06-17 | Cifras agrupadas por artista A-Z com busca |
 | 2026-06-17 | Fluxo cifra→análise→analisador→biblioteca com ?p= query e salvar progressão |
 | 2026-06-18 | Base expandida: 448 cifras de 88 artistas (extraídas dos PDFs SAMBA RAIZ + PAGODES ATUAIS) |
+| 2026-06-22 | Unificação /biblioteca + /cadencias + /progressoes em página única com 4 tabs |
+| 2026-06-22 | Sequências renomeadas: Roda de Samba, Passeio Diatônico, Dominante Secundária, Cadeia de Dominantes, Ciclo Completo |
+| 2026-06-22 | Cards de sequência com grau, acorde e notas formadoras |
+| 2026-06-22 | Navbar simplificada: 3 links (Escola, Progressões, Análise) |
+| 2026-06-22 | Tab Formação de Acordes: 19 tipos, sampler real de cavaquinho (17 WAVs), diagrama SVG do braço |
+| 2026-06-24 | Metrônomo flutuante: BPM 40-220, tap tempo, volume, 4 compassos |
+| 2026-06-24 | Afinador integrado: detecção de pitch via microfone, gauge visual, 4 cordas D-G-B-D |
 
 ---
 
@@ -401,6 +499,7 @@ Módulo client-side reutilizado em `/analise`, `/biblioteca`, `/cadencias` e `Ci
 | Branch | `main` |
 | PDFs fonte | `C:\Users\renat\Downloads\Harmonico\SAMBA RAIZ.pdf` (319p) |
 | | `C:\Users\renat\Downloads\Harmonico\PAGODES ATUAIS ..pdf` (307p) |
+| Samples fonte | `C:\Users\renat\Downloads\Hamonico\PACK SAMPLES CAVAQUINHO - Kitdepontos.COm.Br.zip` |
 
 ### Referências externas salvas
 | Referência | Uso futuro |
