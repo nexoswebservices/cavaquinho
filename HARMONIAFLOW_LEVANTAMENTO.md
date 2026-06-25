@@ -10,11 +10,11 @@
 
 ## 1. Status Geral
 
-**✅ TODAS AS 6 FASES + ANÁLISE VISUAL + BASE EXPANDIDA + FERRAMENTAS DE ÁUDIO**
+**✅ 12 MÓDULOS LIVE — ÁUDIO, PARTITURA, ARPEJOS, IMPROVISOS, CIFRAS INTERATIVAS**
 
 | Fase | Feature | Status |
 |---|---|---|
-| 1 | Cifras + Favoritos + Repertórios | ✅ Live (448 cifras, 88 artistas) |
+| 1 | Cifras + Favoritos + Repertórios | ✅ Live (448 cifras, 88 artistas, transposição, acordes clicáveis) |
 | 2 | Análise Harmônica | ✅ Live (+ fluxo cifra→análise→progressões) |
 | 3 | Progressões (unificada) | ✅ Live (campo harmônico + cadências + sequências + formação de acordes) |
 | 4 | Treino de Cadências | ✅ Live (9 padrões, integrado em /progressoes) |
@@ -23,6 +23,9 @@
 | 7 | Análise Visual TheoryTab | ✅ Live (blocos coloridos por função) |
 | 8 | Formação de Acordes + Sampler | ✅ Live (19 tipos, 3 formas, som real cavaquinho) |
 | 9 | Metrônomo + Afinador | ✅ Live (flutuante, acessível em todas as páginas) |
+| 10 | Arpejos | ✅ Live (8 padrões, braço numerado, partitura VexFlow + tablatura) |
+| 11 | Improvisos | ✅ Live (12 escalas, 8 frases, backing tracks, braço inteiro) |
+| 12 | Cifras Interativas | ✅ Live (transposição de tom, acordes clicáveis com tooltip, auto-scroll) |
 
 **Modo atual:** Acesso público read-only (login desativado para avaliação da comunidade)
 
@@ -227,6 +230,14 @@ Hamonico/
 │   │   │   ├── MusicaAnalise.tsx             ← Análise de música por seções
 │   │   │   ├── FormacaoAcordes.tsx           ← Enciclopédia: 19 tipos × 12 notas × 3 formas
 │   │   │   └── BracoCavaquinho.tsx           ← Diagrama SVG do braço (D-G-B-D)
+│   │   ├── arpejos/
+│   │   │   └── BracoArpejo.tsx               ← Braço com sequência numerada
+│   │   ├── improvisos/
+│   │   │   └── BracoEscala.tsx               ← Braço inteiro (trastes 0-12) com escala
+│   │   ├── partitura/
+│   │   │   ├── PartituraView.tsx             ← Renderizador VexFlow (pentagrama)
+│   │   │   ├── TablaturaView.tsx             ← Tablatura SVG 4 cordas
+│   │   │   └── PartituraComTab.tsx           ← Combo partitura + tablatura
 │   │   ├── cadencias/
 │   │   │   └── TreinoCadencias.tsx
 │   │   └── quiz/
@@ -235,7 +246,11 @@ Hamonico/
 │   │   ├── auth.ts, db.ts
 │   │   ├── escola-content.ts                 ← 24 lições (cavaquinho)
 │   │   ├── markdown.ts, teoria.ts, quiz.ts
-│   │   ├── sampler.ts                        ← Engine Web Audio API (pitch-shift, playChord)
+│   │   ├── transpose.ts                      ← Transposição de acordes (preserva espaçamento)
+│   │   ├── sampler.ts                        ← Engine Web Audio API (playNote, playChord, playArpejo, playBackingTrack)
+│   │   ├── arpejos-data.ts                   ← 8 padrões de arpejo
+│   │   ├── escalas-data.ts                   ← 12 escalas (pentatônicas, blues, modos)
+│   │   ├── frases-data.ts                    ← 8 frases curadas com partitura + tablatura
 │   │   └── progressions-data.ts / .json      ← 5 sequências com músicas analisadas
 │   └── types/
 │       ├── index.ts
@@ -262,13 +277,17 @@ Hamonico/
 - Sub-navegação: Lições | Quiz | Meu Progresso via `EscolaSubNav`
 - Progresso por módulo, barra geral, botão "Marcar como concluída"
 
-### 6.3 Cifras — 448 músicas, 88 artistas
+### 6.3 Cifras Interativas — 448 músicas, 88 artistas
 - **Base expandida:** extraídas de 2 PDFs (SAMBA RAIZ 319p + PAGODES ATUAIS 307p) via `scripts/extract-cifras.py`
 - **Fontes:** Cartola, Clara Nunes, Alcione, Noel Rosa, Pixinguinha, Belo, Ferrugem, Thiaguinho, Turma do Pagode, Sorriso Maroto, Xande de Pilares...
 - `/cifras` — **agrupadas por artista A-Z** com busca por música ou artista
 - `/cifras/[id]` — **duas tabs**:
-  - **Cifra**: ChordSheet estilo CifraClub (acordes acima das letras, seções estilizadas, controle de fonte)
+  - **Cifra**: ChordSheet com acordes clicáveis, controle de fonte
   - **Análise Harmônica**: visualização TheoryTab com blocos coloridos
+- **Transposição de tom**: botões −/+ para transpor todos os acordes em tempo real, preservando espaçamento e qualidade. Botão "Original" para resetar. Análise Harmônica também transpõe.
+- **Acordes clicáveis**: clique em qualquer acorde → tooltip com diagrama do braço do cavaquinho (BracoCavaquinho) + botão play com som real (sampler)
+- **Auto-scroll**: botão toggle + slider de velocidade, para prática mãos-livres
+- **Barra de controles sticky**: tom, tamanho de fonte, auto-scroll — fixa abaixo da navbar
 
 ### 6.4 Fluxo Cifra → Análise → Progressões
 Fluxo completo implementado e testado em produção:
@@ -359,21 +378,57 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 | Cadeia de Dominantes | I – V7/ii – ii – V7 – v – I7 – IV – V7 – I | Dom. Secundárias | 2 |
 | Ciclo Completo | I – viiø – V7/vi – vi – v – I7 – IV – iv – iii – V7/ii – ii – V7 | Avançada | 2 |
 
-### 6.11 Quiz (`/escola/quiz`)
+### 6.11 Arpejos (`/arpejos`)
+- **8 padrões**: Ascendente, Descendente, Alternado, Sweep Up/Down, Quebrado, Samba, Pagode
+- **8 tipos de acorde**: Maior, Menor, 7, m7, 7M, Dim, Aum, m7(b5)
+- **12 notas** × 6 opções de BPM (60-160)
+- **Diagrama do braço** (`BracoArpejo.tsx`): posições numeradas com cores por ordem de execução
+- **Partitura VexFlow + Tablatura** renderizadas em tempo real para cada padrão/acorde
+- **Play arpejo**: toca notas em sequência no tempo do BPM via `playArpejo()` do sampler
+- Descrição + dica de execução para cada padrão
+
+### 6.12 Improvisos (`/improvisos`) — 4 tabs
+
+**Tab Escalas:**
+- **12 escalas**: Pentatônica Maior/Menor, Blues, Jônica, Dórica, Frígia, Lídia, Mixolídia, Eólica, Lócria, Menor Harmônica, Menor Melódica
+- **Braço inteiro** (`BracoEscala.tsx`): trastes 0-12, todas as posições da escala, tônica destacada em roxo
+- Notas, descrição, uso comum, acordes compatíveis
+
+**Tab Frases ("Quadradinhos"):**
+- **8 frases curadas**: pentatônicas, blues, samba fill, dórica, mixolídia, cromática, menor harmônica
+- **Partitura VexFlow + Tablatura** para cada frase
+- Play button, nível (Iniciante/Intermediário/Avançado), músicas de referência, dica de execução
+
+**Tab Exercícios:**
+- Guia passo a passo para combinar escalas + frases + backing tracks
+
+**Tab Backing Tracks:**
+- **5 progressões**: ii-V-I, I-IV-V-I, I-vi-IV-V, Roda de Samba, Blues 12 compassos
+- **Play em loop** via `playBackingTrack()` do sampler
+- Controle de BPM, escala sugerida
+
+### 6.13 Partitura (transversal — VexFlow)
+- **PartituraView**: renderiza pentagrama com clave de sol, notas com duração, acidentes
+- **TablaturaView**: 4 linhas SVG (cordas D-G-B-D) com números de trastes
+- **PartituraComTab**: combo partitura + tablatura alinhadas (usado em Arpejos e Improvisos)
+
+### 6.14 Quiz (`/escola/quiz`)
 - 10 perguntas dinâmicas, 7 tipos, feedback imediato, estrelas
 
-### 6.12 Meu Progresso (`/escola/meu-progresso`)
+### 6.15 Meu Progresso (`/escola/meu-progresso`)
 - XP, níveis, ranks, conquistas — calculados do UserProgress
 
 ---
 
 ## 7. Navegação
 
-### Navbar principal (3 links)
+### Navbar principal (5 links)
 | Link | Rota | Escopo |
 |---|---|---|
 | Escola | `/escola` | Lições, Quiz, Meu Progresso (sub-nav) |
 | Progressões | `/progressoes` | Campo harmônico, cadências, sequências, formação de acordes, minhas progressões (5 tabs) |
+| Arpejos | `/arpejos` | 8 padrões de arpejo com braço, partitura, tablatura, play |
+| Improvisos | `/improvisos` | Escalas, frases, exercícios, backing tracks (4 tabs) |
 | Análise | `/analise` | Analisador harmônico (aceita ?p=) |
 
 ### Elemento flutuante
@@ -436,7 +491,7 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 - **Notas amostradas:** C#, D, E, F#, G, G#, A, A#, B (9 de 12 cromáticas)
 - **Cobertura completa:** C, D#, F via pitch-shift (playbackRate, max 1 semitom)
 - **Oitavas:** 3 a 5 (D/E/F# têm 3 oitavas, B/C# têm 2, restante 1)
-- **API:** `initSampler()`, `playNote(note, octave)`, `playChord(notes)`, `stopAll()`
+- **API:** `initSampler()`, `playNote(note, octave)`, `playChord(notes)`, `playArpejo(notes, bpm, pattern)`, `playBackingTrack(chords, bpm, beatsPerChord)`, `stopAll()`
 - **Lazy loading:** AudioContext criado no primeiro clique (respeita autoplay policy)
 
 ### 9.2 `src/lib/teoria.ts` — Engine de Teoria Musical
@@ -485,6 +540,11 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | 2026-06-22 | Tab Formação de Acordes: 19 tipos, sampler real de cavaquinho (17 WAVs), diagrama SVG do braço |
 | 2026-06-24 | Metrônomo flutuante: BPM 40-220, tap tempo, volume, 4 compassos |
 | 2026-06-24 | Afinador integrado: detecção de pitch via microfone, gauge visual, 4 cordas D-G-B-D |
+| 2026-06-25 | Módulo Arpejos: 8 padrões, braço numerado, partitura VexFlow + tablatura, playArpejo |
+| 2026-06-25 | Módulo Improvisos: 12 escalas no braço inteiro, 8 frases curadas, backing tracks, exercícios |
+| 2026-06-25 | Partitura transversal: VexFlow (PartituraView) + TablaturaView + PartituraComTab |
+| 2026-06-25 | Rebuild Cifras: transposição de tom, acordes clicáveis com tooltip (braço + play), auto-scroll, CifraControls sticky |
+| 2026-06-25 | Navbar 5 links: Escola, Progressões, Arpejos, Improvisos, Análise |
 
 ---
 
