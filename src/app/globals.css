@@ -65,3 +65,39 @@ body {
 .lesson-content strong {
   @apply text-white font-semibold;
 }
+
+/* VexFlow partitura — tema escuro */
+.vf-partitura svg {
+  background: transparent !important;
+}
+.vf-partitura svg path {
+  stroke: #94a3b8 !important;
+}
+.vf-partitura svg path[fill="black"],
+.vf-partitura svg path[fill="#000000"],
+.vf-partitura svg path[fill="#000"] {
+  fill: #cbd5e1 !important;
+}
+.vf-partitura svg path[fill="none"] {
+  fill: none !important;
+}
+.vf-partitura svg line {
+  stroke: #475569 !important;
+}
+.vf-partitura svg rect[fill="black"],
+.vf-partitura svg rect[fill="#000000"],
+.vf-partitura svg rect[fill="#000"] {
+  fill: #cbd5e1 !important;
+}
+.vf-partitura svg text {
+  fill: #cbd5e1 !important;
+  font-weight: 500;
+}
+/* Nota destacada (highlight) — preservar cor violeta */
+.vf-partitura svg .vf-highlight path {
+  stroke: #a78bfa !important;
+  fill: #a78bfa !important;
+}
+.vf-partitura svg .vf-highlight text {
+  fill: #a78bfa !important;
+}
