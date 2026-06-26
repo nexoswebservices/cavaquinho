@@ -34,17 +34,22 @@ function isChordToken(t: string): boolean {
 function isTabLine(line: string): boolean {
   const trimmed = line.trim()
   if (STD_TAB_LINE.test(trimmed)) return true
-  if (NUM_TAB_LINE.test(trimmed)) return true
   if (STRING_TAB_LINE.test(trimmed)) return true
-  // Linhas com predominância de números e dashes (tab numérica)
+
+  // Verificar se a linha tem acordes — se sim, NÃO é tab
+  const tokens = trimmed.split(/\s+/).filter((t) => t !== "|" && t !== "%" && t.replace(/\|/g, "").trim())
+  const chordTokens = tokens.filter(isChordToken).length
+  if (chordTokens >= 2) return false
+  if (tokens.length > 0 && chordTokens / tokens.length >= 0.5) return false
+
+  if (NUM_TAB_LINE.test(trimmed)) return true
+
+  // Padrões numéricos com dashes (tab pura sem acordes)
   const digits = (trimmed.match(/\d/g) || []).length
   const dashes = (trimmed.match(/-/g) || []).length
-  const pipes = (trimmed.match(/\|/g) || []).length
-  if (digits >= 4 && (digits + dashes + pipes) > trimmed.replace(/\s/g, "").length * 0.5) return true
-  // Linhas que começam com | e tem números
-  if (/^\|/.test(trimmed) && digits >= 3) return true
-  // Linhas tipo "VIOLAO: | 53-40-41 |" — tem label + tab
-  if (/:\s*\|/.test(trimmed) && digits >= 4) return true
+  if (digits >= 4 && dashes >= 2 && (digits + dashes) > trimmed.replace(/[\s|]/g, "").length * 0.6) return true
+  // Linhas tipo "VIOLAO: | 53-40-41 |" — label + tab
+  if (/:\s*\|/.test(trimmed) && digits >= 4 && dashes >= 2) return true
   return false
 }
 
