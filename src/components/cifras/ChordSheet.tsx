@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import { transposeLine } from "@/lib/transpose"
 import { ChordTooltip } from "./ChordTooltip"
+import { initSampler, isReady, playNote } from "@/lib/sampler"
 
 // Acorde completo: raiz + qualidade + extensões + baixo
 // Reconhece: Am7/-5, C7/9, Bb7+/9, Em7/5-, F#m7(b5), G7(9/11), A4(7/9), etc.
@@ -158,6 +159,77 @@ function renderChordLine(
   return parts.length > 0 ? parts : text
 }
 
+// Tablatura numérica do cavaquinho: 1º dígito = corda (1-4), restante = traste
+// Ex: 21 = corda 2 traste 1, 110 = corda 1 traste 10
+const TUNING_MIDI_TAB = [74, 71, 67, 62] // D5, B4, G4, D4 (cordas 1-4)
+const CHROMATIC_TAB = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+function parseTabNumbers(text: string): [string, number][] {
+  const nums = text.match(/\d{2,3}/g)
+  if (!nums) return []
+
+  const notes: [string, number][] = []
+  for (const num of nums) {
+    let stringNum: number
+    let fret: number
+
+    if (num.length === 3) {
+      stringNum = parseInt(num[0])
+      fret = parseInt(num.slice(1))
+    } else {
+      stringNum = parseInt(num[0])
+      fret = parseInt(num[1])
+    }
+
+    if (stringNum < 1 || stringNum > 4 || fret > 17) continue
+
+    const midi = TUNING_MIDI_TAB[stringNum - 1] + fret
+    const note = CHROMATIC_TAB[midi % 12]
+    const octave = Math.floor(midi / 12) - 1
+    notes.push([note, octave])
+  }
+
+  return notes
+}
+
+function TabPlayButton({ text }: { text: string }) {
+  const [playing, setPlaying] = useState(false)
+
+  const handlePlay = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!isReady()) await initSampler()
+
+    const notes = parseTabNumbers(text)
+    if (notes.length === 0) return
+
+    setPlaying(true)
+    const interval = 250
+
+    notes.forEach(([note, octave], i) => {
+      setTimeout(() => playNote(note, octave), i * interval)
+    })
+
+    setTimeout(() => setPlaying(false), notes.length * interval + 200)
+  }, [text])
+
+  const notes = parseTabNumbers(text)
+  if (notes.length === 0) return null
+
+  return (
+    <button
+      onClick={handlePlay}
+      className={`ml-2 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs transition-all flex-shrink-0 ${
+        playing
+          ? "bg-emerald-500 text-white scale-110"
+          : "bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30"
+      }`}
+      title={`Tocar tablatura (${notes.length} notas)`}
+    >
+      {playing ? "♪" : "▶"}
+    </button>
+  )
+}
+
 interface ChordSheetProps {
   conteudo: string
   transposeSemitones?: number
@@ -229,8 +301,9 @@ export function ChordSheet({ conteudo, transposeSemitones = 0, fontSize = 14 }: 
 
             case "tab":
               return (
-                <div key={i} className="text-emerald-400/60 whitespace-pre text-[0.8em] leading-snug">
-                  {b.text}
+                <div key={i} className="flex items-center gap-0 text-emerald-400/60 text-[0.8em] leading-snug">
+                  <span className="whitespace-pre flex-1">{b.text}</span>
+                  <TabPlayButton text={b.text!} />
                 </div>
               )
 
