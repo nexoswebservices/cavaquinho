@@ -31,8 +31,19 @@ function displayNote(note: string, preferFlat: boolean): string {
 // Calcula oitava correta baseado na posição no braço do cavaquinho
 function findNoteOnFretboard(noteChrom: string): { string: number; fret: number; octave: number } {
   const noteIdx = CHROMATIC.indexOf(noteChrom)
-  for (let s = 3; s >= 0; s--) {
-    for (let f = 0; f <= 12; f++) {
+  // Busca da corda mais grave (D4) para a mais aguda, trastes baixos primeiro
+  for (let s = 0; s <= 3; s++) {
+    for (let f = 0; f <= 7; f++) {
+      const midi = TUNING_MIDI[s] + f
+      if (midi % 12 === noteIdx) {
+        const octave = Math.floor(midi / 12) - 1
+        return { string: s + 1, fret: f, octave }
+      }
+    }
+  }
+  // Fallback: busca em trastes mais altos
+  for (let s = 0; s <= 3; s++) {
+    for (let f = 8; f <= 12; f++) {
       const midi = TUNING_MIDI[s] + f
       if (midi % 12 === noteIdx) {
         const octave = Math.floor(midi / 12) - 1
