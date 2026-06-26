@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react"
 export interface NoteData {
   note: string
   octave: number
-  duration: string // "w"=semibreve, "h"=mínima, "q"=semínima, "8"=colcheia, "16"=semicolcheia
+  duration: string
   accidental?: "#" | "b"
 }
 
@@ -15,6 +15,7 @@ interface PartituraProps {
   keySignature?: string
   title?: string
   width?: number
+  highlightIndex?: number
 }
 
 const SHARP_NOTES = new Set(["C#", "D#", "F#", "G#", "A#"])
@@ -37,6 +38,7 @@ export function PartituraView({
   keySignature = "C",
   title,
   width: propWidth,
+  highlightIndex,
 }: PartituraProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -59,6 +61,14 @@ export function PartituraView({
       renderer.resize(w, h)
       const context = renderer.getContext()
 
+      // Theme escuro: linhas e notas em branco/cinza claro
+      const svgEl = container.querySelector("svg")
+      if (svgEl) {
+        svgEl.style.background = "transparent"
+      }
+      context.setFillStyle("#e2e8f0")
+      context.setStrokeStyle("#e2e8f0")
+
       const staveWidth = Math.max(w - 20, 200)
       const stave = new VF.Stave(10, 20, staveWidth)
       stave.addClef("treble")
@@ -68,7 +78,7 @@ export function PartituraView({
       }
       stave.setContext(context).draw()
 
-      const vexNotes = notes.map((n) => {
+      const vexNotes = notes.map((n, i) => {
         const { key, accidental } = noteToVexKey(n.note, n.octave)
         const sn = new VF.StaveNote({
           keys: [key],
@@ -77,6 +87,11 @@ export function PartituraView({
         if (accidental || n.accidental) {
           sn.addModifier(new VF.Accidental(accidental ?? n.accidental!))
         }
+
+        if (highlightIndex !== undefined && i === highlightIndex) {
+          sn.setStyle({ fillStyle: "#a78bfa", strokeStyle: "#a78bfa" })
+        }
+
         return sn
       })
 
@@ -96,7 +111,7 @@ export function PartituraView({
     return () => {
       mounted = false
     }
-  }, [notes, timeSignature, keySignature, propWidth])
+  }, [notes, timeSignature, keySignature, propWidth, highlightIndex])
 
   return (
     <div className="overflow-x-auto">

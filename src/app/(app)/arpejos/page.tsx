@@ -1,18 +1,19 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { ARPEJO_PATTERNS, CHORD_TYPES_ARPEJO } from "@/lib/arpejos-data"
 import { BracoArpejo } from "@/components/arpejos/BracoArpejo"
 import { PlayButton } from "@/components/ui/PlayButton"
-import { initSampler, isReady, playArpejo } from "@/lib/sampler"
-import { PartituraComTab } from "@/components/partitura/PartituraComTab"
+import { initSampler, isReady, playNote } from "@/lib/sampler"
+import { PartituraView } from "@/components/partitura/PartituraView"
+import { TablaturaView } from "@/components/partitura/TablaturaView"
 import type { NoteData } from "@/components/partitura/PartituraView"
 import type { TabNote } from "@/components/partitura/TablaturaView"
 
 const NOTAS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 const CHROMATIC = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 const TO_SHARP: Record<string, string> = { Eb: "D#", Ab: "G#", Bb: "A#", Db: "C#", Gb: "F#" }
-const TUNING_MIDI = [62, 67, 71, 74]
+const TUNING_MIDI = [62, 67, 71, 74] // D4, G4, B4, D5
 
 function noteAtSemitone(root: string, semitones: number): string {
   const r = TO_SHARP[root] ?? root
@@ -27,6 +28,21 @@ function displayNote(note: string, preferFlat: boolean): string {
   return map[note] ?? note
 }
 
+// Calcula oitava correta baseado na posição no braço do cavaquinho
+function findNoteOnFretboard(noteChrom: string): { string: number; fret: number; octave: number } {
+  const noteIdx = CHROMATIC.indexOf(noteChrom)
+  for (let s = 3; s >= 0; s--) {
+    for (let f = 0; f <= 12; f++) {
+      const midi = TUNING_MIDI[s] + f
+      if (midi % 12 === noteIdx) {
+        const octave = Math.floor(midi / 12) - 1
+        return { string: s + 1, fret: f, octave }
+      }
+    }
+  }
+  return { string: 1, fret: 0, octave: 4 }
+}
+
 const BPM_OPTIONS = [60, 80, 100, 120, 140, 160]
 
 export default function ArpejosPage() {
@@ -35,6 +51,8 @@ export default function ArpejosPage() {
   const [patternId, setPatternId] = useState("asc")
   const [bpm, setBpm] = useState(100)
   const [playingArpejo, setPlayingArpejo] = useState(false)
+  const [highlightIdx, setHighlightIdx] = useState<number | undefined>(undefined)
+  const timerRef = useRef<number[]>([])
 
   const chordType = CHORD_TYPES_ARPEJO.find((t) => t.id === chordTypeId)!
   const pattern = ARPEJO_PATTERNS.find((p) => p.id === patternId)!
@@ -44,44 +62,57 @@ export default function ArpejosPage() {
   const chordNotes = chordType.intervals.map((s) => noteAtSemitone(rootSharp, s))
   const chordName = root + chordType.suffix
 
-  // Build notes for playback: chord notes expanded by pattern
-  const playNotes: [string, number][] = pattern.sequence.map((idx) => {
+  // Calcular posições no braço com oitavas corretas
+  const notePositions = pattern.sequence.map((idx) => {
     const note = chordNotes[idx % chordNotes.length]
-    return [note, 4]
+    return { note, ...findNoteOnFretboard(note) }
   })
 
-  // Build partitura notes
-  const partNotes: NoteData[] = pattern.sequence.map((idx, i) => {
-    const note = chordNotes[idx % chordNotes.length]
-    const dn = displayNote(note, preferFlat)
+  // Notas para playback com oitavas corretas
+  const playNotes: [string, number][] = notePositions.map((p) => [p.note, p.octave])
+
+  // Notas para partitura com oitavas corretas
+  const partNotes: NoteData[] = notePositions.map((p, i) => {
+    const dn = displayNote(p.note, preferFlat)
     return {
       note: dn,
-      octave: 4,
+      octave: p.octave,
       duration: pattern.durations[i] ?? "8",
       accidental: dn.includes("#") ? "#" as const : dn.includes("b") ? "b" as const : undefined,
     }
   })
 
-  // Build tab notes (find fret positions)
-  const tabNotes: TabNote[] = pattern.sequence.map((idx) => {
-    const note = chordNotes[idx % chordNotes.length]
-    const noteIdx = CHROMATIC.indexOf(note)
-    for (let s = 3; s >= 0; s--) {
-      for (let f = 0; f <= 12; f++) {
-        if ((TUNING_MIDI[s] + f) % 12 === noteIdx) {
-          return { string: s + 1, fret: f }
-        }
-      }
-    }
-    return { string: 1, fret: 0 }
-  })
+  // Notas para tablatura
+  const tabNotes: TabNote[] = notePositions.map((p) => ({
+    string: p.string,
+    fret: p.fret,
+  }))
 
   const handlePlayArpejo = useCallback(async () => {
     if (!isReady()) await initSampler()
+
+    // Limpar timers anteriores
+    timerRef.current.forEach(clearTimeout)
+    timerRef.current = []
+
     setPlayingArpejo(true)
-    playArpejo(playNotes, bpm, pattern.sequence.map((_, i) => i))
-    setTimeout(() => setPlayingArpejo(false), (60 / bpm) * pattern.sequence.length * 1000 + 200)
-  }, [playNotes, bpm, pattern])
+    const interval = (60 / bpm) * 1000
+
+    playNotes.forEach(([note, octave], i) => {
+      const t = window.setTimeout(() => {
+        playNote(note, octave)
+        setHighlightIdx(i)
+      }, i * interval)
+      timerRef.current.push(t)
+    })
+
+    const endTimer = window.setTimeout(() => {
+      setPlayingArpejo(false)
+      setHighlightIdx(undefined)
+      timerRef.current = []
+    }, playNotes.length * interval + 200)
+    timerRef.current.push(endTimer)
+  }, [playNotes, bpm])
 
   return (
     <div className="space-y-8">
@@ -172,15 +203,13 @@ export default function ArpejosPage() {
           </div>
         </div>
 
-        {/* Braço + Partitura */}
+        {/* Braço + Partitura + Tab */}
         <div className="flex gap-6 items-start mb-6">
           <BracoArpejo chordNotes={chordNotes} sequence={pattern.sequence} />
-          <div className="flex-1 min-w-0">
-            <PartituraComTab
-              notes={partNotes}
-              tab={tabNotes}
-              title={`${chordName} — ${pattern.nome}`}
-            />
+          <div className="flex-1 min-w-0 bg-[#0a0714] border border-white/5 rounded-xl p-4 space-y-0">
+            <p className="text-xs text-slate-500 mb-2">{chordName} — {pattern.nome}</p>
+            <PartituraView notes={partNotes} highlightIndex={highlightIdx} />
+            <TablaturaView notes={tabNotes} />
           </div>
         </div>
 
@@ -196,14 +225,22 @@ export default function ArpejosPage() {
           ))}
         </div>
 
-        {/* Sequência */}
+        {/* Sequência com highlight */}
         <div className="mb-5">
           <p className="text-xs text-slate-500 mb-1">Sequência</p>
           <div className="flex gap-2">
             {pattern.sequence.map((idx, i) => {
               const note = displayNote(chordNotes[idx % chordNotes.length], preferFlat)
+              const isActive = highlightIdx === i
               return (
-                <span key={i} className="bg-white/5 text-slate-300 font-mono text-xs px-2 py-1 rounded-lg">
+                <span
+                  key={i}
+                  className={`font-mono text-xs px-2 py-1 rounded-lg transition-all ${
+                    isActive
+                      ? "bg-violet-600 text-white scale-110"
+                      : "bg-white/5 text-slate-300"
+                  }`}
+                >
                   {i + 1}. {note}
                 </span>
               )
