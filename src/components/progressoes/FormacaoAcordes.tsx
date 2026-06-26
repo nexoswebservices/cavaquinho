@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { PlayButton } from "@/components/ui/PlayButton"
 import { BracoCavaquinho } from "@/components/progressoes/BracoCavaquinho"
+import { PartituraView } from "@/components/partitura/PartituraView"
+import type { NoteData } from "@/components/partitura/PartituraView"
 
 const NOTAS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 const CHROMATIC = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -153,6 +155,26 @@ export function FormacaoAcordes() {
             <p className="text-amber-300 font-mono text-sm">{chordType.intervalNames.join(" – ")}</p>
           </div>
         </div>
+
+        {/* Partitura do acorde */}
+        {(() => {
+          const partNotes: NoteData[] = chordType.intervals.map((semitones) => {
+            const note = noteAtSemitone(rootSharp, semitones % 12)
+            const dn = displayNote(note, preferFlat)
+            return {
+              note: dn,
+              octave: 4 + Math.floor(semitones / 12),
+              duration: "w",
+              accidental: dn.includes("#") ? "#" as const : dn.includes("b") ? "b" as const : undefined,
+            }
+          })
+          return (
+            <div className="mb-6 bg-[#0a0714] border border-white/5 rounded-xl p-4">
+              <p className="text-xs text-slate-500 mb-1">{chordName} — notas no pentagrama</p>
+              <PartituraView notes={partNotes} />
+            </div>
+          )
+        })()}
 
         {/* 3 formas */}
         <div className="space-y-3">
