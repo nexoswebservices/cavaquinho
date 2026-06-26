@@ -1,22 +1,45 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { ESCALAS, ESCALA_TIPOS } from "@/lib/escalas-data"
 import { FRASES, FRASE_NIVEIS } from "@/lib/frases-data"
 import { BracoEscala } from "@/components/improvisos/BracoEscala"
+import { PartituraView } from "@/components/partitura/PartituraView"
+import { TablaturaView } from "@/components/partitura/TablaturaView"
 import { PartituraComTab } from "@/components/partitura/PartituraComTab"
-import { PlayButton } from "@/components/ui/PlayButton"
-import { initSampler, isReady, playArpejo, playBackingTrack, stopBackingTrack } from "@/lib/sampler"
+import { initSampler, isReady, playNote, playBackingTrack, stopBackingTrack } from "@/lib/sampler"
+import type { NoteData } from "@/components/partitura/PartituraView"
+import type { TabNote } from "@/components/partitura/TablaturaView"
 
 const NOTAS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 const CHROMATIC = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 const TO_SHARP: Record<string, string> = { Eb: "D#", Ab: "G#", Bb: "A#", Db: "C#", Gb: "F#" }
+const TUNING_MIDI = [62, 67, 71, 74]
 
 function noteAtSemitone(root: string, semitones: number): string {
   const r = TO_SHARP[root] ?? root
   const idx = CHROMATIC.indexOf(r)
   if (idx === -1) return root
   return CHROMATIC[(idx + semitones) % 12]
+}
+
+function displayNote(note: string, preferFlat: boolean): string {
+  if (!preferFlat) return note
+  const map: Record<string, string> = { "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb" }
+  return map[note] ?? note
+}
+
+function findNoteOnFretboard(noteChrom: string): { string: number; fret: number; octave: number } {
+  const noteIdx = CHROMATIC.indexOf(noteChrom)
+  for (let s = 3; s >= 0; s--) {
+    for (let f = 0; f <= 12; f++) {
+      const midi = TUNING_MIDI[s] + f
+      if (midi % 12 === noteIdx) {
+        return { string: s + 1, fret: f, octave: Math.floor(midi / 12) - 1 }
+      }
+    }
+  }
+  return { string: 1, fret: 0, octave: 4 }
 }
 
 const TABS = [
@@ -37,6 +60,7 @@ const BACKING_PROGRESSIONS = [
 ]
 
 const MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11]
+const BPM_ESCALA = 120
 
 export default function ImprovisosPage() {
   const [tab, setTab] = useState<TabId>("escalas")
@@ -46,11 +70,69 @@ export default function ImprovisosPage() {
   const [backingIdx, setBackingIdx] = useState(0)
   const [backingPlaying, setBackingPlaying] = useState(false)
   const [backingBpm, setBackingBpm] = useState(100)
+  const [escalaPlaying, setEscalaPlaying] = useState(false)
+  const [escalaHighlight, setEscalaHighlight] = useState<number | undefined>(undefined)
+  const timersRef = useRef<number[]>([])
 
   const rootSharp = TO_SHARP[root] ?? root
+  const preferFlat = ["F", "Bb", "Eb", "Ab", "Db", "Gb"].includes(root)
   const escala = ESCALAS.find((e) => e.id === escalaId)!
 
   const filteredFrases = FRASES.filter((f) => fraseNivel === "Todos" || f.nivel === fraseNivel)
+
+  // Notas da escala com posições no braço e oitavas corretas
+  const escalaPositions = escala.intervalos.map((interval) => {
+    const note = noteAtSemitone(rootSharp, interval)
+    return { note, ...findNoteOnFretboard(note) }
+  })
+
+  const escalaPartNotes: NoteData[] = escalaPositions.map((p) => {
+    const dn = displayNote(p.note, preferFlat)
+    return {
+      note: dn,
+      octave: p.octave,
+      duration: "q",
+      accidental: dn.includes("#") ? "#" as const : dn.includes("b") ? "b" as const : undefined,
+    }
+  })
+
+  const escalaTabNotes: TabNote[] = escalaPositions.map((p) => ({
+    string: p.string,
+    fret: p.fret,
+  }))
+
+  const handlePlayEscala = useCallback(async () => {
+    if (!isReady()) await initSampler()
+
+    timersRef.current.forEach(clearTimeout)
+    timersRef.current = []
+    setEscalaPlaying(true)
+
+    const interval = (60 / BPM_ESCALA) * 1000
+
+    escalaPositions.forEach((p, i) => {
+      const t = window.setTimeout(() => {
+        playNote(p.note, p.octave)
+        setEscalaHighlight(i)
+      }, i * interval)
+      timersRef.current.push(t)
+    })
+
+    const endTimer = window.setTimeout(() => {
+      setEscalaPlaying(false)
+      setEscalaHighlight(undefined)
+      timersRef.current = []
+    }, escalaPositions.length * interval + 300)
+    timersRef.current.push(endTimer)
+  }, [escalaPositions])
+
+  const handlePlayFrase = useCallback(async (fraseNotas: { note: string; octave: number }[]) => {
+    if (!isReady()) await initSampler()
+    const interval = (60 / BPM_ESCALA) * 1000
+    fraseNotas.forEach((n, i) => {
+      setTimeout(() => playNote(TO_SHARP[n.note] ?? n.note, n.octave), i * interval)
+    })
+  }, [])
 
   const handlePlayBacking = useCallback(async () => {
     if (!isReady()) await initSampler()
@@ -73,11 +155,6 @@ export default function ImprovisosPage() {
     playBackingTrack(chords, backingBpm, 4)
     setBackingPlaying(true)
   }, [backingPlaying, backingIdx, backingBpm, rootSharp])
-
-  const handlePlayFrase = useCallback(async (fraseNotas: [string, number][]) => {
-    if (!isReady()) await initSampler()
-    playArpejo(fraseNotas, 120, fraseNotas.map((_, i) => i))
-  }, [])
 
   return (
     <div className="space-y-8">
@@ -103,7 +180,7 @@ export default function ImprovisosPage() {
         ))}
       </div>
 
-      {/* Nota raiz (compartilhada) */}
+      {/* Nota raiz */}
       <div>
         <p className="text-xs text-slate-500 mb-2">Tonalidade</p>
         <div className="flex flex-wrap gap-1.5">
@@ -154,24 +231,51 @@ export default function ImprovisosPage() {
                 <h2 className="text-xl font-bold text-white">{escala.nome} de {root}</h2>
                 <p className="text-xs text-slate-500 mt-1">{escala.tipo} • {escala.usoComum}</p>
               </div>
-              <PlayButton
-                notes={escala.intervalos.map((i): [string, number] => [noteAtSemitone(rootSharp, i), 4])}
-                size="md"
-                label="Tocar escala"
-              />
+              <button
+                onClick={handlePlayEscala}
+                disabled={escalaPlaying}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                  escalaPlaying
+                    ? "bg-violet-600/50 text-violet-300 cursor-wait"
+                    : "bg-violet-600 hover:bg-violet-500 text-white"
+                }`}
+              >
+                {escalaPlaying ? "Tocando..." : "▶ Tocar Escala"}
+              </button>
             </div>
 
-            <BracoEscala root={rootSharp} intervalos={escala.intervalos} />
+            {/* Braço com highlight */}
+            <BracoEscala root={rootSharp} intervalos={escala.intervalos} activeNoteIdx={escalaHighlight} />
 
-            <div className="mt-4 space-y-2">
-              <div className="flex flex-wrap gap-2">
-                {escala.intervalos.map((i, idx) => (
-                  <span key={idx} className="bg-violet-500/15 border border-violet-400/30 text-violet-200 font-mono text-sm font-bold px-3 py-1 rounded-lg">
-                    {noteAtSemitone(rootSharp, i)}
+            {/* Partitura + Tablatura */}
+            <div className="mt-4 bg-[#0a0714] border border-white/5 rounded-xl p-4 space-y-0">
+              <PartituraView notes={escalaPartNotes} highlightIndex={escalaHighlight} />
+              <TablaturaView notes={escalaTabNotes} />
+            </div>
+
+            {/* Notas com highlight */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {escala.intervalos.map((interval, idx) => {
+                const note = noteAtSemitone(rootSharp, interval)
+                const dn = displayNote(note, preferFlat)
+                const isActive = escalaHighlight === idx
+                return (
+                  <span
+                    key={idx}
+                    className={`font-mono text-sm font-bold px-3 py-1 rounded-lg transition-all ${
+                      isActive
+                        ? "bg-emerald-500 text-white scale-110"
+                        : "bg-violet-500/15 border border-violet-400/30 text-violet-200"
+                    }`}
+                  >
+                    {dn}
                   </span>
-                ))}
-              </div>
-              <p className="text-slate-300 text-sm mt-3">{escala.descricao}</p>
+                )
+              })}
+            </div>
+
+            <div className="mt-3 space-y-1">
+              <p className="text-slate-300 text-sm">{escala.descricao}</p>
               <p className="text-xs text-slate-500">Acordes compatíveis: {escala.acordesCompativeis.join(", ")}</p>
             </div>
           </div>
@@ -198,10 +302,6 @@ export default function ImprovisosPage() {
           <div className="space-y-4">
             {filteredFrases.map((frase) => {
               const escalaRef = ESCALAS.find((e) => e.id === frase.escala)
-              const frasePlayNotes: [string, number][] = frase.notas.map((n) => [
-                TO_SHARP[n.note] ?? n.note,
-                n.octave,
-              ])
 
               return (
                 <div key={frase.id} className="bg-[#120d24] border border-white/5 rounded-2xl p-5">
@@ -213,7 +313,7 @@ export default function ImprovisosPage() {
                       </p>
                     </div>
                     <button
-                      onClick={() => handlePlayFrase(frasePlayNotes)}
+                      onClick={() => handlePlayFrase(frase.notas)}
                       className="w-10 h-10 rounded-xl bg-violet-600/20 text-violet-300 hover:bg-violet-600/30 flex items-center justify-center transition-colors"
                     >
                       ▶
@@ -251,26 +351,18 @@ export default function ImprovisosPage() {
           <div className="bg-[#120d24] border border-violet-500/20 rounded-2xl p-6">
             <h2 className="text-lg font-bold text-white mb-4">Exercício Guiado</h2>
             <div className="space-y-3">
-              <div className="bg-[#0a0714] border border-white/5 rounded-xl p-4">
-                <p className="text-xs text-slate-500 mb-1">Passo 1</p>
-                <p className="text-slate-300 text-sm">Escolha uma tonalidade e a escala <span className="text-violet-300 font-bold">{escala.nome}</span></p>
-              </div>
-              <div className="bg-[#0a0714] border border-white/5 rounded-xl p-4">
-                <p className="text-xs text-slate-500 mb-1">Passo 2</p>
-                <p className="text-slate-300 text-sm">Memorize as posições no braço (tab Escalas)</p>
-              </div>
-              <div className="bg-[#0a0714] border border-white/5 rounded-xl p-4">
-                <p className="text-xs text-slate-500 mb-1">Passo 3</p>
-                <p className="text-slate-300 text-sm">Aprenda 2-3 frases da biblioteca (tab Frases)</p>
-              </div>
-              <div className="bg-[#0a0714] border border-white/5 rounded-xl p-4">
-                <p className="text-xs text-slate-500 mb-1">Passo 4</p>
-                <p className="text-slate-300 text-sm">Ligue um backing track e improvise combinando as frases com notas da escala</p>
-              </div>
-              <div className="bg-[#0a0714] border border-white/5 rounded-xl p-4">
-                <p className="text-xs text-slate-500 mb-1">Passo 5</p>
-                <p className="text-slate-300 text-sm">Use o metrônomo (botão flutuante) para controlar o andamento</p>
-              </div>
+              {[
+                ["Passo 1", `Escolha uma tonalidade e a escala ${escala.nome}`],
+                ["Passo 2", "Memorize as posições no braço (tab Escalas)"],
+                ["Passo 3", "Aprenda 2-3 frases da biblioteca (tab Frases)"],
+                ["Passo 4", "Ligue um backing track e improvise combinando as frases com notas da escala"],
+                ["Passo 5", "Use o metrônomo (botão flutuante) para controlar o andamento"],
+              ].map(([label, text]) => (
+                <div key={label} className="bg-[#0a0714] border border-white/5 rounded-xl p-4">
+                  <p className="text-xs text-slate-500 mb-1">{label}</p>
+                  <p className="text-slate-300 text-sm">{text}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -13,11 +13,13 @@ interface BracoEscalaProps {
   root: string
   intervalos: number[]
   highlightNotes?: string[]
+  activeNoteIdx?: number
 }
 
-export function BracoEscala({ root, intervalos, highlightNotes }: BracoEscalaProps) {
+export function BracoEscala({ root, intervalos, highlightNotes, activeNoteIdx }: BracoEscalaProps) {
   const rootIdx = CHROMATIC.indexOf(root)
   const scaleNotes = new Set(intervalos.map((i) => (rootIdx + i) % 12))
+  const activeChromIdx = activeNoteIdx !== undefined ? (rootIdx + intervalos[activeNoteIdx]) % 12 : -1
   const highlightSet = highlightNotes
     ? new Set(highlightNotes.map((n) => CHROMATIC.indexOf(n)))
     : null
@@ -81,19 +83,22 @@ export function BracoEscala({ root, intervalos, highlightNotes }: BracoEscalaPro
             if (!scaleNotes.has(noteIdx)) return null
 
             const isRoot = noteIdx === rootIdx
+            const isActive = noteIdx === activeChromIdx
             const isHighlight = highlightSet ? highlightSet.has(noteIdx) : false
             const x = f === 0 ? LEFT - 0 : LEFT + f * FRET_W - FRET_W / 2
             const y = TOP + s * STRING_GAP
             const note = midiToNote(midi)
 
-            let fill = "#334155"
-            if (isRoot) fill = "#7c3aed"
+            let fill = "#475569"
+            let r = 7
+            if (isActive) { fill = "#22c55e"; r = 9 }
+            else if (isRoot) fill = "#7c3aed"
             else if (isHighlight) fill = "#f59e0b"
-            else fill = "#475569"
 
             return (
               <g key={`n-${s}-${f}`}>
-                <circle cx={x} cy={y} r={7} fill={fill} />
+                {isActive && <circle cx={x} cy={y} r={12} fill="#22c55e" opacity={0.2} />}
+                <circle cx={x} cy={y} r={r} fill={fill} />
                 <text x={x} y={y + 3} fontSize={7} fill="white" textAnchor="middle" fontWeight={isRoot ? "bold" : "normal"}>
                   {note}
                 </text>
