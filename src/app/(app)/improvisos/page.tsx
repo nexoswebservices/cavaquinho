@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from "react"
 import { ESCALAS, ESCALA_TIPOS } from "@/lib/escalas-data"
 import { FRASES, FRASE_NIVEIS } from "@/lib/frases-data"
-import { BracoEscala } from "@/components/improvisos/BracoEscala"
+import { BracoEscala, DEGREE_COLORS } from "@/components/improvisos/BracoEscala"
 import { PartituraView } from "@/components/partitura/PartituraView"
 import { TablaturaView } from "@/components/partitura/TablaturaView"
 import { PartituraComTab } from "@/components/partitura/PartituraComTab"
@@ -80,6 +80,7 @@ export default function ImprovisosPage() {
   const [backingBpm, setBackingBpm] = useState(100)
   const [escalaPlaying, setEscalaPlaying] = useState(false)
   const [escalaHighlight, setEscalaHighlight] = useState<number | undefined>(undefined)
+  const [activePos, setActivePos] = useState<{ string: number; fret: number } | undefined>(undefined)
   const timersRef = useRef<number[]>([])
 
   const rootSharp = TO_SHARP[root] ?? root
@@ -91,7 +92,8 @@ export default function ImprovisosPage() {
   // Notas da escala com posições no braço e oitavas corretas
   const escalaPositions = escala.intervalos.map((interval) => {
     const note = noteAtSemitone(rootSharp, interval)
-    return { note, ...findNoteOnFretboard(note) }
+    const pos = findNoteOnFretboard(note)
+    return { note, string0: pos.string - 1, fret: pos.fret, octave: pos.octave, string: pos.string }
   })
 
   const escalaPartNotes: NoteData[] = escalaPositions.map((p) => {
@@ -122,6 +124,7 @@ export default function ImprovisosPage() {
       const t = window.setTimeout(() => {
         playNote(p.note, p.octave)
         setEscalaHighlight(i)
+        setActivePos({ string: p.string0, fret: p.fret })
       }, i * interval)
       timersRef.current.push(t)
     })
@@ -129,6 +132,7 @@ export default function ImprovisosPage() {
     const endTimer = window.setTimeout(() => {
       setEscalaPlaying(false)
       setEscalaHighlight(undefined)
+      setActivePos(undefined)
       timersRef.current = []
     }, escalaPositions.length * interval + 300)
     timersRef.current.push(endTimer)
@@ -252,29 +256,33 @@ export default function ImprovisosPage() {
               </button>
             </div>
 
-            {/* Braço com highlight */}
-            <BracoEscala root={rootSharp} intervalos={escala.intervalos} activeNoteIdx={escalaHighlight} />
+            {/* Braço com highlight por posição específica */}
+            <BracoEscala root={rootSharp} intervalos={escala.intervalos} activePosition={activePos} />
 
             {/* Partitura + Tablatura */}
             <div className="mt-4 bg-[#0a0714] border border-white/5 rounded-xl p-4 space-y-0">
+              <p className="text-xs text-slate-500 mb-1">{escala.nome} de {root}</p>
               <PartituraView notes={escalaPartNotes} highlightIndex={escalaHighlight} />
               <TablaturaView notes={escalaTabNotes} />
             </div>
 
-            {/* Notas com highlight */}
+            {/* Notas com cores por grau */}
             <div className="mt-4 flex flex-wrap gap-2">
               {escala.intervalos.map((interval, idx) => {
                 const note = noteAtSemitone(rootSharp, interval)
                 const dn = displayNote(note, preferFlat)
                 const isActive = escalaHighlight === idx
+                const color = DEGREE_COLORS[idx]
                 return (
                   <span
                     key={idx}
-                    className={`font-mono text-sm font-bold px-3 py-1 rounded-lg transition-all ${
-                      isActive
-                        ? "bg-emerald-500 text-white scale-110"
-                        : "bg-violet-500/15 border border-violet-400/30 text-violet-200"
+                    className={`font-mono text-sm font-bold px-3 py-1.5 rounded-lg transition-all border ${
+                      isActive ? "scale-110 text-white" : "text-white/90"
                     }`}
+                    style={{
+                      backgroundColor: isActive ? color : `${color}25`,
+                      borderColor: `${color}60`,
+                    }}
                   >
                     {dn}
                   </span>
