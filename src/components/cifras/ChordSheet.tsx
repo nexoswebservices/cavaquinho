@@ -4,28 +4,53 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { transposeLine } from "@/lib/transpose"
 import { ChordTooltip } from "./ChordTooltip"
 
+// Acorde completo: raiz + qualidade + extensões + baixo
+// Reconhece: Am7/-5, C7/9, Bb7+/9, Em7/5-, F#m7(b5), G7(9/11), A4(7/9), etc.
 const CHORD_RE =
-  /^[A-G](#|b)?(maj|min|dim|aug|sus|add|m)?\d*(\([^)]*\))?(\/[A-G](#|b)?\d*)?[ºø+\-]*$/i
-const STD_TAB_LINE = /^[A-Ga-g]\|[-\d xhp/\\|]*\|?$/
-const NUM_TAB_LINE = /^\|?\s*\d{1,3}(-\d{1,3}){2,}/
+  /^[A-G](#|b)?(m|maj|min|dim|aug|sus|add)?\d*[ºø+\-]?(\([^)]*\))?(\/[+-]?\d+[+-]?[#b]?)*(\/[A-G](#|b)?)?[ºø+\-]*$/i
+
+// Tablatura padrão (E|--5-7--|)
+const STD_TAB_LINE = /^[A-Ga-g]\s*\|[-\d xhpbs/\\|.~]*\|?\s*$/
+// Tablatura numérica (| 21-10-11 | ou 12-23-34)
+const NUM_TAB_LINE = /^\|?\s*\d{1,3}\s*[-\d|h\s]+[-\d]\s*\|?\s*$/
+// Linha que é claramente tab de corda (D-----3--2--5--)
+const STRING_TAB_LINE = /^[A-Ga-g]\s*[-\d|.~\s]{6,}$/
+// Seções
 const SECTION_RE =
   /^\[.*\]$|^[\[(].*[\])]$|^(INTRO|REFRÃO|VERSO|BRIDGE|CODA|INTRODUÇÃO|SOLO|PRÉ-REFRÃO|FINAL|REFR)[:\s]*$/i
 
-const INLINE_CHORD_RE = /\b([A-G][#b]?(?:m7?\(?b?5?\)?|7M|7\+|7|maj7|dim7?|º7?|ø|aug|sus[24]|add9|6|9|11|13|m7\(b?5[-)]|m7\(5-\))?(?:\/[A-G][#b]?)?)\b/g
+// Inline: detecta acordes dentro de texto (para renderizar clicáveis)
+const INLINE_CHORD_RE = /\b([A-G][#b]?(?:m7?\(?[b5+-]*\)?|7M|7\+|7|maj7|dim7?|º7?|ø|aug|sus[24]|add9?|[245]?\+?)?(?:\d+[+-]?)?(?:\([^)]*\))?(?:\/[+-]?\d+[+-]?[#b]?)*(?:\/[A-G][#b]?)?)\b/g
 
 function isChordToken(t: string): boolean {
-  if (!t || t.length > 20) return false
-  const cleaned = t.replace(/^\|+|\|+$/g, "").replace(/[()]/g, "").trim()
+  if (!t || t.length > 25) return false
+  const cleaned = t.replace(/^\|+|\|+$/g, "").replace(/^\(|\)$/g, "").trim()
   if (!cleaned) return false
   return CHORD_RE.test(cleaned)
+}
+
+function isTabLine(line: string): boolean {
+  const trimmed = line.trim()
+  if (STD_TAB_LINE.test(trimmed)) return true
+  if (NUM_TAB_LINE.test(trimmed)) return true
+  if (STRING_TAB_LINE.test(trimmed)) return true
+  // Linhas com predominância de números e dashes (tab numérica)
+  const digits = (trimmed.match(/\d/g) || []).length
+  const dashes = (trimmed.match(/-/g) || []).length
+  const pipes = (trimmed.match(/\|/g) || []).length
+  if (digits >= 4 && (digits + dashes + pipes) > trimmed.replace(/\s/g, "").length * 0.5) return true
+  // Linhas que começam com | e tem números
+  if (/^\|/.test(trimmed) && digits >= 3) return true
+  // Linhas tipo "VIOLAO: | 53-40-41 |" — tem label + tab
+  if (/:\s*\|/.test(trimmed) && digits >= 4) return true
+  return false
 }
 
 function classifyLine(line: string): "chord" | "lyric" | "tab" | "numtab" | "section" | "empty" | "mixed" {
   const trimmed = line.trim()
   if (!trimmed) return "empty"
   if (SECTION_RE.test(trimmed)) return "section"
-  if (STD_TAB_LINE.test(trimmed)) return "tab"
-  if (NUM_TAB_LINE.test(trimmed)) return "numtab"
+  if (isTabLine(trimmed)) return "numtab"
 
   const tokens = trimmed
     .split(/\s+/)

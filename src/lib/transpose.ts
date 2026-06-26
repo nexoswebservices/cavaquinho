@@ -7,7 +7,7 @@ const TO_SHARP: Record<string, string> = {
   Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#",
 }
 
-const CHORD_RE = /\b([A-G][#b]?)(m7?\(?b?5?\)?|7M|7\+|7|maj7|dim7?|º7?|ø|aug|sus[24]|add9|6|9|11|13|m7\(b?5[-)]|m7\(5-\))?(\/[A-G][#b]?)?\b/g
+const CHORD_RE = /\b([A-G][#b]?)((?:m|maj|min|dim|aug|sus|add)?\d*[ºø+\-]?(?:\([^)]*\))?(?:\/[+-]?\d+[+-]?[#b]?)*)(\/([A-G][#b]?))?\b/g
 
 function noteIndex(note: string): number {
   const n = TO_SHARP[note] ?? note
@@ -24,11 +24,10 @@ function shiftNote(note: string, semitones: number, useFlats: boolean): string {
 export function transposeChord(chord: string, semitones: number, useFlats = false): string {
   if (semitones === 0) return chord
 
-  return chord.replace(CHORD_RE, (match, root: string, quality: string, bass: string) => {
+  return chord.replace(CHORD_RE, (_match, root: string, quality: string, bassSlash: string, bassNote: string) => {
     const newRoot = shiftNote(root, semitones, useFlats)
     let result = newRoot + (quality ?? "")
-    if (bass) {
-      const bassNote = bass.slice(1)
+    if (bassNote) {
       const newBass = shiftNote(bassNote, semitones, useFlats)
       result += "/" + newBass
     }
