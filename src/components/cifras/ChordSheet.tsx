@@ -6,9 +6,10 @@ import { ChordTooltip } from "./ChordTooltip"
 import { initSampler, isReady, playNote } from "@/lib/sampler"
 
 // Acorde completo: raiz + qualidade + extensões + baixo
-// Reconhece: Am7/-5, C7/9, Bb7+/9, Em7/5-, F#m7(b5), G7(9/11), A4(7/9), etc.
+// Reconhece: Am7/-5, C7/9, Bb7+/9, Em7/5-, F#m7(b5), G7(9/11), A4(7/9),
+// A7M, C#m7b5, E7#9, F#º, G#7b13, B5+7, Dm7M, etc.
 const CHORD_RE =
-  /^[A-G](#|b)?(m|maj|min|dim|aug|sus|add)?\d*[ºø+\-]?(\([^)]*\))?(\/[+-]?\d+[+-]?[#b]?)*(\/[A-G](#|b)?)?[ºø+\-]*$/i
+  /^[A-G](#|b)?[ºø]?(m|maj|min|dim|aug|sus|add)?\d*[ºø+\-]?[M]?([b#]?\d+[+-]?)*(\([^)]*\))?(\/[#b+-]?\d+[+-]?[#b]?)*(\/[A-G](#|b)?)?[ºø+\-]*$/i
 
 // Tablatura padrão (E|--5-7--|)
 const STD_TAB_LINE = /^[A-Ga-g]\s*\|[-\d xhpbs/\\|.~]*\|?\s*$/
@@ -21,7 +22,7 @@ const SECTION_RE =
   /^\[.*\]$|^[\[(].*[\])]$|^(INTRO|REFRÃO|VERSO|BRIDGE|CODA|INTRODUÇÃO|SOLO|PRÉ-REFRÃO|FINAL|REFR)[:\s]*$/i
 
 // Inline: detecta acordes dentro de texto (para renderizar clicáveis)
-const INLINE_CHORD_RE = /\b([A-G][#b]?(?:m7?\(?[b5+-]*\)?|7M|7\+|7|maj7|dim7?|º7?|ø|aug|sus[24]|add9?|[245]?\+?)?(?:\d+[+-]?)?(?:\([^)]*\))?(?:\/[+-]?\d+[+-]?[#b]?)*(?:\/[A-G][#b]?)?)\b/g
+const INLINE_CHORD_RE = /\b([A-G][#b]?[ºø]?(?:m|maj|min|dim|aug|sus|add)?\d*[ºø+\-]?M?(?:[b#]\d+[+-]?)*(?:\([^)]*\))?(?:\/[#b+-]?\d+[+-]?[#b]?)*(?:\/[A-G][#b]?)?)\b/g
 
 function isChordToken(t: string): boolean {
   if (!t || t.length > 25) return false

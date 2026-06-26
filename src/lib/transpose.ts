@@ -7,7 +7,7 @@ const TO_SHARP: Record<string, string> = {
   Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#",
 }
 
-const CHORD_RE = /\b([A-G][#b]?)((?:m|maj|min|dim|aug|sus|add)?\d*[ºø+\-]?(?:\([^)]*\))?(?:\/[+-]?\d+[+-]?[#b]?)*)(\/([A-G][#b]?))?\b/g
+const CHORD_RE = /\b([A-G][#b]?)([ºø]?(?:m|maj|min|dim|aug|sus|add)?\d*[ºø+\-]?M?(?:[b#]\d+[+-]?)*(?:\([^)]*\))?(?:\/[#b+-]?\d+[+-]?[#b]?)*)(\/([A-G][#b]?))?\b/g
 
 function noteIndex(note: string): number {
   const n = TO_SHARP[note] ?? note
