@@ -205,7 +205,7 @@ Hamonico/
 │   │   ├── api/ (...)
 │   │   ├── layout.tsx, page.tsx, providers.tsx, globals.css
 │   ├── components/
-│   │   ├── layout/Navbar.tsx                 ← 3 links: Escola | Progressões | Análise
+│   │   ├── layout/Navbar.tsx                 ← 6 links: Escola | Cifras | Progressões | Arpejos | Improvisos | Análise
 │   │   ├── ui/
 │   │   │   ├── Metronomo.tsx                 ← Painel flutuante com tabs Metrônomo | Afinador
 │   │   │   ├── Afinador.tsx                  ← Detecção de pitch via microfone (autocorrelação)
@@ -214,9 +214,11 @@ Hamonico/
 │   │   │   ├── EscolaSubNav.tsx
 │   │   │   ├── ModuleGrid.tsx, ProgressBar.tsx, LessonActions.tsx
 │   │   ├── cifras/
-│   │   │   ├── ChordSheet.tsx                ← Estilo CifraClub + controle de fonte
+│   │   │   ├── ChordSheet.tsx                ← Acordes clicáveis, transposição, play tab, 212+ formatos
+│   │   │   ├── ChordTooltip.tsx              ← Tooltip com braço + play ao clicar acorde
+│   │   │   ├── CifraControls.tsx             ← Barra sticky: tom, fonte, auto-scroll
 │   │   │   ├── CifraAnalise.tsx              ← TheoryTab: blocos coloridos por função
-│   │   │   ├── CifraTabs.tsx                 ← Tabs Cifra | Análise Harmônica
+│   │   │   ├── CifraTabs.tsx                 ← Tabs Cifra | Análise + transposição compartilhada
 │   │   │   ├── CifraList.tsx                 ← Agrupado por artista A-Z + busca
 │   │   │   ├── CifraFavoriteButton.tsx, AddToRepertorioButton.tsx
 │   │   │   ├── NovoRepertorioForm.tsx, DeleteRepertorioButton.tsx
@@ -277,7 +279,7 @@ Hamonico/
 - Sub-navegação: Lições | Quiz | Meu Progresso via `EscolaSubNav`
 - Progresso por módulo, barra geral, botão "Marcar como concluída"
 
-### 6.3 Cifras Interativas — 448 músicas, 112 artistas
+### 6.3 Cifras Interativas — 576 músicas, 112 artistas
 - **Base expandida:** extraídas de 2 PDFs (SAMBA RAIZ 319p + PAGODES ATUAIS 307p) via `scripts/extract-cifras.py`
 - **Fontes:** Cartola, Clara Nunes, Alcione, Noel Rosa, Pixinguinha, Belo, Ferrugem, Thiaguinho, Turma do Pagode, Sorriso Maroto, Xande de Pilares...
 - `/cifras` — **agrupadas por artista A-Z** com busca por música ou artista
@@ -425,10 +427,11 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 
 ## 7. Navegação
 
-### Navbar principal (5 links)
+### Navbar principal (6 links)
 | Link | Rota | Escopo |
 |---|---|---|
 | Escola | `/escola` | Lições, Quiz, Meu Progresso (sub-nav) |
+| Cifras | `/cifras` | 576 cifras interativas com transposição, acordes clicáveis, play tab |
 | Progressões | `/progressoes` | Campo harmônico, cadências, sequências, formação de acordes, minhas progressões (5 tabs) |
 | Arpejos | `/arpejos` | 8 padrões de arpejo com braço, partitura, tablatura, play |
 | Improvisos | `/improvisos` | Escalas, frases, exercícios, backing tracks (4 tabs) |
@@ -461,14 +464,23 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 
 ---
 
-## 8. Banco de Cifras (448 músicas)
+## 8. Banco de Cifras (576 músicas)
 
 ### Origem dos dados
 | Fonte | Páginas | Cifras | Gênero |
 |---|---|---|---|
-| `SAMBA RAIZ.pdf` | 319 | 196 | Samba clássico (Cartola, Clara Nunes, Noel Rosa...) |
-| `PAGODES ATUAIS..pdf` | 307 | 252 | Pagode contemporâneo (Ferrugem, Thiaguinho, Belo...) |
-| **Total (dedup)** | **626** | **448** | **112 artistas** |
+| `SAMBA RAIZ.pdf` | 319 | ~250 | Samba clássico (Cartola, Clara Nunes, Noel Rosa...) |
+| `PAGODES ATUAIS..pdf` | 307 | ~326 | Pagode contemporâneo (Ferrugem, Thiaguinho, Belo...) |
+| **Total (dedup + separação)** | **626** | **576** | **112 artistas** |
+
+### Qualidade dos dados (auditoria 2026-06-27)
+| Verificação | Resultado |
+|---|---|
+| Cifras encavaladas (2+ músicas) | **0** (84 separadas em 128 novas cifras) |
+| Notas/acordes perdidos | **0** (212+ formatos reconhecidos) |
+| Cifras sem acordes | **0** |
+| Conteúdo muito curto | **0** |
+| Símbolos soltos removidos | **21** |
 
 ### Top artistas por quantidade
 | Artista | Qtde | | Artista | Qtde |
@@ -510,23 +522,37 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | `campoHarmonico(root, mode)` | 7 acordes diatônicos com grau e label |
 | `normNote(n)` | Normaliza enarmônicos (Bb→A#, Eb→D#) |
 
-### Notações brasileiras reconhecidas
-`m7(5-)`, `7M`, `7+`, `º`, `ø`, `aug`, `6(9)`, `7(5+)`, `7(13-)`, `/bass`
+### Notações brasileiras reconhecidas (212+ formatos)
+**Básicas:** `m`, `7`, `m7`, `7M` (maj7), `dim`, `º`, `ø`, `aug`, `+`, `sus4`, `sus2`, `6`, `add9`
+**Extensões:** `7/9`, `7/11`, `7/13`, `9`, `11`, `13`, `6/9`, `4(7/9)`
+**Alterações:** `7#9`, `7b9`, `7#5`, `7b5`, `7b13`, `7/-5`, `7/-9`, `7/-13`, `5+`, `5-`
+**Compostas:** `m7b5`, `m7(b5)`, `m7(5-)`, `m7/-5`, `m7M`, `dim7`, `º7`, `5+7`
+**Com baixo:** `/A`, `/Bb`, `/C#`, etc.
+**Parênteses:** `(9/11)`, `(b5)`, `(5-)`, `(7/9)`
 
 ---
 
 ## 10. Itens Pendentes / Roadmap
 
+### Funcionalidades implementadas recentemente (removidas do pendente)
+- ~~Transposição de tom nas cifras~~ ✅ (2026-06-25)
+- ~~Melhoria do formato das cifras~~ ✅ (2026-06-26, acordes clicáveis, play tab, auto-scroll)
+- ~~Arpejos~~ ✅ (2026-06-25)
+- ~~Improvisos~~ ✅ (2026-06-25)
+- ~~Partitura~~ ✅ (2026-06-25, VexFlow)
+- ~~Metrônomo + Afinador~~ ✅ (2026-06-24)
+
 ### Funcionalidades pendentes
-- **Transposição de tom** nas cifras
 - **Painel Admin** (CRUD de cifras e usuários)
 - **Área de Usuário** (perfil, trocar senha)
 - **Campo `progressao`** auto-extraído do conteúdo das cifras
 - **HookTheory Hookpad-style** — editor interativo de progressões adaptado ao cavaquinho
 - **Reativar login** após avaliação da comunidade
 - **Novos módulos na Escola** — aguardando conteúdo dos cursos Hotmart (Layon Bacelar)
-- **Melhoria do formato das cifras** — padronizar para formato CifraClub canônico (acordes posicionados sobre sílabas)
 - **Ampliar base de samples** — mais velocidades, mais oitavas para melhor cobertura
+- **Cifras modelo CifraClub** — acordes posicionados sobre sílabas específicas (requer reestruturação do conteudo)
+- **Importação de partituras** — importar MusicXML/ABC para visualização no VexFlow
+- **Mais frases de improviso** — expandir de 8 para 30+ frases curadas
 
 ### Histórico de revisões
 | Data | Mudanças |
