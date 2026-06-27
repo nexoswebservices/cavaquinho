@@ -25,7 +25,8 @@ function parseChordForTooltip(chord: string): { root: string; notes: string[] } 
   // Determinar tríade base
   const isMinor = /^m(?!aj)/.test(q) || /m\d/.test(q) || q.includes("m7") || q.includes("m9")
   const isDim = /dim|º|ø/.test(q) || /m7[/(]?b?5[-b)]?/.test(q) || /m7b5/.test(q) || /5-/.test(q) || /m5-/.test(q)
-  const isAug = /aug|\+|5\+|#5/.test(q) && !/5\+7/.test(q) // 5+7 é aug+7
+  // 7+ em notação brasileira = maj7, NÃO aumentado. Só é aug se + vier sozinho ou com 5
+  const isAug = (/aug|5\+|#5/.test(q) || (/\+/.test(q) && !/7\+/.test(q) && !/\+\d/.test(q))) && !/5\+7/.test(q)
 
   if (isDim) {
     intervals.push(0, 3, 6) // dim triad
