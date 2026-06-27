@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/progressoes", label: "Progressões", match: "/progressoes" },
   { href: "/arpejos", label: "Arpejos", match: "/arpejos" },
   { href: "/improvisos", label: "Improvisos", match: "/improvisos" },
+  { href: "/partituras", label: "Partituras", match: "/partituras" },
   { href: "/analise", label: "Análise", match: "/analise" },
 ]
 
