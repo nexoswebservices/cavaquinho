@@ -22,7 +22,7 @@ const SECTION_RE =
   /^\[.*\]$|^[\[(].*[\])]$|^(INTRO|REFRÃO|VERSO|BRIDGE|CODA|INTRODUÇÃO|SOLO|PRÉ-REFRÃO|FINAL|REFR)[:\s]*$/i
 
 // Inline: detecta acordes dentro de texto (para renderizar clicáveis)
-const INLINE_CHORD_RE = /\b([A-G][#b]?[ºø]?(?:m|maj|min|dim|aug|sus|add)?\d*[ºø+\-]?M?(?:[b#]\d+[+-]?)*(?:\([^)]*\))?(?:\/[#b+-]?\d+[+-]?[#b]?)*(?:\/[A-G][#b]?)?)\b/g
+const INLINE_CHORD_RE = /\b([A-G][#b]?[ºø]?(?:m|maj|min|dim|aug|sus|add)?\d*[ºø+\-]?M?(?:[b#]\d+[+-]?)*(?:\([^)]*\))?(?:\/[#b+-]?\d+[+-]?[#b]?)*(?:\/[A-G][#b]?)?[ºø+\-]*)/g
 
 function isChordToken(t: string): boolean {
   if (!t || t.length > 25) return false
@@ -36,18 +36,23 @@ function isTabLine(line: string): boolean {
   if (STD_TAB_LINE.test(trimmed)) return true
   if (STRING_TAB_LINE.test(trimmed)) return true
 
-  // Verificar se a linha tem acordes — se sim, NÃO é tab
+  // Contar padrões numéricos com dashes (tab real)
+  const tabPatterns = (trimmed.match(/\d{2,3}(-\d{2,3})+/g) || []).length
+  const digits = (trimmed.match(/\d/g) || []).length
+  const dashes = (trimmed.match(/-/g) || []).length
+
+  // Se tem padrões tab claros (21-30-21), é tab mesmo com alguns acordes
+  if (tabPatterns >= 1 && dashes >= 2) return true
+
+  // Verificar se a linha é SOMENTE acordes — se sim, NÃO é tab
   const tokens = trimmed.split(/\s+/).filter((t) => t !== "|" && t !== "%" && t.replace(/\|/g, "").trim())
   const chordTokens = tokens.filter(isChordToken).length
-  if (chordTokens >= 2) return false
-  if (tokens.length > 0 && chordTokens / tokens.length >= 0.5) return false
+  if (tokens.length > 0 && chordTokens / tokens.length >= 0.5 && tabPatterns === 0) return false
 
   if (NUM_TAB_LINE.test(trimmed)) return true
 
-  // Padrões numéricos com dashes (tab pura sem acordes)
-  const digits = (trimmed.match(/\d/g) || []).length
-  const dashes = (trimmed.match(/-/g) || []).length
-  if (digits >= 4 && dashes >= 2 && (digits + dashes) > trimmed.replace(/[\s|]/g, "").length * 0.6) return true
+  // Padrões numéricos soltos com predominância de dígitos
+  if (digits >= 4 && dashes >= 2 && (digits + dashes) > trimmed.replace(/[\s|]/g, "").length * 0.5) return true
   // Linhas tipo "VIOLAO: | 53-40-41 |" — label + tab
   if (/:\s*\|/.test(trimmed) && digits >= 4 && dashes >= 2) return true
   return false

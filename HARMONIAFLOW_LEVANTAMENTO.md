@@ -4,7 +4,7 @@
 **App reconstruído:** https://cavaquinho.nexoswebservices.com  
 **Repositório local:** `c:\Users\renat\Downloads\Hamonico`  
 **Data do levantamento inicial:** 2026-06-09  
-**Última atualização:** 2026-06-25
+**Última atualização:** 2026-06-27
 
 ---
 
@@ -14,7 +14,7 @@
 
 | Fase | Feature | Status |
 |---|---|---|
-| 1 | Cifras + Favoritos + Repertórios | ✅ Live (448 cifras, 88 artistas, transposição, acordes clicáveis) |
+| 1 | Cifras + Favoritos + Repertórios | ✅ Live (576 cifras, 112 artistas, transposição, acordes clicáveis, play tab) |
 | 2 | Análise Harmônica | ✅ Live (+ fluxo cifra→análise→progressões) |
 | 3 | Progressões (unificada) | ✅ Live (campo harmônico + cadências + sequências + formação de acordes) |
 | 4 | Treino de Cadências | ✅ Live (9 padrões, integrado em /progressoes) |
@@ -116,7 +116,7 @@ DATABASE_URL="mysql://u828037891_cavaquinho:I9c3UhVlw5pMdiWCqoMb@srv1804.hstgr.i
 | @@unique([userId, moduleId, lessonId]) | |
 
 ### 4.3 `Cifra`
-**448 cifras** extraídas dos PDFs de cadernos musicais.
+**576 cifras** extraídas dos PDFs de cadernos musicais.
 | Campo | Tipo |
 |---|---|
 | id | String (cuid) |
@@ -163,7 +163,7 @@ Hamonico/
 │   ├── schema.prisma
 │   ├── seed.ts                          ← deleteMany + createMany em batch
 │   └── data/
-│       ├── cifras.json                  ← 448 cifras (extraídas dos PDFs)
+│       ├── cifras.json                  ← 576 cifras (extraídas dos PDFs)
 │       └── cifras.ts
 ├── public/
 │   └── samples/
@@ -277,7 +277,7 @@ Hamonico/
 - Sub-navegação: Lições | Quiz | Meu Progresso via `EscolaSubNav`
 - Progresso por módulo, barra geral, botão "Marcar como concluída"
 
-### 6.3 Cifras Interativas — 448 músicas, 88 artistas
+### 6.3 Cifras Interativas — 448 músicas, 112 artistas
 - **Base expandida:** extraídas de 2 PDFs (SAMBA RAIZ 319p + PAGODES ATUAIS 307p) via `scripts/extract-cifras.py`
 - **Fontes:** Cartola, Clara Nunes, Alcione, Noel Rosa, Pixinguinha, Belo, Ferrugem, Thiaguinho, Turma do Pagode, Sorriso Maroto, Xande de Pilares...
 - `/cifras` — **agrupadas por artista A-Z** com busca por música ou artista
@@ -288,6 +288,9 @@ Hamonico/
 - **Acordes clicáveis**: clique em qualquer acorde → tooltip com diagrama do braço do cavaquinho (BracoCavaquinho) + botão play com som real (sampler)
 - **Auto-scroll**: botão toggle + slider de velocidade, para prática mãos-livres
 - **Barra de controles sticky**: tom, tamanho de fonte, auto-scroll — fixa abaixo da navbar
+- **Play nas tablaturas**: botão ▶ verde ao lado de cada linha de tablatura, toca as notas em sequência via sampler
+- **Reconhecimento de 212+ formatos de acorde**: A7M, F#m7b5, E7#9, G7+, B5+7, Em7/-5, C#7/b9, etc.
+- **Base limpa**: 576 cifras separadas (128 extraídas de concatenações), 21 símbolos soltos removidos
 
 ### 6.4 Fluxo Cifra → Análise → Progressões
 Fluxo completo implementado e testado em produção:
@@ -465,7 +468,7 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 |---|---|---|---|
 | `SAMBA RAIZ.pdf` | 319 | 196 | Samba clássico (Cartola, Clara Nunes, Noel Rosa...) |
 | `PAGODES ATUAIS..pdf` | 307 | 252 | Pagode contemporâneo (Ferrugem, Thiaguinho, Belo...) |
-| **Total (dedup)** | **626** | **448** | **88 artistas** |
+| **Total (dedup)** | **626** | **448** | **112 artistas** |
 
 ### Top artistas por quantidade
 | Artista | Qtde | | Artista | Qtde |
@@ -532,7 +535,7 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | 2026-06-17 | Análise Visual TheoryTab (blocos coloridos por função) nas cifras |
 | 2026-06-17 | Cifras agrupadas por artista A-Z com busca |
 | 2026-06-17 | Fluxo cifra→análise→analisador→biblioteca com ?p= query e salvar progressão |
-| 2026-06-18 | Base expandida: 448 cifras de 88 artistas (extraídas dos PDFs SAMBA RAIZ + PAGODES ATUAIS) |
+| 2026-06-18 | Base expandida: 576 cifras de 112 artistas (extraídas dos PDFs SAMBA RAIZ + PAGODES ATUAIS) |
 | 2026-06-22 | Unificação /biblioteca + /cadencias + /progressoes em página única com 4 tabs |
 | 2026-06-22 | Sequências renomeadas: Roda de Samba, Passeio Diatônico, Dominante Secundária, Cadeia de Dominantes, Ciclo Completo |
 | 2026-06-22 | Cards de sequência com grau, acorde e notas formadoras |
@@ -545,6 +548,11 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | 2026-06-25 | Partitura transversal: VexFlow (PartituraView) + TablaturaView + PartituraComTab |
 | 2026-06-25 | Rebuild Cifras: transposição de tom, acordes clicáveis com tooltip (braço + play), auto-scroll, CifraControls sticky |
 | 2026-06-25 | Navbar 5 links: Escola, Progressões, Arpejos, Improvisos, Análise |
+| 2026-06-26 | Cifras de volta ao menu (6 links), play nas tablaturas, 212+ formatos de acorde reconhecidos |
+| 2026-06-26 | Separação de 84 cifras concatenadas: 448→576 cifras, 88→112 artistas |
+| 2026-06-26 | Fix INLINE_CHORD_RE para acordes com + (G7+, A7+), tooltip com parser robusto |
+| 2026-06-27 | Revisão profunda: 0 cifras encavaladas, 0 notas perdidas, 21 símbolos soltos limpos |
+| 2026-06-27 | Fix tab mista com acordes, partitura na Formação de Acordes |
 
 ---
 
