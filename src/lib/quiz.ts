@@ -187,7 +187,79 @@ const GERADORES = [
   () => { const n = rand(NOTAS); return perguntaQualGrau(n, rand(MODES)) },
   () => { const n = rand(NOTAS); return perguntaCampoCompletar(n, rand(MODES)) },
   () => { const n = rand(NOTAS); return perguntaCadencia(n) },
+  () => { const n = rand(NOTAS); return perguntaFuncao(n) },
+  () => { const n = rand(NOTAS); return perguntaTensao(n) },
+  () => { const n = rand(NOTAS); return perguntaSubV(n) },
 ]
+
+function perguntaFuncao(nota: string): Pergunta {
+  const normRoot = TO_NORM[nota] ?? nota
+  const campo = campoHarmonico(normRoot, 'major')
+  const grauIdx = rand([0, 1, 2, 3, 4, 5, 6])
+  const acorde = campo[grauIdx]
+  const funcoes = ['Tônica', 'Subdominante', 'Dominante'] as const
+  const correta = funcoes.indexOf(acorde.fn)
+
+  return {
+    id: `funcao-${nota}-${grauIdx}`,
+    texto: `Qual a FUNÇÃO harmônica do grau ${acorde.degree} (${acorde.example}) no campo de ${nota} maior?`,
+    opcoes: [...funcoes],
+    correta,
+    explicacao: `O grau ${acorde.degree} tem função de ${acorde.fn}. Tônica = repouso (I, iii, vi), Subdominante = afastamento (ii, IV), Dominante = tensão (V, viiº).`,
+  }
+}
+
+function perguntaTensao(nota: string): Pergunta {
+  const normRoot = TO_NORM[nota] ?? nota
+  const campo = campoHarmonico(normRoot, 'major')
+  const grausComTensao = [0, 1, 3, 4, 5] // graus com tensões interessantes
+  const grauIdx = rand(grausComTensao)
+  const acorde = campo[grauIdx]
+
+  const tensoesCorretas = acorde.tensions
+  const todasTensoes = ['9', 'b9', '#9', '11', '#11', '13', 'b13']
+  const erradas = todasTensoes.filter(t => !tensoesCorretas.includes(t))
+
+  const opcoes = [
+    tensoesCorretas.join(', '),
+    rand(erradas) + ', ' + rand(erradas),
+    'Nenhuma tensão disponível',
+    rand(todasTensoes) + ', ' + rand(todasTensoes),
+  ]
+
+  return {
+    id: `tensao-${nota}-${grauIdx}`,
+    texto: `Quais tensões estão disponíveis para ${acorde.example} (grau ${acorde.degree}) no campo de ${nota} maior?`,
+    opcoes,
+    correta: 0,
+    explicacao: `O grau ${acorde.degree} (${acorde.label}) aceita as tensões: ${tensoesCorretas.join(', ')}. Tensões que colidem com notas do acorde são evitadas.`,
+  }
+}
+
+function perguntaSubV(nota: string): Pergunta {
+  const normRoot = TO_NORM[nota] ?? nota
+  const campo = campoHarmonico(normRoot, 'major')
+  const v7 = campo[4]
+
+  // SubV = 6 semitons acima do V
+  const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+  const vIdx = CHROMATIC.indexOf(normRoot === v7.root ? v7.root : (TO_NORM[v7.root] ?? v7.root))
+  // V root is at scale degree 5
+  const vRoot = CHROMATIC[(CHROMATIC.indexOf(normRoot) + 7) % 12]
+  const subVRoot = CHROMATIC[(CHROMATIC.indexOf(vRoot) + 6) % 12]
+  const subV = subVRoot + '7'
+
+  const wrongs = [0, 1, 2].map(i => CHROMATIC[(CHROMATIC.indexOf(subVRoot) + 2 + i * 3) % 12] + '7')
+  const opcoes = [subV, ...wrongs]
+
+  return {
+    id: `subv-${nota}`,
+    texto: `No tom de ${nota} maior, qual é o dominante substituto (SubV) de ${vRoot}7?`,
+    opcoes,
+    correta: 0,
+    explicacao: `O SubV de ${vRoot}7 é ${subV} — fica a 6 semitons (trítono) e compartilha o mesmo trítono interno. Resolve cromaticamente: ${subV}→${campo[0].example}.`,
+  }
+}
 
 export function gerarPerguntas(n = 10): Pergunta[] {
   const perguntas: Pergunta[] = []

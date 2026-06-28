@@ -636,6 +636,66 @@ Esse é o campo harmônico em ação. Analise suas músicas favoritas usando num
         ],
         chords: ["C", "Dm", "Em", "F", "G", "Am", "Bdim"],
       },
+      {
+        id: "ac-7",
+        title: "Acordes Sus e Alterados",
+        description: "Sus4, sus2, 7(#5), 7(b13), 7(b9), 7(#9) — tensões que colorem o samba.",
+        duration: "12 min",
+        content: `
+## Acordes Sus e Alterados
+
+Estes acordes adicionam **cor e movimento** à harmonia. São muito usados em passagens, preparações e momentos expressivos do samba e bossa nova.
+
+### Acordes Suspensos (Sus)
+
+Substituem a 3ª por outra nota, criando **ambiguidade** — nem maior, nem menor.
+
+| Acorde | Fórmula | Exemplo | Efeito |
+|---|---|---|---|
+| **Xsus4** | 1 – 4 – 5 | Gsus4 = G C D | Suspensão, "pede resolução" |
+| **Xsus2** | 1 – 2 – 5 | Gsus2 = G A D | Aberto, etéreo |
+
+**Resolução clássica:** Gsus4 → G → C (suspende, resolve na 3ª, depois no tom)
+
+No cavaquinho: o sus4 é muito usado antes do acorde dominante. Exemplo: Gsus4 → G7 → C
+
+### Acordes Alterados do Dominante
+
+O V7 é o acorde com **mais possibilidades de alteração**:
+
+| Acorde | Fórmula | Efeito |
+|---|---|---|
+| **X7(#5)** | 1 – 3 – #5 – b7 | Quinta alterada na estrutura (sem 5ª natural) |
+| **X7(b13)** | 1 – 3 – 5 – b7 – b13 | Quinta natural + b13 como tensão |
+| **X7(b9)** | 1 – 3 – 5 – b7 – b9 | Tensão escura, dramática |
+| **X7(#9)** | 1 – 3 – 5 – b7 – #9 | "Acorde Hendrix", tensão intensa |
+
+### Diferença Prática: #5 vs b13
+
+- **G7(#5)** = G B D# F → a 5ª foi **substituída** por D#
+- **G7(b13)** = G B D F Eb → a 5ª D **continua** e Eb é tensão adicionada
+- No cavaquinho (4 cordas): geralmente soa igual, mas o conceito importa para análise
+
+### Aplicação no Pagode
+
+- **Gsus4 → G7 → C**: preparação clássica antes da resolução
+- **E7(b9) → Am**: tensão máxima antes do menor — som dramático do pagode
+- **G7(#5) → C**: resolução com brilho extra — bossa nova
+
+### No Cavaquinho
+
+Shapes comuns (tom de C):
+- Gsus4: monte G mas coloque o dedo na 4ª justa (C)
+- G7(b9): adicione Ab na montagem do G7
+- Sus → Dominante → Tônica: o movimento mais elegante da harmonia
+        `,
+        tips: [
+          "Gsus4→G7→C: a resolução mais bonita — suspende, tenciona, resolve",
+          "E7(b9)→Am: o drama do pagode em dois acordes",
+          "No cavaquinho, #5 e b13 soam muito parecido — foque na resolução",
+        ],
+        chords: ["Gsus4", "G7", "E7", "Am"],
+      },
     ],
   },
   {
@@ -1324,6 +1384,114 @@ Com o domínio do campo harmônico, cadências, empréstimo modal e dominantes s
           "80% das músicas usam só 3-4 progressões que você já conhece",
           "Analise 1 música por semana — em 3 meses você lê harmonia naturalmente",
         ],
+      },
+      {
+        id: "har-7",
+        title: "Dominante Substituto (SubV)",
+        description: "Substituição por trítono: cromatismo sofisticado no samba e bossa nova.",
+        duration: "12 min",
+        content: `
+## Dominante Substituto (SubV)
+
+O **dominante substituto** (SubV ou Sub V) é um dos recursos mais sofisticados da harmonia popular. Usado amplamente na bossa nova, jazz e samba moderno.
+
+### O Conceito
+
+O SubV substitui o V7 por um acorde a **6 semitons** (trítono) de distância. Funciona porque ambos compartilham o mesmo **trítono interno**.
+
+### Exemplo em C
+
+- **V7 original:** G7 → contém B e F (trítono)
+- **SubV:** Db7 → contém F e B (Cb) — **mesmo trítono!**
+- Resolução: Db7 → C (desce meio tom cromaticamente)
+
+### Na Prática
+
+| Cadência original | Com SubV | Efeito |
+|---|---|---|
+| Dm7 → G7 → C | Dm7 → **Db7** → C | Cromatismo: Ré → Réb → Dó |
+| Am7 → D7 → G | Am7 → **Ab7** → G | Cromatismo: Lá → Láb → Sol |
+| Em7 → A7 → Dm | Em7 → **Eb7** → Dm | Cromatismo: Mi → Mib → Ré |
+
+### Tabela de SubV para Todos os Tons
+
+| Tom (I) | V7 | SubV |
+|---|---|---|
+| C | G7 | Db7 |
+| G | D7 | Ab7 |
+| D | A7 | Eb7 |
+| A | E7 | Bb7 |
+| F | C7 | Gb7 |
+| Bb | F7 | B7 |
+
+### Aplicação Avançada: Cadeia com SubV
+
+A7 → D7 → **Db7** → C
+
+Combina dominante secundário (A7→Dm) com SubV (Db7→C) para criar uma linha cromática descendente no baixo.
+
+### No Pagode e Bossa Nova
+
+A bossa nova de Tom Jobim é repleta de SubV:
+- "Garota de Ipanema": usa Db7 como SubV de G7
+- "Desafinado": substitutos tritônicos em cascata
+- No pagode moderno: Thiaguinho e Sorriso Maroto usam SubV para sofisticar o refrão
+        `,
+        tips: [
+          "O SubV sempre fica meio tom ACIMA do acorde de resolução (Db7→C)",
+          "Na dúvida, conte 6 semitons a partir do V7 — esse é o SubV",
+          "Dm7→Db7→C: ouça o baixo descer cromaticamente Ré-Réb-Dó",
+        ],
+        chords: ["Dm7", "G7", "Db7", "C"],
+      },
+      {
+        id: "har-8",
+        title: "Combinando Campos Harmônicos",
+        description: "Misture campos maior, menor natural, harmônica e melódica em uma única progressão.",
+        duration: "15 min",
+        content: `
+## Combinando Campos Harmônicos
+
+Na prática, os grandes compositores de samba e pagode **não usam um único campo harmônico**. Eles misturam livremente acordes de diferentes campos para criar riqueza harmônica.
+
+### Os 4 Campos de Lá menor
+
+| Campo | Escala | V grau | Característica |
+|---|---|---|---|
+| Natural | A B C D E F G | Em7 (fraco) | Suave, modal |
+| Harmônica | A B C D E F G# | E7 (forte!) | Tensão dramática |
+| Melódica | A B C D E F# G# | E7 + F#ø | Jazz/bossa |
+| Dórica | A B C D E F# G | F#ø + D7 | Funk/samba moderno |
+
+### Progressão Mista (muito usada no samba)
+
+Am → Dm → **E7** → Am → **F** → **G7** → Am
+
+- Am, Dm: campo natural
+- **E7**: campo harmônico (G# na terça, cria tensão real)
+- **F, G7**: empréstimo do campo de C maior (relativa)
+
+### Como Funciona
+
+1. Use o campo **natural** como base (i → iv)
+2. Sempre que precisar resolver no i, use **V7 da harmônica** (E7→Am)
+3. Para suavizar, empreste acordes da **relativa maior** (F, G7, C)
+4. Para sofisticar, use **ii-V de campos vizinhos**
+
+### Exemplo: "Carinhoso" (Pixinguinha)
+
+Mistura magistral de campos:
+- **F** (campo maior principal)
+- **E7→Am** (harmônica menor de Am)
+- **D7→Gm** (dominante secundário)
+- Resultado: riqueza harmônica que não "briga" — flui naturalmente
+        `,
+        tips: [
+          "Pense em campos como paletas de cores — você pode misturar livremente",
+          "O V7 da harmônica (E7 em Am) é o mais importante: cria resolução real",
+          "Ouça sambas de Cartola e Pixinguinha — eles são mestres da mistura de campos",
+        ],
+        chords: ["Am", "Dm", "E7", "F", "G7", "C"],
       },
     ],
   },

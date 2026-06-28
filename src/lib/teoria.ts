@@ -285,13 +285,44 @@ export function detectCadences(degrees: DegreeInfo[]): Cadence[] {
 }
 
 // Campo harmônico: generate the 7 diatonic chords for a key
+export type HarmonicFunction = "Tônica" | "Subdominante" | "Dominante"
+
 export interface CampoChord {
   degree: string
   root: string
   quality: Quality
   label: string
   example: string
+  fn: HarmonicFunction
+  tensions: string[]
 }
+
+const MAJ_HARMONIC_FN: HarmonicFunction[] = [
+  "Tônica", "Subdominante", "Tônica", "Subdominante",
+  "Dominante", "Tônica", "Dominante",
+]
+const MIN_HARMONIC_FN: HarmonicFunction[] = [
+  "Tônica", "Subdominante", "Tônica", "Subdominante",
+  "Dominante", "Subdominante", "Dominante",
+]
+const MAJ_TENSIONS: string[][] = [
+  ["9", "13"],       // I maj7
+  ["9", "11"],       // ii m7
+  ["11"],            // iii m7
+  ["9", "#11"],      // IV maj7
+  ["9", "b9", "#9", "#11", "13", "b13"], // V 7
+  ["9", "11"],       // vi m7
+  ["11", "b13"],     // vii° ø
+]
+const MIN_TENSIONS: string[][] = [
+  ["9", "11"],       // i m7
+  ["11", "b13"],     // ii° ø
+  ["9", "13"],       // III maj7
+  ["9", "11"],       // iv m7
+  ["b9", "b13"],     // V 7
+  ["9", "#11"],      // VI maj7
+  [],                // vii° dim
+]
 
 const QUALITY_LABEL: Record<Quality, string> = {
   M: 'maior',
@@ -319,7 +350,9 @@ export function campoHarmonico(root: string, mode: Mode): CampoChord[] {
   const scale = scaleOf(root, intervals)
   const dQ = mode === 'major' ? MAJ_Q : MIN_Q
   const romans = ROMAN
-  const fns = mode === 'major' ? MAJ_FN : MIN_FN
+
+  const hFn = mode === 'major' ? MAJ_HARMONIC_FN : MIN_HARMONIC_FN
+  const hTensions = mode === 'major' ? MAJ_TENSIONS : MIN_TENSIONS
 
   return scale.map((note, i) => {
     const quality = dQ[i]
@@ -339,6 +372,8 @@ export function campoHarmonico(root: string, mode: Mode): CampoChord[] {
       quality,
       label: QUALITY_LABEL[quality],
       example: displayRoot + suffix,
+      fn: hFn[i],
+      tensions: hTensions[i],
     }
   })
 }

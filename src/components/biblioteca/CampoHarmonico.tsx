@@ -85,16 +85,28 @@ export function CampoHarmonico({ nota, mode, onNotaChange, onModeChange }: Campo
           Campo harmônico de <span className="text-violet-300 font-medium">{nota} {mode === "major" ? "maior" : "menor"}</span>
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-          {campo.map((c) => (
-            <div
-              key={c.degree}
-              className={`border rounded-xl p-3 text-center ${degreeColor(c.degree)}`}
-            >
-              <p className="text-xs opacity-60 mb-1">{c.degree}</p>
-              <p className="text-lg font-bold font-mono leading-none mb-1">{c.example}</p>
-              <p className="text-xs opacity-50">{c.label}</p>
-            </div>
-          ))}
+          {campo.map((c) => {
+            const fnColor = c.fn === "Tônica" ? "bg-violet-500/20 text-violet-300"
+              : c.fn === "Dominante" ? "bg-amber-500/20 text-amber-300"
+              : "bg-sky-500/20 text-sky-300"
+            return (
+              <div
+                key={c.degree}
+                className={`border rounded-xl p-3 text-center ${degreeColor(c.degree)}`}
+              >
+                <p className="text-xs opacity-60 mb-0.5">{c.degree}</p>
+                <p className="text-lg font-bold font-mono leading-none mb-1">{c.example}</p>
+                <span className={`inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-full mb-1 ${fnColor}`}>
+                  {c.fn}
+                </span>
+                {c.tensions.length > 0 && (
+                  <p className="text-[10px] text-slate-500 mt-0.5">
+                    {c.tensions.join(", ")}
+                  </p>
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>

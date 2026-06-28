@@ -39,6 +39,7 @@ interface Padrao {
   descricao: string
   dica: string
   grausLabel: string
+  musicas?: string[]
 }
 
 const PADROES: Padrao[] = [
@@ -50,6 +51,7 @@ const PADROES: Padrao[] = [
     grausLabel: "ii – V7 – I",
     descricao: "A cadência mais importante do samba. O ii cria tensão, o V7 aumenta, e o I resolve.",
     dica: "Pratique lento e ouça a sensação de \"chegada\" no I.",
+    musicas: ["Garota de Ipanema — Tom Jobim", "Chega de Saudade — Tom Jobim", "Wave — Tom Jobim"],
   },
   {
     nome: "I – IV – V7 – I",
@@ -59,6 +61,7 @@ const PADROES: Padrao[] = [
     grausLabel: "I – IV – V7 – I",
     descricao: "Base de inúmeras músicas populares. Funciona em qualquer tonalidade.",
     dica: "Experimente variar o ritmo: marque o I e o IV mais longos.",
+    musicas: ["Trem das Onze — Adoniran Barbosa", "Aquarela do Brasil — Ary Barroso"],
   },
   {
     nome: "I – vi – IV – V",
@@ -68,6 +71,7 @@ const PADROES: Padrao[] = [
     grausLabel: "I – vi – IV – V",
     descricao: "Sequência clássica do pagode moderno. Cria uma sensação circular.",
     dica: "Tente cantarolar uma melodia por cima enquanto toca.",
+    musicas: ["Não Foi a Toa — Belo", "Deixa a Vida Me Levar — Zeca Pagodinho"],
   },
   {
     nome: "I – V – vi – IV",
@@ -77,6 +81,7 @@ const PADROES: Padrao[] = [
     grausLabel: "I – V – vi – IV",
     descricao: "Variação da anterior, muito usada em hits do pagode dos anos 2000.",
     dica: "A mudança de V para vi é chamada cadência deceptiva — surpresa harmônica.",
+    musicas: ["Sorriso Bonito — Belo", "Só Pra Contrariar — Alexandre Pires"],
   },
   {
     nome: "I – I7 – IV – IVm",
@@ -86,6 +91,7 @@ const PADROES: Padrao[] = [
     grausLabel: "I – I7 – IV – IVm – I",
     descricao: "O I7 cria tensão que resolve no IV. O IVm é emprestado do menor paralelo.",
     dica: "O IVm é o segredo do \"sabor\" desta progressão — não deixe de ouvi-lo.",
+    musicas: ["As Rosas Não Falam — Cartola", "Preciso Me Encontrar — Cartola"],
   },
   {
     nome: "i – VII – VI – V7",
@@ -95,6 +101,7 @@ const PADROES: Padrao[] = [
     grausLabel: "i – VII – VI – V7",
     descricao: "Cadência andaluza descendo. Muito usada no samba mais dramático e chorinho.",
     dica: "Note que o V7 aqui é maior (da escala harmônica menor), criando tensão forte.",
+    musicas: ["Meu Lugar — Arlindo Cruz", "Noites Cariocas — Jacob do Bandolim"],
   },
   {
     nome: "i – iv – V7 – i",
@@ -104,6 +111,7 @@ const PADROES: Padrao[] = [
     grausLabel: "i – iv – V7 – i",
     descricao: "Versão menor do I-IV-V. O V7 vem da escala harmônica menor.",
     dica: "Compare com a versão maior: a mudança de modo cria emoção diferente.",
+    musicas: ["Carinhoso — Pixinguinha", "Lamento — Pixinguinha"],
   },
   {
     nome: "I – bVII – IV – I",
@@ -113,6 +121,7 @@ const PADROES: Padrao[] = [
     grausLabel: "I – bVII – IV – I",
     descricao: "Empréstimo do Mixolídio. O bVII não pertence ao campo harmônico maior.",
     dica: "O bVII é 1 tom abaixo do I. Em C: C – Bb – F – C.",
+    musicas: ["País Tropical — Jorge Ben Jor", "Mas que Nada — Jorge Ben Jor"],
   },
   {
     nome: "Ciclo de Quintas",
@@ -122,6 +131,7 @@ const PADROES: Padrao[] = [
     grausLabel: "I – IV – viiº – iii – vi – ii – V – I",
     descricao: "Sequência que percorre todas as quintas do campo harmônico. Fundamental no choro e samba elaborado.",
     dica: "Ouça como cada acorde \"cai\" uma quinta até voltar ao I — é o ciclo completo.",
+    musicas: ["Fly Me to the Moon — Frank Sinatra", "Autumn Leaves — Jazz Standard"],
   },
 ]
 
@@ -157,14 +167,14 @@ function getChordsForPadrao(padrao: Padrao, nota: string): string[] {
 // ── Progressões comuns (para tab Campo Harmônico) ──────────────
 
 const PROGRESSOES_COMUNS = [
-  { nome: "I – IV – V – I", tipo: "Básica", graus: "I – IV – V7 – I", indices: [0, 3, 4, 0], descricao: "A progressão mais usada na música popular." },
-  { nome: "ii – V – I", tipo: "Jazz/Samba", graus: "ii – V7 – I", indices: [1, 4, 0], descricao: "Base do samba e jazz. Gera tensão e resolução perfeita." },
-  { nome: "I – vi – IV – V", tipo: "Clássica", graus: "I – vi – IV – V", indices: [0, 5, 3, 4], descricao: "Usada em inúmeros clássicos do pagode." },
-  { nome: "I – V – vi – IV", tipo: "Pop/Pagode", graus: "I – V – vi – IV", indices: [0, 4, 5, 3], descricao: "Variação da anterior, muito usada no pagode moderno." },
-  { nome: "i – VII – VI – V", tipo: "Menor", graus: "i – VII – VI – V7", indices: [0, 6, 5, 4], descricao: "Cadência andaluza, frequente no samba mais dramático.", forceMinor: true },
-  { nome: "I – bVII – IV – I", tipo: "Modal", graus: "I – bVII – IV – I", indices: [0, -1, 3, 0], descricao: "Empréstimo modal, muito usado em samba-rock." },
-  { nome: "Ciclo de Quintas", tipo: "Avançada", graus: "I – IV – viiº – iii – vi – ii – V – I", indices: [0, 3, 6, 2, 5, 1, 4, 0], descricao: "Sequência que percorre todas as quintas do campo harmônico." },
-  { nome: "I – I7 – IV – IVm", tipo: "Blues/Samba", graus: "I – I7 – IV – IVm – I", indices: [0, -2, 3, -3, 0], descricao: "Tônica dominante seguida de movimento IV – IVm muito usado no pagode." },
+  { nome: "I – IV – V – I", tipo: "Básica", graus: "I – IV – V7 – I", indices: [0, 3, 4, 0], descricao: "A progressão mais usada na música popular.", musicas: ["Trem das Onze — Adoniran", "Aquarela do Brasil — Ary Barroso"] },
+  { nome: "ii – V – I", tipo: "Jazz/Samba", graus: "ii – V7 – I", indices: [1, 4, 0], descricao: "Base do samba e jazz. Gera tensão e resolução perfeita.", musicas: ["Garota de Ipanema — Tom Jobim", "Wave — Tom Jobim"] },
+  { nome: "I – vi – IV – V", tipo: "Clássica", graus: "I – vi – IV – V", indices: [0, 5, 3, 4], descricao: "Usada em inúmeros clássicos do pagode.", musicas: ["Não Foi a Toa — Belo", "Deixa a Vida Me Levar — Zeca Pagodinho"] },
+  { nome: "I – V – vi – IV", tipo: "Pop/Pagode", graus: "I – V – vi – IV", indices: [0, 4, 5, 3], descricao: "Variação da anterior, muito usada no pagode moderno.", musicas: ["Sorriso Bonito — Belo", "Só Pra Contrariar — Alexandre Pires"] },
+  { nome: "i – VII – VI – V", tipo: "Menor", graus: "i – VII – VI – V7", indices: [0, 6, 5, 4], descricao: "Cadência andaluza, frequente no samba mais dramático.", forceMinor: true, musicas: ["Meu Lugar — Arlindo Cruz", "Noites Cariocas — Jacob do Bandolim"] },
+  { nome: "I – bVII – IV – I", tipo: "Modal", graus: "I – bVII – IV – I", indices: [0, -1, 3, 0], descricao: "Empréstimo modal, muito usado em samba-rock.", musicas: ["País Tropical — Jorge Ben Jor"] },
+  { nome: "Ciclo de Quintas", tipo: "Avançada", graus: "I – IV – viiº – iii – vi – ii – V – I", indices: [0, 3, 6, 2, 5, 1, 4, 0], descricao: "Sequência que percorre todas as quintas do campo harmônico.", musicas: ["Fly Me to the Moon — Jazz Standard"] },
+  { nome: "I – I7 – IV – IVm", tipo: "Blues/Samba", graus: "I – I7 – IV – IVm – I", indices: [0, -2, 3, -3, 0], descricao: "Tônica dominante seguida de movimento IV – IVm muito usado no pagode.", musicas: ["As Rosas Não Falam — Cartola"] },
 ]
 
 function buildExemplo(
@@ -311,6 +321,9 @@ export default function ProgressoesPage() {
                     {buildExemplo(p.indices, nota, mode, p.forceMinor)}
                   </p>
                   <p className="text-slate-500 text-xs mt-1">{p.descricao}</p>
+                  {p.musicas && p.musicas.length > 0 && (
+                    <p className="text-[10px] text-slate-600 mt-1">{p.musicas.join(" • ")}</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -448,6 +461,12 @@ export default function ProgressoesPage() {
               <p className="text-amber-400 text-sm">
                 <span className="font-semibold">Dica: </span>{padrao.dica}
               </p>
+              {padrao.musicas && padrao.musicas.length > 0 && (
+                <p className="text-xs text-slate-500">
+                  <span className="text-slate-400 font-medium">Músicas: </span>
+                  {padrao.musicas.join(" • ")}
+                </p>
+              )}
             </div>
           </div>
 
