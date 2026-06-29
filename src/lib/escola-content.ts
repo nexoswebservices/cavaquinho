@@ -287,11 +287,54 @@ Uma forma fácil: todos os modos de **C maior** usam as mesmas notas (C D E F G 
 - G Mixolídio = G A B C D E F G
 
 > Não tente memorizar tudo de uma vez. Foque no **Dórico e no Mixolídio** — os mais usados na música popular brasileira.
+
+### Dórico no Cavaquinho (A Dórico)
+
+Notas: A B C D E F# G
+
+**Tablatura (afinação D-G-B-D):**
+
+\`\`\`
+4ª corda (D): |--0--2--3--5--7--
+3ª corda (G): |--0--2--4--5--7--
+2ª corda (B): |--0--1--3--5--7--
+1ª corda (D): |--0--2--3--5--7--
+\`\`\`
+
+**Frase Dórica típica do pagode:**
+A → C → D → E → F# → E → D → A
+
+O F# é a nota que diferencia o Dórico do menor natural — enfatize-a!
+
+### Mixolídio no Cavaquinho (G Mixolídio)
+
+Notas: G A B C D E F
+
+**Tablatura:**
+
+\`\`\`
+4ª corda (D): |--5--7--8--10--
+3ª corda (G): |--0--2--4--5--7--
+2ª corda (B): |--0--1--3--5--
+1ª corda (D): |--0--2--3--5--
+\`\`\`
+
+**Frase Mixolídia típica (sobre G7):**
+G → A → B → D → E → F → E → D → G
+
+O Fá natural (b7) é a marca do Mixolídio — dá o "tempero blues" sobre o V7.
+
+### Aplicação Prática
+
+- **Dórico sobre ii (Dm7):** Use D Dórico para solar sobre Dm7 em progressões ii-V-I
+- **Mixolídio sobre V (G7):** Use G Mixolídio para solar sobre G7 antes de resolver no I
+- **No pagode:** O Dórico funciona em músicas com groove funk; o Mixolídio em sambas com dominante prolongado
         `,
         tips: [
           "Foque em Dórico (funk/samba moderno) e Mixolídio (blues/MPB)",
           "Todos os modos de C maior têm as mesmas notas — só muda a tônica",
           "Dórico = menor com 6° grau maior — dá aquele swing especial",
+          "Mixolídio = maior com 7° grau abaixado — o modo do V7",
         ],
       },
     ],
