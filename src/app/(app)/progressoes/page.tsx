@@ -9,6 +9,7 @@ import { PROGRESSOES } from "@/lib/progressions-data"
 import { ProgressaoCard } from "@/components/progressoes/ProgressaoCard"
 import { PlayButton } from "@/components/ui/PlayButton"
 import { FormacaoAcordes } from "@/components/progressoes/FormacaoAcordes"
+import { CicloQuintas } from "@/components/progressoes/CicloQuintas"
 
 interface SavedProgression {
   progression: string
@@ -21,6 +22,7 @@ const TABS = [
   { id: "cadencias", label: "Cadências" },
   { id: "sequencias", label: "Sequências" },
   { id: "acordes", label: "Formação de Acordes" },
+  { id: "quintas", label: "Ciclo de Quintas" },
   { id: "minhas", label: "Minhas Progressões" },
 ] as const
 
@@ -507,6 +509,9 @@ export default function ProgressoesPage() {
 
       {/* ═══ Tab: Formação de Acordes ═══ */}
       {tab === "acordes" && <FormacaoAcordes />}
+
+      {/* ═══ Tab: Ciclo de Quintas ═══ */}
+      {tab === "quintas" && <CicloQuintas />}
 
       {/* ═══ Tab: Minhas Progressões ═══ */}
       {tab === "minhas" && (

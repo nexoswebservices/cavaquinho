@@ -5,6 +5,7 @@ import { ARPEJO_PATTERNS, CHORD_TYPES_ARPEJO } from "@/lib/arpejos-data"
 import { BracoArpejo } from "@/components/arpejos/BracoArpejo"
 import { PlayButton } from "@/components/ui/PlayButton"
 import { initSampler, isReady, playNote } from "@/lib/sampler"
+import { campoHarmonico } from "@/lib/teoria"
 import { PartituraView } from "@/components/partitura/PartituraView"
 import { TablaturaView } from "@/components/partitura/TablaturaView"
 import type { NoteData } from "@/components/partitura/PartituraView"
@@ -285,6 +286,38 @@ export default function ArpejosPage() {
           <p className="text-amber-400 text-sm">
             <span className="font-semibold">Dica: </span>{pattern.dica}
           </p>
+        </div>
+      </div>
+
+      {/* Arpejos do Campo Harmônico */}
+      <div className="bg-[#120d24] border border-white/5 rounded-2xl p-6">
+        <h2 className="text-lg font-bold text-white mb-1">Arpejos do Campo Harmônico</h2>
+        <p className="text-slate-400 text-sm mb-4">
+          Os 7 arpejos diatônicos de <span className="text-violet-300 font-bold">{root} maior</span> — toque em sequência para internalizar o campo.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+          {campoHarmonico(rootSharp, "major").map((c) => {
+            const intervals = c.quality === "m" ? [0, 3, 7]
+              : c.quality === "d7" ? [0, 4, 7, 10]
+              : c.quality === "dim" ? [0, 3, 6]
+              : c.quality === "hdim" ? [0, 3, 6, 10]
+              : [0, 4, 7]
+            const notes: [string, number][] = intervals.map((s) => {
+              const n = noteAtSemitone(TO_SHARP[c.root] ?? c.root, s)
+              return [n, 4]
+            })
+            const fnColor = c.fn === "Tônica" ? "border-violet-500/30 bg-violet-500/10"
+              : c.fn === "Dominante" ? "border-amber-500/30 bg-amber-500/10"
+              : "border-sky-500/30 bg-sky-500/10"
+            return (
+              <div key={c.degree} className={`border rounded-xl p-3 text-center ${fnColor}`}>
+                <p className="text-[10px] opacity-60">{c.degree}</p>
+                <p className="text-sm font-bold font-mono text-white mb-1">{c.example}</p>
+                <p className="text-[9px] opacity-50 mb-2">{c.fn}</p>
+                <PlayButton notes={notes} size="sm" label={`Arpejo ${c.example}`} />
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
