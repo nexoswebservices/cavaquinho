@@ -4,28 +4,30 @@
 **App reconstruído:** https://cavaquinho.nexoswebservices.com  
 **Repositório local:** `c:\Users\renat\Downloads\Hamonico`  
 **Data do levantamento inicial:** 2026-06-09  
-**Última atualização:** 2026-06-27
+**Última atualização:** 2026-06-28
 
 ---
 
 ## 1. Status Geral
 
-**✅ 12 MÓDULOS LIVE — ÁUDIO, PARTITURA, ARPEJOS, IMPROVISOS, CIFRAS INTERATIVAS**
+**✅ 14 MÓDULOS LIVE — ÁUDIO, PARTITURA, ARPEJOS, IMPROVISOS, CIFRAS, PARTITURAS, CONTEÚDO EXPANDIDO**
 
 | Fase | Feature | Status |
 |---|---|---|
 | 1 | Cifras + Favoritos + Repertórios | ✅ Live (576 cifras, 112 artistas, transposição, acordes clicáveis, play tab) |
 | 2 | Análise Harmônica | ✅ Live (+ fluxo cifra→análise→progressões) |
-| 3 | Progressões (unificada) | ✅ Live (campo harmônico + cadências + sequências + formação de acordes) |
-| 4 | Treino de Cadências | ✅ Live (9 padrões, integrado em /progressoes) |
-| 5 | Quiz | ✅ Live (em `/escola/quiz`) |
+| 3 | Progressões (unificada) | ✅ Live (campo harmônico c/ tensões + cadências + sequências + formação + ciclo de quintas) |
+| 4 | Treino de Cadências | ✅ Live (9 padrões c/ exemplos de músicas, integrado em /progressoes) |
+| 5 | Quiz | ✅ Live (10 tipos: graus, cadências, funções, tensões, SubV) |
 | 6 | Meu Progresso (gamificação) | ✅ Live (em `/escola/meu-progresso`) |
 | 7 | Análise Visual TheoryTab | ✅ Live (blocos coloridos por função) |
-| 8 | Formação de Acordes + Sampler | ✅ Live (19 tipos, 3 formas, som real cavaquinho) |
+| 8 | Formação de Acordes + Sampler | ✅ Live (19 tipos, 3 formas, partitura VexFlow, som real cavaquinho) |
 | 9 | Metrônomo + Afinador | ✅ Live (flutuante, acessível em todas as páginas) |
-| 10 | Arpejos | ✅ Live (8 padrões, braço numerado, partitura VexFlow + tablatura) |
+| 10 | Arpejos | ✅ Live (8 padrões + arpejos do campo harmônico, partitura + tablatura) |
 | 11 | Improvisos | ✅ Live (12 escalas, 8 frases, backing tracks, braço inteiro) |
-| 12 | Cifras Interativas | ✅ Live (transposição de tom, acordes clicáveis com tooltip, auto-scroll) |
+| 12 | Cifras Interativas | ✅ Live (transposição, acordes clicáveis, auto-scroll, play tab) |
+| 13 | Partituras | ✅ Live (ensino, visualizador ABC, gerador cifra→partitura, exercícios) |
+| 14 | Conteúdo Expandido | ✅ Live (tensões, funções, SubV, acordes sus, campos combinados, ciclo de quintas) |
 
 **Modo atual:** Acesso público read-only (login desativado para avaliação da comunidade)
 
@@ -274,9 +276,11 @@ Hamonico/
 - APIs mantêm 401 para requests sem session
 
 ### 6.2 Escola de Música
-- **4 módulos, 24 lições** de teoria musical para **cavaquinho**/samba
+- **4 módulos, 26 lições** de teoria musical para **cavaquinho**/samba
+- Módulos: Escalas (6), Acordes (7, +ac-7 Sus/Alterados), Cadências (5), Harmonia (8, +SubV, +Campos Combinados)
 - Tablaturas de 4 cordas (D-G-B-D) — sem referências a violão
 - Sub-navegação: Lições | Quiz | Meu Progresso via `EscolaSubNav`
+- **Quiz com 10 tipos**: graus, cadências, campo, completar + funções harmônicas, tensões, dominante substituto
 - Progresso por módulo, barra geral, botão "Marcar como concluída"
 
 ### 6.3 Cifras Interativas — 576 músicas, 112 artistas
@@ -333,16 +337,17 @@ Cifra (/cifras/[id])
 - **Botão "Salvar nas Progressões"** (persiste em localStorage)
 - Link "Ver nas Progressões →" após salvar
 
-### 6.7 Progressões (`/progressoes`) — Página Unificada com 5 Tabs
+### 6.7 Progressões (`/progressoes`) — Página Unificada com 6 Tabs
 
 Unificação das antigas páginas `/biblioteca`, `/cadencias` e `/progressoes` em uma única página com tabs:
 
 | Tab | Conteúdo |
 |-----|----------|
-| **Campo Harmônico** | 12 notas × maior/menor, 7 acordes diatônicos, 8 progressões comuns transpostas, tabela de intervalos e graus |
-| **Cadências** | 9 padrões de treino (merge das 8 cadências + Ciclo de Quintas), seletor de tonalidade, embaralhar, descrições e dicas, campo harmônico inline |
-| **Sequências** | 5 sequências com nomes descritivos (Roda de Samba, Passeio Diatônico, Dominante Secundária, Cadeia de Dominantes, Ciclo Completo), cards com grau/acorde/notas formadoras em C maior, link para detalhe com músicas |
-| **Formação de Acordes** | 19 tipos de acorde × 12 notas raiz, fórmula + notas + intervalos, 3 formas com diagrama SVG do braço do cavaquinho (D-G-B-D), play com som real de cavaquinho via Web Audio API |
+| **Campo Harmônico** | 12 notas × maior/menor, 7 acordes com **função harmônica** (Tônica/Sub/Dom) e **tensões disponíveis** (9, 11, 13, etc.), 8 progressões comuns com **exemplos de músicas reais**, tabela de intervalos |
+| **Cadências** | 9 padrões de treino com exemplos de músicas (Garota de Ipanema, Trem das Onze, etc.), seletor de tonalidade, embaralhar, dicas |
+| **Sequências** | 5 sequências com nomes descritivos, cards com grau/acorde/notas formadoras, link para detalhe com músicas |
+| **Formação de Acordes** | 19 tipos × 12 notas, fórmula + notas + intervalos, 3 formas com braço SVG, **partitura VexFlow**, play com sampler |
+| **Ciclo de Quintas** | SVG interativo com 12 notas maiores + relativas menores, clique mostra campo harmônico com funções |
 | **Minhas Progressões** | Progressões salvas do Analisador Harmônico (localStorage) |
 
 - `/biblioteca` e `/cadencias` redirecionam para `/progressoes`
@@ -391,6 +396,7 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 - **Partitura VexFlow + Tablatura** renderizadas em tempo real para cada padrão/acorde
 - **Play arpejo**: toca notas em sequência no tempo do BPM via `playArpejo()` do sampler
 - Descrição + dica de execução para cada padrão
+- **Arpejos do Campo Harmônico**: 7 graus diatônicos com play, cores por função (Tônica/Sub/Dom)
 
 ### 6.12 Improvisos (`/improvisos`) — 4 tabs
 
@@ -427,14 +433,15 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 
 ## 7. Navegação
 
-### Navbar principal (6 links)
+### Navbar principal (7 links)
 | Link | Rota | Escopo |
 |---|---|---|
-| Escola | `/escola` | Lições, Quiz, Meu Progresso (sub-nav) |
+| Escola | `/escola` | 26 lições em 4 módulos, Quiz (10 tipos), Meu Progresso |
 | Cifras | `/cifras` | 576 cifras interativas com transposição, acordes clicáveis, play tab |
-| Progressões | `/progressoes` | Campo harmônico, cadências, sequências, formação de acordes, minhas progressões (5 tabs) |
-| Arpejos | `/arpejos` | 8 padrões de arpejo com braço, partitura, tablatura, play |
-| Improvisos | `/improvisos` | Escalas, frases, exercícios, backing tracks (4 tabs) |
+| Progressões | `/progressoes` | Campo harmônico c/ tensões, cadências, sequências, formação, ciclo de quintas (6 tabs) |
+| Arpejos | `/arpejos` | 8 padrões + arpejos do campo harmônico, partitura, tablatura, play |
+| Improvisos | `/improvisos` | 12 escalas, 8 frases, exercícios, backing tracks (4 tabs) |
+| Partituras | `/partituras` | Ensino (6 lições + quiz), visualizador ABC, gerador cifra→partitura, exercícios (4 tabs) |
 | Análise | `/analise` | Analisador harmônico (aceita ?p=) |
 
 ### Elemento flutuante
@@ -541,6 +548,14 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 - ~~Improvisos~~ ✅ (2026-06-25)
 - ~~Partitura~~ ✅ (2026-06-25, VexFlow)
 - ~~Metrônomo + Afinador~~ ✅ (2026-06-24)
+- ~~Módulo Partituras~~ ✅ (2026-06-27, 4 tabs: ensino, visualizador ABC, gerador, exercícios)
+- ~~Tensões e funções no campo harmônico~~ ✅ (2026-06-28)
+- ~~Exemplos de músicas nas progressões~~ ✅ (2026-06-28)
+- ~~Novas lições: SubV, Acordes Sus, Campos Combinados~~ ✅ (2026-06-28)
+- ~~Quiz expandido: funções, tensões, SubV~~ ✅ (2026-06-28)
+- ~~Ciclo de Quintas interativo~~ ✅ (2026-06-28)
+- ~~Arpejos vinculados ao campo harmônico~~ ✅ (2026-06-28)
+- ~~Modos gregos com tablatura (Dórico + Mixolídio)~~ ✅ (2026-06-28)
 
 ### Funcionalidades pendentes
 - **Painel Admin** (CRUD de cifras e usuários)
@@ -548,7 +563,6 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 - **Campo `progressao`** auto-extraído do conteúdo das cifras
 - **HookTheory Hookpad-style** — editor interativo de progressões adaptado ao cavaquinho
 - **Reativar login** após avaliação da comunidade
-- **Novos módulos na Escola** — aguardando conteúdo dos cursos Hotmart (Layon Bacelar)
 - **Ampliar base de samples** — mais velocidades, mais oitavas para melhor cobertura
 - **Cifras modelo CifraClub** — acordes posicionados sobre sílabas específicas (requer reestruturação do conteudo)
 - **Importação de partituras** — importar MusicXML/ABC para visualização no VexFlow
@@ -579,6 +593,14 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | 2026-06-26 | Fix INLINE_CHORD_RE para acordes com + (G7+, A7+), tooltip com parser robusto |
 | 2026-06-27 | Revisão profunda: 0 cifras encavaladas, 0 notas perdidas, 21 símbolos soltos limpos |
 | 2026-06-27 | Fix tab mista com acordes, partitura na Formação de Acordes |
+| 2026-06-27 | Módulo Partituras: ensino (6 lições + quiz), visualizador ABC, gerador cifra→partitura, exercícios |
+| 2026-06-27 | Fix artistas duplicados (7 variantes) e acordes 7+ (Fmaj7, não aug) |
+| 2026-06-28 | Melhorias de conteúdo (3 sprints): tensões/funções no campo, músicas nas progressões |
+| 2026-06-28 | +3 lições: har-7 Dominante Substituto, har-8 Campos Combinados, ac-7 Sus e Alterados |
+| 2026-06-28 | Quiz expandido: +3 tipos (função harmônica, tensões, SubV). Total: 10 tipos |
+| 2026-06-28 | Ciclo de Quintas interativo (SVG, nova tab em /progressoes) |
+| 2026-06-28 | Arpejos do Campo Harmônico (7 graus com play em /arpejos) |
+| 2026-06-28 | Modos gregos expandidos: tablatura Dórico + Mixolídio no cavaquinho |
 
 ---
 
