@@ -7,10 +7,12 @@ const TUNING_MIDI = [62, 67, 71, 74] // D4, G4, B4, D5
 const TUNING_LABELS = ["D", "G", "B", "D"]
 const MAX_FRET = 12
 
-function noteToMidi(note: string, octave: number): number {
-  const idx = CHROMATIC.indexOf(note)
-  if (idx === -1) return 0
-  return (octave + 1) * 12 + idx
+const TO_SHARP: Record<string, string> = {
+  Bb: "A#", Eb: "D#", Ab: "G#", Db: "C#", Gb: "F#", Cb: "B", Fb: "E",
+}
+
+function toSharp(note: string): string {
+  return TO_SHARP[note] ?? note
 }
 
 function midiToNote(midi: number): string {
@@ -22,16 +24,87 @@ interface Voicing {
   fingers: string[]
 }
 
+// Identifies root chromatic index and chord quality from note array
+function inferQuality(notes: string[]): { rootIdx: number; quality: string } {
+  const idxs = notes.map((n) => CHROMATIC.indexOf(toSharp(n)))
+  if (idxs.some((i) => i === -1)) return { rootIdx: -1, quality: "unknown" }
+  const root = idxs[0]
+  const intervals = idxs.map((i) => (i - root + 12) % 12).sort((a, b) => a - b)
+  const key = intervals.join(",")
+  const MAP: Record<string, string> = {
+    "0,4,7": "major",
+    "0,3,7": "minor",
+    "0,4,7,10": "dom7",
+    "0,4,7,11": "maj7",
+    "0,3,7,10": "min7",
+    "0,3,6": "dim",
+    "0,3,6,10": "halfdim",
+    "0,4,8": "aug",
+    "0,5,7": "sus4",
+    "0,2,7": "sus2",
+  }
+  return { rootIdx: root, quality: MAP[key] ?? "unknown" }
+}
+
+// Returns fret numbers [D4, G4, B4, D5] derived from standard Brazilian cavaquinho shape families.
+// Shapes derived from "Dicionário básico de acordes para cavaquinho" (Betto Correa).
+//
+// Major families (tuning open: D=2, G=7, B=11, D=2):
+//   C-shape (R 0-3): 3rd–5th–root–3rd  | formula[(R+2)%12, R%12, (R+1)%12, (R+2)%12]
+//   E-shape (R 4-8): root–3rd–5th–root  | formula[(R-2)%12, (R-3)%12, (R-4)%12, (R-2)%12]
+//   Barre  (R 9-11): all strings same   | b=(R+5)%12
+//
+// Minor families:
+//   Cm-shape (R 0-3): m3rd–5th–root–m3rd | [(R+1)%12, R%12, (R+1)%12, (R+1)%12]
+//   Em-shape (R 4-8): root–m3rd–5th–root | [(R-2)%12, (R-4)%12, (R-4)%12, (R-2)%12]
+//   Am-shape (R 9-11): 5th–root–m3rd–5th | [(R+5)%12, (R+5)%12, (R+4)%12, (R+5)%12]
+//
+// Dom7 families (b7 replaces one voice):
+//   C7-shape (R 0-3): 3rd–b7–root–3rd   | [(R+2)%12, (R+3)%12, (R+1)%12, (R+2)%12]
+//   E7-shape (R 4-8): root–3rd–5th–b7   | [(R-2)%12, (R-3)%12, (R-4)%12, (R-4)%12]
+//   A7-shape (R 9-11): b7–root–3rd–5th  | [(R+8)%12, (R+5)%12, (R+5)%12, (R+5)%12]
+function getFormulaFrets(rootIdx: number, quality: string): (number | null)[] | null {
+  const R = rootIdx
+
+  if (quality === "major") {
+    if (R <= 3) return [(R + 2) % 12, R % 12, (R + 1) % 12, (R + 2) % 12]
+    if (R <= 8) return [(R - 2 + 12) % 12, (R - 3 + 12) % 12, (R - 4 + 12) % 12, (R - 2 + 12) % 12]
+    const b = (R + 5) % 12
+    return [b, b, b, b]
+  }
+
+  if (quality === "minor") {
+    if (R <= 3) return [(R + 1) % 12, R % 12, (R + 1) % 12, (R + 1) % 12]
+    if (R <= 8) return [(R - 2 + 12) % 12, (R - 4 + 12) % 12, (R - 4 + 12) % 12, (R - 2 + 12) % 12]
+    return [(R + 5) % 12, (R + 5) % 12, (R + 4) % 12, (R + 5) % 12]
+  }
+
+  if (quality === "dom7") {
+    if (R <= 3) return [(R + 2) % 12, (R + 3) % 12, (R + 1) % 12, (R + 2) % 12]
+    if (R <= 8) return [(R - 2 + 12) % 12, (R - 3 + 12) % 12, (R - 4 + 12) % 12, (R - 4 + 12) % 12]
+    return [(R + 8) % 12, (R + 5) % 12, (R + 5) % 12, (R + 5) % 12]
+  }
+
+  return null
+}
+
+function makeVoicing(frets: (number | null)[]): Voicing {
+  const fingers = frets.map((f, s) =>
+    f !== null ? midiToNote(TUNING_MIDI[s] + (f as number)) : "X"
+  )
+  return { frets, fingers }
+}
+
+// Greedy algorithm fallback for chord types without a formula
 function findVoicing(chordNotes: string[], startFret: number): Voicing {
-  const noteSet = new Set(chordNotes.map((n) => CHROMATIC.indexOf(n)))
+  const noteSet = new Set(chordNotes.map((n) => CHROMATIC.indexOf(toSharp(n))))
   const frets: (number | null)[] = []
   const covered = new Set<number>()
 
   for (let s = 0; s < 4; s++) {
     const openMidi = TUNING_MIDI[s]
-
-    // Coleta candidatos no range (corda solta ou entre startFret e startFret+4)
     const candidates: Array<{ fret: number; noteIdx: number; dist: number }> = []
+
     for (let f = 0; f <= MAX_FRET; f++) {
       const noteIdx = (openMidi + f) % 12
       if (!noteSet.has(noteIdx)) continue
@@ -40,7 +113,6 @@ function findVoicing(chordNotes: string[], startFret: number): Voicing {
       candidates.push({ fret: f, noteIdx, dist: Math.abs(f - startFret) })
     }
 
-    // Fallback: qualquer traste se não houver no range
     if (candidates.length === 0) {
       for (let f = 0; f <= MAX_FRET; f++) {
         const noteIdx = (openMidi + f) % 12
@@ -52,7 +124,6 @@ function findVoicing(chordNotes: string[], startFret: number): Voicing {
     }
 
     if (candidates.length > 0) {
-      // Prefere notas ainda não cobertas; empate decide por distância
       candidates.sort((a, b) => {
         const aCovered = covered.has(a.noteIdx) ? 1 : 0
         const bCovered = covered.has(b.noteIdx) ? 1 : 0
@@ -67,17 +138,17 @@ function findVoicing(chordNotes: string[], startFret: number): Voicing {
     }
   }
 
-  const fingers = frets.map((f, s) =>
-    f !== null ? midiToNote(TUNING_MIDI[s] + (f as number)) : "X"
-  )
-  return { frets, fingers }
+  return makeVoicing(frets)
 }
 
 function getThreeVoicings(chordNotes: string[]): Voicing[] {
-  const v1 = findVoicing(chordNotes, 0)
-  const v2 = findVoicing(chordNotes, 4)
-  const v3 = findVoicing(chordNotes, 7)
-  return [v1, v2, v3]
+  const { rootIdx, quality } = inferQuality(chordNotes)
+  const formulaFrets = getFormulaFrets(rootIdx, quality)
+
+  const v0 = formulaFrets ? makeVoicing(formulaFrets) : findVoicing(chordNotes, 2)
+  const v1 = findVoicing(chordNotes, 4)
+  const v2 = findVoicing(chordNotes, 7)
+  return [v0, v1, v2]
 }
 
 interface BracoCavaquinhoProps {
