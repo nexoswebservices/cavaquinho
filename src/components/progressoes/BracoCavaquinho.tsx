@@ -165,9 +165,10 @@ export function BracoCavaquinho({ chordNotes, voicingIndex }: BracoCavaquinhoPro
   const minFret = usedFrets.length > 0 ? Math.min(...usedFrets) : 1
   const maxFret = usedFrets.length > 0 ? Math.max(...usedFrets) : 4
 
+  const hasOpenStrings = frets.some(f => f === 0)
   let displayStart = 1
   let showNut = true
-  if (minFret > 4) {
+  if (!hasOpenStrings && minFret > 1) {
     displayStart = minFret
     showNut = false
   }
