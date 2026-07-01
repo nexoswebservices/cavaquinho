@@ -86,6 +86,11 @@ function getFormulaFrets(rootIdx: number, quality: string): (number | null)[] | 
     return [(R + 8) % 12, (R + 5) % 12, (R + 5) % 12, (R + 5) % 12]
   }
 
+  if (quality === "maj7") {
+    // root on D4, 5th on G4, maj7 on B4, 3rd on D5
+    return [(R - 2 + 12) % 12, R % 12, R % 12, (R + 2) % 12]
+  }
+
   return null
 }
 
@@ -147,7 +152,10 @@ function getThreeVoicings(chordNotes: string[]): Voicing[] {
   const formulaFrets = getFormulaFrets(rootIdx, quality)
 
   const v0 = formulaFrets ? makeVoicing(formulaFrets) : findVoicing(chordNotes, 2)
-  const v1 = findVoicing(chordNotes, 4)
+  // E7 second shape from Betto Correa PDF: [2,1,3,2] = E,G#,D,E (root,3rd,b7,root)
+  const v1 = (rootIdx === 4 && quality === "dom7")
+    ? makeVoicing([2, 1, 3, 2])
+    : findVoicing(chordNotes, 4)
   const v2 = findVoicing(chordNotes, 7)
   return [v0, v1, v2]
 }
