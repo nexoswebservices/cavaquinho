@@ -81,6 +81,7 @@ function getFormulaFrets(rootIdx: number, quality: string): (number | null)[] | 
 
   if (quality === "dom7") {
     if (R <= 3) return [(R + 2) % 12, (R + 3) % 12, (R + 1) % 12, (R + 2) % 12]
+    if (R === 4) return [2, 1, 0, 0]  // E7: shape aberto com D e B soltos
     if (R <= 8) return [(R - 4 + 12) % 12, (R - 3 + 12) % 12, (R - 4 + 12) % 12, (R - 2 + 12) % 12]
     return [(R + 8) % 12, (R + 5) % 12, (R + 5) % 12, (R + 5) % 12]
   }
