@@ -25,42 +25,51 @@ interface Voicing {
 function findVoicing(chordNotes: string[], startFret: number): Voicing {
   const noteSet = new Set(chordNotes.map((n) => CHROMATIC.indexOf(n)))
   const frets: (number | null)[] = []
-  const fingers: string[] = []
+  const covered = new Set<number>()
 
   for (let s = 0; s < 4; s++) {
     const openMidi = TUNING_MIDI[s]
-    let bestFret: number | null = null
-    let bestDist = Infinity
 
+    // Coleta candidatos no range (corda solta ou entre startFret e startFret+4)
+    const candidates: Array<{ fret: number; noteIdx: number; dist: number }> = []
     for (let f = 0; f <= MAX_FRET; f++) {
-      const noteMidi = openMidi + f
-      const noteIdx = noteMidi % 12
-      if (noteSet.has(noteIdx)) {
-        const dist = Math.abs(f - startFret)
-        if (f === 0 || (f >= startFret && f <= startFret + 4)) {
-          if (dist < bestDist || bestFret === null) {
-            bestFret = f
-            bestDist = dist
-          }
-        }
-      }
+      const noteIdx = (openMidi + f) % 12
+      if (!noteSet.has(noteIdx)) continue
+      const inRange = f === 0 || (f >= startFret && f <= startFret + 4)
+      if (!inRange) continue
+      candidates.push({ fret: f, noteIdx, dist: Math.abs(f - startFret) })
     }
 
-    if (bestFret === null) {
+    // Fallback: qualquer traste se não houver no range
+    if (candidates.length === 0) {
       for (let f = 0; f <= MAX_FRET; f++) {
-        const noteMidi = openMidi + f
-        const noteIdx = noteMidi % 12
+        const noteIdx = (openMidi + f) % 12
         if (noteSet.has(noteIdx)) {
-          bestFret = f
+          candidates.push({ fret: f, noteIdx, dist: Math.abs(f - startFret) })
           break
         }
       }
     }
 
-    frets.push(bestFret)
-    fingers.push(bestFret !== null ? midiToNote(openMidi + bestFret) : "X")
+    if (candidates.length > 0) {
+      // Prefere notas ainda não cobertas; empate decide por distância
+      candidates.sort((a, b) => {
+        const aCovered = covered.has(a.noteIdx) ? 1 : 0
+        const bCovered = covered.has(b.noteIdx) ? 1 : 0
+        if (aCovered !== bCovered) return aCovered - bCovered
+        return a.dist - b.dist
+      })
+      const best = candidates[0]
+      frets.push(best.fret)
+      covered.add(best.noteIdx)
+    } else {
+      frets.push(null)
+    }
   }
 
+  const fingers = frets.map((f, s) =>
+    f !== null ? midiToNote(TUNING_MIDI[s] + (f as number)) : "X"
+  )
   return { frets, fingers }
 }
 
