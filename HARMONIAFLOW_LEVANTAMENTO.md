@@ -4,13 +4,13 @@
 **App reconstruído:** https://cavaquinho.nexoswebservices.com  
 **Repositório local:** `c:\Users\renat\Downloads\Hamonico`  
 **Data do levantamento inicial:** 2026-06-09  
-**Última atualização:** 2026-06-28
+**Última atualização:** 2026-07-01
 
 ---
 
 ## 1. Status Geral
 
-**✅ 14 MÓDULOS LIVE — ÁUDIO, PARTITURA, ARPEJOS, IMPROVISOS, CIFRAS, PARTITURAS, CONTEÚDO EXPANDIDO**
+**✅ 14 MÓDULOS LIVE — ÁUDIO, PARTITURA, ARPEJOS, IMPROVISOS, CIFRAS, PARTITURAS, CONTEÚDO EXPANDIDO + PROGRESSÕES AVANÇADAS**
 
 | Fase | Feature | Status |
 |---|---|---|
@@ -27,7 +27,7 @@
 | 11 | Improvisos | ✅ Live (12 escalas, 8 frases, backing tracks, braço inteiro) |
 | 12 | Cifras Interativas | ✅ Live (transposição, acordes clicáveis, auto-scroll, play tab) |
 | 13 | Partituras | ✅ Live (ensino, visualizador ABC, gerador cifra→partitura, exercícios) |
-| 14 | Conteúdo Expandido | ✅ Live (tensões, funções, SubV, acordes sus, campos combinados, ciclo de quintas) |
+| 14 | Conteúdo Expandido | ✅ Live (tensões, funções, SubV, acordes sus, campos combinados, ciclo de quintas, menores harm/mel, +4 progressões avançadas) |
 
 **Modo atual:** Acesso público read-only (login desativado para avaliação da comunidade)
 
@@ -248,7 +248,7 @@ Hamonico/
 │   │       └── QuizGame.tsx
 │   ├── lib/
 │   │   ├── auth.ts, db.ts
-│   │   ├── escola-content.ts                 ← 24 lições (cavaquinho)
+│   │   ├── escola-content.ts                 ← 28 lições (cavaquinho)
 │   │   ├── markdown.ts, teoria.ts, quiz.ts
 │   │   ├── transpose.ts                      ← Transposição de acordes (preserva espaçamento)
 │   │   ├── sampler.ts                        ← Engine Web Audio API (playNote, playChord, playArpejo, playBackingTrack)
@@ -276,8 +276,8 @@ Hamonico/
 - APIs mantêm 401 para requests sem session
 
 ### 6.2 Escola de Música
-- **4 módulos, 26 lições** de teoria musical para **cavaquinho**/samba
-- Módulos: Escalas (6), Acordes (7, +ac-7 Sus/Alterados), Cadências (5), Harmonia (8, +SubV, +Campos Combinados)
+- **4 módulos, 28 lições** de teoria musical para **cavaquinho**/samba
+- Módulos: Escalas (6), Acordes (7, +ac-7 Sus/Alterados), Cadências (5), Harmonia (10, +SubV, +Campos Combinados, +har-2b Menor Harmônico, +har-2c Menor Melódico)
 - Tablaturas de 4 cordas (D-G-B-D) — sem referências a violão
 - Sub-navegação: Lições | Quiz | Meu Progresso via `EscolaSubNav`
 - **Quiz com 10 tipos**: graus, cadências, campo, completar + funções harmônicas, tensões, dominante substituto
@@ -343,8 +343,8 @@ Unificação das antigas páginas `/biblioteca`, `/cadencias` e `/progressoes` e
 
 | Tab | Conteúdo |
 |-----|----------|
-| **Campo Harmônico** | 12 notas × maior/menor, 7 acordes com **função harmônica** (Tônica/Sub/Dom) e **tensões disponíveis** (9, 11, 13, etc.), 8 progressões comuns com **exemplos de músicas reais**, tabela de intervalos |
-| **Cadências** | 9 padrões de treino com exemplos de músicas (Garota de Ipanema, Trem das Onze, etc.), seletor de tonalidade, embaralhar, dicas |
+| **Campo Harmônico** | 12 notas × maior/menor, 7 acordes com **função harmônica** (Tônica/Sub/Dom) e **tensões disponíveis** (9, 11, 13, etc.), **12 progressões comuns** com exemplos de músicas reais (inclui Dom. Sec. E7, Samba com Empréstimo, Samba Completo, Sub. Trítono), tabela de intervalos |
+| **Cadências** | **13 padrões de treino** com exemplos de músicas, seletor de tonalidade, embaralhar, dicas (inclui progressões com dominantes secundários e SubV) |
 | **Sequências** | 5 sequências com nomes descritivos, cards com grau/acorde/notas formadoras, link para detalhe com músicas |
 | **Formação de Acordes** | 19 tipos × 12 notas, fórmula + notas + intervalos, 3 formas com braço SVG, **partitura VexFlow**, play com sampler |
 | **Ciclo de Quintas** | SVG interativo com 12 notas maiores + relativas menores, clique mostra campo harmônico com funções |
@@ -357,7 +357,7 @@ Unificação das antigas páginas `/biblioteca`, `/cadencias` e `/progressoes` e
 - **19 tipos de acorde:** Maior, Menor, Dim, Aug, 7, m7, maj7, dim7, m7(b5), Sus4, Sus2, 6, m6, 9, m9, 11, 13, Add9, Power(5)
 - **Cálculo dinâmico:** fórmula, notas e intervalos calculados em tempo real para qualquer raiz + tipo
 - **3 formas** com voicings diferentes no braço do cavaquinho
-- **Diagrama SVG do braço** (`BracoCavaquinho.tsx`): 4 cordas D-G-B-D, trastes, pontos com nome da nota, corda solta (O) / muda (X)
+- **Diagrama SVG do braço** (`BracoCavaquinho.tsx`): 4 cordas D-G-B-D, trastes, pontos com nome da nota, corda solta (O) / muda (X). **Voicings fórmula-based** derivados do "Dicionário básico de acordes" (Betto Correa) — 3 famílias major (C-shape, E-shape, barre), 3 minor (Cm, Em, Am), 3 dom7. Acorde D=\[4,2,3,4\], G=\[5,4,3,5\], etc.
 - **Sampler real** (`sampler.ts`): 17 samples WAV extraídos do pack Kitdepontos, Web Audio API, pitch-shift para cobertura cromática completa (notas faltantes C, D#, F cobertas via playbackRate ≤ 1 semitom)
 - **PlayButton** reutilizável: lazy loading do AudioContext, ícone com animação
 
@@ -436,7 +436,7 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 ### Navbar principal (7 links)
 | Link | Rota | Escopo |
 |---|---|---|
-| Escola | `/escola` | 26 lições em 4 módulos, Quiz (10 tipos), Meu Progresso |
+| Escola | `/escola` | 28 lições em 4 módulos, Quiz (10 tipos), Meu Progresso |
 | Cifras | `/cifras` | 576 cifras interativas com transposição, acordes clicáveis, play tab |
 | Progressões | `/progressoes` | Campo harmônico c/ tensões, cadências, sequências, formação, ciclo de quintas (6 tabs) |
 | Arpejos | `/arpejos` | 8 padrões + arpejos do campo harmônico, partitura, tablatura, play |
@@ -556,6 +556,10 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 - ~~Ciclo de Quintas interativo~~ ✅ (2026-06-28)
 - ~~Arpejos vinculados ao campo harmônico~~ ✅ (2026-06-28)
 - ~~Modos gregos com tablatura (Dórico + Mixolídio)~~ ✅ (2026-06-28)
+- ~~Diagramas de acordes corretos (BracoCavaquinho formula-based)~~ ✅ (2026-07-01)
+- ~~4 novas progressões avançadas (Dom. Sec. E7, Samba Empréstimo, Samba Completo, SubV)~~ ✅ (2026-07-01)
+- ~~har-2b: Campo Harmônico Menor Harmônico~~ ✅ (2026-07-01)
+- ~~har-2c: Campo Harmônico Menor Melódico~~ ✅ (2026-07-01)
 
 ### Funcionalidades pendentes
 - **Painel Admin** (CRUD de cifras e usuários)
@@ -601,6 +605,10 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | 2026-06-28 | Ciclo de Quintas interativo (SVG, nova tab em /progressoes) |
 | 2026-06-28 | Arpejos do Campo Harmônico (7 graus com play em /arpejos) |
 | 2026-06-28 | Modos gregos expandidos: tablatura Dórico + Mixolídio no cavaquinho |
+| 2026-07-01 | Fix diagramas de acordes: voicings fórmula-based derivados do Dicionário Betto Correa (C-shape, E-shape, barre, Cm, Em, Am, dom7) |
+| 2026-07-01 | +4 progressões avançadas: Dom. Sec. E7, Samba com Empréstimo, Samba Completo, Com Sub. Trítono (PADROES + PROGRESSOES_COMUNS) |
+| 2026-07-01 | buildExemplo extendido: índices -4 (V7/vi), -5 (V7/ii), -6 (SubV) para cálculo dinâmico por tonalidade |
+| 2026-07-01 | +2 lições Harmonia: har-2b (Menor Harmônico) e har-2c (Menor Melódico) — total 28 lições, Harmonia com 10 |
 
 ---
 
