@@ -30,6 +30,8 @@ type TabId = (typeof TABS)[number]["id"]
 
 const NOTAS_DISPLAY = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 const TO_NORM: Record<string, string> = { Eb: "D#", Ab: "G#", Bb: "A#" }
+const CHROM_SHARP = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+const ENHARMONIC_FLAT: Record<string, string> = { "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb" }
 
 // ── Cadências unificadas (merge /cadencias + /biblioteca) ──────────────
 
@@ -135,6 +137,46 @@ const PADROES: Padrao[] = [
     dica: "Ouça como cada acorde \"cai\" uma quinta até voltar ao I — é o ciclo completo.",
     musicas: ["Fly Me to the Moon — Frank Sinatra", "Autumn Leaves — Jazz Standard"],
   },
+  {
+    nome: "Dom. Secundário E7",
+    tipo: "Intermediário",
+    graus: [0, -4, 5, 4, 0],
+    modo: "major",
+    grausLabel: "I – V/vi – vi – V7 – I",
+    descricao: "O dominante secundário de vi cria tensão antes do relativo menor. Muito usado no pagode carioca.",
+    dica: "Em C: C – E7 – Am – G7 – C. O E7 'puxa' o Am com força máxima.",
+    musicas: ["Deixa a Vida Me Levar — Zeca Pagodinho", "Tarde em Itapoã — Toquinho & Vinícius"],
+  },
+  {
+    nome: "Samba com Empréstimo",
+    tipo: "Intermediário",
+    graus: [0, 3, -3, 0],
+    modo: "major",
+    grausLabel: "I – IV – iv – I",
+    descricao: "O iv menor emprestado do campo paralelo gera o efeito 'aperto no coração' do samba.",
+    dica: "Em C: C – F – Fm – C. O único semitom que muda (A → Ab) é o que faz toda a magia.",
+    musicas: ["As Rosas Não Falam — Cartola", "Preciso Me Encontrar — Cartola"],
+  },
+  {
+    nome: "Samba Completo",
+    tipo: "Avançado",
+    graus: [0, -4, 5, -5, 1, 4, 0],
+    modo: "major",
+    grausLabel: "I – V/vi – vi – V/ii – ii – V7 – I",
+    descricao: "A progressão completa do samba: dois dominantes secundários em cascata antes do ii-V-I.",
+    dica: "Em C: C–E7–Am–A7–Dm–G7–C. Cada acorde 'puxa' o próximo em cadeia.",
+    musicas: ["Alguém Me Avisou — Alcione", "Faz Parte do Meu Show — Tim Maia"],
+  },
+  {
+    nome: "Com Sub. Trítono",
+    tipo: "Avançado",
+    graus: [1, -6, 0],
+    modo: "major",
+    grausLabel: "ii – SubV – I",
+    descricao: "O substituto tritônico (SubV) fica exatamente meio tom acima do I, criando descida cromática.",
+    dica: "Em C: Dm – Db7 – C. Ouça o baixo descer: Ré → Réb → Dó.",
+    musicas: ["Garota de Ipanema — Tom Jobim", "Desafinado — Tom Jobim"],
+  },
 ]
 
 const PADROES_ESPECIAIS: Record<string, (nota: string, campo: ReturnType<typeof campoHarmonico>) => string[]> = {
@@ -154,6 +196,22 @@ const PADROES_ESPECIAIS: Record<string, (nota: string, campo: ReturnType<typeof 
     }
     const bVII = (bVII_MAP[campo[0].root] ?? "?") + "7"
     return [I, bVII, IV, I]
+  },
+  "Dom. Secundário E7": (_nota, campo) => {
+    const R = CHROM_SHARP.indexOf(campo[0].root)
+    return [campo[0].example, CHROM_SHARP[(R + 4) % 12] + "7", campo[5].example, campo[4].example, campo[0].example]
+  },
+  "Samba com Empréstimo": (_nota, campo) => {
+    return [campo[0].example, campo[3].example, campo[3].root + "m", campo[0].example]
+  },
+  "Samba Completo": (_nota, campo) => {
+    const R = CHROM_SHARP.indexOf(campo[0].root)
+    return [campo[0].example, CHROM_SHARP[(R + 4) % 12] + "7", campo[5].example, CHROM_SHARP[(R + 9) % 12] + "7", campo[1].example, campo[4].example, campo[0].example]
+  },
+  "Com Sub. Trítono": (_nota, campo) => {
+    const R = CHROM_SHARP.indexOf(campo[0].root)
+    const n = CHROM_SHARP[(R + 1) % 12]
+    return [campo[1].example, (ENHARMONIC_FLAT[n] ?? n) + "7", campo[0].example]
   },
 }
 
@@ -177,6 +235,10 @@ const PROGRESSOES_COMUNS = [
   { nome: "I – bVII – IV – I", tipo: "Modal", graus: "I – bVII – IV – I", indices: [0, -1, 3, 0], descricao: "Empréstimo modal, muito usado em samba-rock.", musicas: ["País Tropical — Jorge Ben Jor"] },
   { nome: "Ciclo de Quintas", tipo: "Avançada", graus: "I – IV – viiº – iii – vi – ii – V – I", indices: [0, 3, 6, 2, 5, 1, 4, 0], descricao: "Sequência que percorre todas as quintas do campo harmônico.", musicas: ["Fly Me to the Moon — Jazz Standard"] },
   { nome: "I – I7 – IV – IVm", tipo: "Blues/Samba", graus: "I – I7 – IV – IVm – I", indices: [0, -2, 3, -3, 0], descricao: "Tônica dominante seguida de movimento IV – IVm muito usado no pagode.", musicas: ["As Rosas Não Falam — Cartola"] },
+  { nome: "Dom. Secundário E7", tipo: "Intermediário", graus: "I – V/vi – vi – V7 – I", indices: [0, -4, 5, 4, 0], descricao: "Dominante secundário de vi: tensão dramática antes do relativo menor.", musicas: ["Deixa a Vida Me Levar — Zeca Pagodinho"] },
+  { nome: "Samba com Empréstimo", tipo: "Intermediário", graus: "I – IV – iv – I", indices: [0, 3, -3, 0], descricao: "O iv menor emprestado do campo paralelo cria o 'aperto no coração'.", musicas: ["As Rosas Não Falam — Cartola"] },
+  { nome: "Samba Completo", tipo: "Avançado", graus: "I – V/vi – vi – V/ii – ii – V7 – I", indices: [0, -4, 5, -5, 1, 4, 0], descricao: "Dois dominantes secundários em cascata antes do ii-V-I. Base do samba clássico.", musicas: ["Alguém Me Avisou — Alcione"] },
+  { nome: "Com Sub. Trítono", tipo: "Avançado", graus: "ii – SubV – I", indices: [1, -6, 0], descricao: "Substituto tritônico: meio tom cromático antes do I. Essencial no jazz e bossa nova.", musicas: ["Garota de Ipanema — Tom Jobim"] },
 ]
 
 function buildExemplo(
@@ -194,6 +256,9 @@ function buildExemplo(
     if (idx === -1 && minorCampo) return minorCampo[6].example
     if (idx === -2) return campo[0].root + "7"
     if (idx === -3) return campo[3].root + "m"
+    if (idx === -4) { const R = CHROM_SHARP.indexOf(campo[0].root); return CHROM_SHARP[(R + 4) % 12] + "7" }
+    if (idx === -5) { const R = CHROM_SHARP.indexOf(campo[0].root); return CHROM_SHARP[(R + 9) % 12] + "7" }
+    if (idx === -6) { const R = CHROM_SHARP.indexOf(campo[0].root); const n = CHROM_SHARP[(R + 1) % 12]; return (ENHARMONIC_FLAT[n] ?? n) + "7" }
     return campo[idx].example
   })
 

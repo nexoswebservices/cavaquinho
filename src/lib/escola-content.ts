@@ -1159,6 +1159,130 @@ Esse tipo de mistura é o que dá a riqueza harmônica ao samba-canção e à MP
         ],
       },
       {
+        id: "har-2b",
+        title: "Campo Harmônico Menor Harmônico",
+        description: "A escala menor harmônica e seus acordes especiais, incluindo o V7 dominante real.",
+        duration: "12 min",
+        content: `
+## Campo Harmônico Menor Harmônico
+
+A escala menor **harmônica** eleva o 7° grau (G → G# em Am), criando o acorde V7 com tensão real de dominante.
+
+### Por que "Harmônica"?
+
+A escala menor natural tem um **V7 fraco** (Em7 em vez de E7). Para resolver com tensão, músicos elevaram o 7° grau:
+
+\`\`\`
+Menor natural:   A B C D E F  G  (→ Em7 — sem tensão)
+Menor harmônica: A B C D E F  G# (→ E7  — tensão máxima!)
+\`\`\`
+
+### Campo de A Menor Harmônico (tétrades)
+
+| Grau | Acorde | Tipo | Função |
+|------|--------|------|--------|
+| i    | Am(maj7) | menor + 7ª maior | Tônica |
+| ii°  | Bø | meio-diminuto | Subdominante |
+| III+ | C+(maj7) | aumentado + 7ª maior | Tônica subs. |
+| iv   | Dm7 | menor 7 | Subdominante |
+| **V** | **E7** | **dominante 7 ⭐** | **Dominante** |
+| VI   | Fmaj7 | maior 7 | Subdominante |
+| vii° | G#dim7 | diminuto | Dominante subs. |
+
+### O Acorde Am(maj7)
+
+O i com 7ª maior é característico desta escala:
+- Am(maj7) = A C E G# (o G# vem da escala harmônica)
+- Som: misterioso, tenso, muito usado em trilhas e chorinho
+
+### Uso Prático
+
+Na música brasileira, raramente se usa o campo harmônico todo. O mais comum é pegar o **E7** e misturá-lo com o campo natural:
+
+\`\`\`
+Am → Dm → E7 → Am    (cadência autêntica menor)
+Am → F → G → E7 → Am (com empréstimo do maior)
+\`\`\`
+
+### O Tritono de E7
+
+E7 = E G# B D
+
+O trítono G#↔D cria a tensão que resolve para A e C em Am:
+- G# sobe para A (sensível)
+- D desce para C (7ª → 3ª do Am)
+        `,
+        tips: [
+          "Am(maj7) = A C E G# — som tenso e característico da menor harmônica",
+          "E7→Am é a cadência mais dramática do samba, tango e flamenco",
+          "Na prática: use o campo natural como base e troque Em7 por E7 quando quiser mais tensão",
+        ],
+        chords: ["Am", "E7", "Dm7", "Fmaj7"],
+      },
+      {
+        id: "har-2c",
+        title: "Campo Harmônico Menor Melódico",
+        description: "A escala menor melódica do jazz e bossa nova, com acordes distintos subindo e descendo.",
+        duration: "12 min",
+        content: `
+## Campo Harmônico Menor Melódico
+
+A escala menor **melódica** eleva tanto o 6° quanto o 7° grau ao subir, criando acordes exclusivos usados no jazz e na bossa nova.
+
+### A Escala
+
+\`\`\`
+Menor natural:  A B C D E F  G  (padrão)
+Menor melódica: A B C D E F# G# (subindo) → A G F E D C B (descendo = natural)
+\`\`\`
+
+Na prática moderna (jazz/bossa), usa-se a forma ascendente em todos os contextos.
+
+### Campo de A Menor Melódico (tétrades)
+
+| Grau | Acorde | Tipo | Destaque |
+|------|--------|------|---------|
+| i    | Am(maj7) | menor + 7ª maior | Tônica |
+| ii   | Bm7 | menor 7 | Suave (diferente do ø natural) |
+| III+ | C+(maj7) | aumentado + 7ª maior | Colorido |
+| IV   | D7 | **dominante 7** | Incomum no IV! |
+| V    | E7 | dominante 7 | Dominante |
+| vi°  | F#ø | meio-diminuto | Subdominante |
+| vii° | G#ø | meio-diminuto | Dominante |
+
+### O que é Especial?
+
+1. **ii vira Bm7** (não Bø): mais suave, facilita o ii-V-I menor
+2. **IV vira D7**: inusitado — o IV como dominante cria tensão sofisticada
+3. **Dois acordes meio-diminutos** (F#ø e G#ø) no topo da escala
+
+### Uso na Bossa Nova e Samba
+
+Tom Jobim e outros compositores usam o campo melódico para criar acordes "coloridos":
+
+\`\`\`
+Am(maj7) → Bm7 → E7 → Am    (ii-V-I melódico)
+Am → D7 → Bm7 → E7 → Am    (IV dominante como tensão extra)
+\`\`\`
+
+### Comparação dos Três Campos
+
+| Grau | Natural | Harmônico | Melódico |
+|------|---------|-----------|---------|
+| i    | Am7     | Am(maj7)  | Am(maj7) |
+| ii   | Bø      | Bø        | Bm7 ✨  |
+| IV   | Dm7     | Dm7       | D7 ✨   |
+| V    | Em7     | **E7** ✨ | E7      |
+| vi   | Fmaj7   | Fmaj7     | F#ø ✨  |
+        `,
+        tips: [
+          "Melódico = harmônico + 6° grau elevado (F# além de G#)",
+          "O ii vira Bm7 (não Bø): facilita o ii-V-I e soa mais suave",
+          "D7 como IV é a 'assinatura' do campo melódico — som muito bossa nova",
+        ],
+        chords: ["Am", "Bm7", "D7", "E7"],
+      },
+      {
         id: "har-3",
         title: "Empréstimo Modal",
         description: "Pegue acordes de outros modos para adicionar cor e tensão à harmonia.",
