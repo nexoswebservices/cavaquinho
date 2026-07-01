@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { PlayButton } from "@/components/ui/PlayButton"
-import { BracoCavaquinho } from "@/components/progressoes/BracoCavaquinho"
+import { BracoCavaquinho, getVoicingNotes } from "@/components/progressoes/BracoCavaquinho"
 import { PartituraView } from "@/components/partitura/PartituraView"
 import type { NoteData } from "@/components/partitura/PartituraView"
 
@@ -60,7 +60,6 @@ const CHORD_TYPES: ChordType[] = [
 
 const CATEGORIES = ["Tríades", "Tétrades", "Extensões", "Outros"]
 
-const OCTAVES = [3, 4, 5]
 const OCTAVE_LABELS = ["Forma 1", "Forma 2", "Forma 3"]
 
 export function FormacaoAcordes() {
@@ -177,46 +176,45 @@ export function FormacaoAcordes() {
         })()}
 
         {/* 3 formas */}
-        <div className="space-y-3">
-          {OCTAVES.map((oct, oi) => {
-            const notesForPlay: [string, number][] = chordType.intervals.map((semitones) => {
-              const note = noteAtSemitone(rootSharp, semitones % 12)
-              const noteOctave = oct + Math.floor(semitones / 12)
-              return [note, noteOctave]
-            })
+        {(() => {
+          const chordNotesSharp = chordType.intervals.map((s) => noteAtSemitone(rootSharp, s % 12))
+          return (
+            <div className="space-y-3">
+              {[0, 1, 2].map((voicingIdx) => {
+                const voicingNotes = getVoicingNotes(chordNotesSharp, voicingIdx)
+                const notesForPlay: [string, number][] = voicingNotes
+                  .filter((n): n is { note: string; octave: number } => n !== null)
+                  .map(({ note, octave }) => [note, octave])
+                const displayNotes = voicingNotes
+                  .map((n) => (n === null ? null : `${displayNote(n.note, preferFlat)}${n.octave}`))
+                  .filter(Boolean) as string[]
 
-            const displayNotes = notesForPlay.map(([n, o]) => {
-              const dn = displayNote(n, preferFlat)
-              return `${dn}${o}`
-            })
-
-            // Chord notes in sharp notation for the fretboard
-            const chordNotesSharp = chordType.intervals.map((s) => noteAtSemitone(rootSharp, s % 12))
-
-            return (
-              <div
-                key={oct}
-                className="bg-[#0a0714] border border-white/5 rounded-xl p-4 flex items-center gap-4"
-              >
-                <BracoCavaquinho chordNotes={chordNotesSharp} voicingIndex={oi} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-slate-500 mb-2">{OCTAVE_LABELS[oi]}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {displayNotes.map((dn, i) => (
-                      <span
-                        key={i}
-                        className="bg-violet-500/15 border border-violet-400/30 text-violet-200 font-mono text-sm font-bold px-3 py-1 rounded-lg"
-                      >
-                        {dn}
-                      </span>
-                    ))}
+                return (
+                  <div
+                    key={voicingIdx}
+                    className="bg-[#0a0714] border border-white/5 rounded-xl p-4 flex items-center gap-4"
+                  >
+                    <BracoCavaquinho chordNotes={chordNotesSharp} voicingIndex={voicingIdx} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-slate-500 mb-2">{OCTAVE_LABELS[voicingIdx]}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {displayNotes.map((dn, i) => (
+                          <span
+                            key={i}
+                            className="bg-violet-500/15 border border-violet-400/30 text-violet-200 font-mono text-sm font-bold px-3 py-1 rounded-lg"
+                          >
+                            {dn}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <PlayButton notes={notesForPlay} size="md" label={`Tocar ${chordName} ${OCTAVE_LABELS[voicingIdx]}`} />
                   </div>
-                </div>
-                <PlayButton notes={notesForPlay} size="md" label={`Tocar ${chordName} ${OCTAVE_LABELS[oi]}`} />
-              </div>
-            )
-          })}
-        </div>
+                )
+              })}
+            </div>
+          )
+        })()}
       </section>
     </div>
   )

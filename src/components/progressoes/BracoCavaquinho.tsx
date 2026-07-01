@@ -151,6 +151,19 @@ function getThreeVoicings(chordNotes: string[]): Voicing[] {
   return [v0, v1, v2]
 }
 
+export function getVoicingNotes(
+  chordNotes: string[],
+  voicingIndex: number
+): Array<{ note: string; octave: number } | null> {
+  const voicings = getThreeVoicings(chordNotes)
+  const { frets } = voicings[voicingIndex] ?? voicings[0]
+  return frets.map((f, s) => {
+    if (f === null) return null
+    const midi = TUNING_MIDI[s] + f
+    return { note: CHROMATIC[midi % 12], octave: Math.floor(midi / 12) - 1 }
+  })
+}
+
 interface BracoCavaquinhoProps {
   chordNotes: string[]
   voicingIndex: number
