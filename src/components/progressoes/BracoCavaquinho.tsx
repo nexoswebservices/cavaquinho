@@ -48,21 +48,30 @@ function inferQuality(notes: string[]): { rootIdx: number; quality: string } {
 
 // Returns fret numbers [D4, G4, B4, D5] derived from standard Brazilian cavaquinho shape families.
 // Shapes derived from "Dicionário básico de acordes para cavaquinho" (Betto Correa).
+// Tuning open notes (chromatic index): D=2, G=7, B=11, D=2
+// Fret formula: fret = (targetNote - openNote + 12) % 12
 //
-// Major families (tuning open: D=2, G=7, B=11, D=2):
-//   C-shape (R 0-3): 3rd–5th–root–3rd  | formula[(R+2)%12, R%12, (R+1)%12, (R+2)%12]
-//   E-shape (R 4-8): root–3rd–5th–root  | formula[(R-2)%12, (R-3)%12, (R-4)%12, (R-2)%12]
-//   Barre  (R 9-11): all strings same   | b=(R+5)%12
+// Major:  C-shape(R≤3)  3rd–5th–root–3rd   | [(R+2)%12, R%12, (R+1)%12, (R+2)%12]
+//         E-shape(R4-8) root–3rd–5th–root   | [(R-2)%12, (R-3)%12, (R-4)%12, (R-2)%12]
+//         Barre (R9-11) all same fret        | b=(R+5)%12
 //
-// Minor families:
-//   Cm-shape (R 0-3): m3rd–5th–root–m3rd | [(R+1)%12, R%12, (R+1)%12, (R+1)%12]
-//   Em-shape (R 4-8): root–m3rd–5th–root | [(R-2)%12, (R-4)%12, (R-4)%12, (R-2)%12]
-//   Am-shape (R 9-11): 5th–root–m3rd–5th | [(R+5)%12, (R+5)%12, (R+4)%12, (R+5)%12]
+// Minor:  Cm(R≤3)  b3–5th–root–b3  | [(R+1)%12, R%12, (R+1)%12, (R+1)%12]
+//         Em(R4-8) root–b3–5th–root | [(R-2)%12, (R-4)%12, (R-4)%12, (R-2)%12]
+//         Am(R9-11)5th–root–b3–5th  | [(R+5)%12, (R+5)%12, (R+4)%12, (R+5)%12]
 //
-// Dom7 families (b7 replaces one voice):
-//   C7-shape (R 0-3): 3rd–b7–root–3rd   | [(R+2)%12, (R+3)%12, (R+1)%12, (R+2)%12]
-//   E7-shape (R 4-8): root–3rd–5th–b7   | [(R-2)%12, (R-3)%12, (R-4)%12, (R-4)%12]
-//   A7-shape (R 9-11): b7–root–3rd–5th  | [(R+8)%12, (R+5)%12, (R+5)%12, (R+5)%12]
+// Dom7:   C7(R≤3)  3rd–b7–root–3rd  | [(R+2)%12, (R+3)%12, (R+1)%12, (R+2)%12]
+//         E7(R4)   open shape [2,1,0,0]
+//         E7(R5-8) b7–3rd–5th–root  | [(R-4)%12, (R-3)%12, (R-4)%12, (R-2)%12]
+//         A7(R9-11)b7–root–3rd–5th  | [(R+8)%12, (R+5)%12, (R+5)%12, (R+5)%12]
+//
+// Maj7:   D-shape(all) root–5th–maj7–3rd | [(R-2)%12, R%12, R%12, (R+2)%12]
+//
+// Min7:   Cm7(R≤3)  b3–b7–root–b3    | [(R+1)%12, (R+3)%12, (R+1)%12, (R+1)%12]
+//         Em7(R4-8) root–b3–5th–b7   | [(R-2)%12, (R-4)%12, (R-4)%12, (R-4)%12]
+//         Am7(R9-11)5th–root–b3–b7   | [(R+5)%12, (R+5)%12, (R+4)%12, (R+8)%12]
+//
+// Dim:    C°(R0-4,9-11) b5–root–b3–b5 | [(R+4)%12, (R+5)%12, (R+4)%12, (R+4)%12]
+//         E°(R5-8)      root–b3–b5–root| [(R-2)%12, (R-4)%12, (R-5)%12, (R-2)%12]
 function getFormulaFrets(rootIdx: number, quality: string): (number | null)[] | null {
   const R = rootIdx
 
@@ -89,6 +98,24 @@ function getFormulaFrets(rootIdx: number, quality: string): (number | null)[] | 
   if (quality === "maj7") {
     // root on D4, 5th on G4, maj7 on B4, 3rd on D5
     return [(R - 2 + 12) % 12, R % 12, R % 12, (R + 2) % 12]
+  }
+
+  if (quality === "min7") {
+    // Cm7-shape: b3 on D4/D5, b7 on G4, root on B4
+    if (R <= 3) return [(R + 1) % 12, (R + 3) % 12, (R + 1) % 12, (R + 1) % 12]
+    // Em7-shape: root on D4, partial barre (b3/5th/b7) on G4/B4/D5
+    if (R <= 8) return [(R - 2 + 12) % 12, (R - 4 + 12) % 12, (R - 4 + 12) % 12, (R - 4 + 12) % 12]
+    // Am7-shape: 5th/root on D4/G4, b3 on B4, b7 on D5
+    return [(R + 5) % 12, (R + 5) % 12, (R + 4) % 12, (R + 8) % 12]
+  }
+
+  if (quality === "dim") {
+    // E°-shape (R 5-8): root on D4/D5, b3 on G4, b5 on B4
+    if (R >= 5 && R <= 8) {
+      return [(R - 2 + 12) % 12, (R - 4 + 12) % 12, (R - 5 + 12) % 12, (R - 2 + 12) % 12]
+    }
+    // C°-shape (all other R): b5 on D4/D5, root on G4, b3 on B4
+    return [(R + 4) % 12, (R + 5) % 12, (R + 4) % 12, (R + 4) % 12]
   }
 
   return null
