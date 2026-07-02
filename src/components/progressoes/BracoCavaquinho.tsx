@@ -185,9 +185,15 @@ function getThreeVoicings(chordNotes: string[]): Voicing[] {
 
   let v1: Voicing
   if (rootIdx === 4 && quality === "dom7") {
-    v1 = makeVoicing([2, 1, 3, 2])   // E7 2ª forma: E,G#,D,E
+    v1 = makeVoicing([2, 1, 3, 2])   // E7 2ª forma (Betto Correa)
+  } else if (rootIdx === 0 && quality === "min7") {
+    v1 = makeVoicing([5, 5, 4, 5])   // Cm7 2ª forma (Betto Correa)
+  } else if (rootIdx === 2 && quality === "min7") {
+    v1 = makeVoicing([3, 5, 3, 7])   // Dm7 2ª forma (Betto Correa)
   } else if (rootIdx === 4 && quality === "min7") {
-    v1 = makeVoicing([5, 7, 5, 9])   // Em7 2ª forma: G,D,E,B (Betto Correa)
+    v1 = makeVoicing([5, 7, 5, 9])   // Em7 2ª forma (Betto Correa)
+  } else if (rootIdx === 7 && quality === "min7") {
+    v1 = makeVoicing([5, 3, 6, 7])   // Gm7 2ª forma (Betto Correa)
   } else if (rootIdx === 9 && quality === "min7") {
     v1 = makeVoicing([7, 5, 8, 9])   // Am7 2ª forma (Betto Correa)
   } else {
