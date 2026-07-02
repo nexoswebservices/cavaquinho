@@ -66,12 +66,14 @@ function inferQuality(notes: string[]): { rootIdx: number; quality: string } {
 //
 // Maj7:   D-shape(all) root–5th–maj7–3rd | [(R-2)%12, R%12, R%12, (R+2)%12]
 //
-// Min7:   Cm7(R≤3)  b3–b7–root–b3    | [(R+1)%12, (R+3)%12, (R+1)%12, (R+1)%12]
-//         Em7(R4-8) root–b3–5th–b7   | [(R-2)%12, (R-4)%12, (R-4)%12, (R-4)%12]
-//         Am7(R9-11)5th–root–b3–b7   | [(R+5)%12, (R+5)%12, (R+4)%12, (R+8)%12]
+// Min7:   Cm7(R=0) hard-coded [5,3,1,5]  (5th–b7–root–5th)
+//         Dm7(R=2) hard-coded [0,2,1,3]  (root open–5th–b7–b3)
+//         Dbm7/Ebm7(R1,3) 5th–b7–root–5th | [(R+5)%12,(R+3)%12,(R+1)%12,(R+5)%12]
+//         Em7-shape(R4-11) root–b3–5th–b7 | [(R-2)%12,(R-4)%12,(R-4)%12,(R-4)%12]
 //
-// Dim:    C°(R0-4,9-11) b5–root–b3–b5 | [(R+4)%12, (R+5)%12, (R+4)%12, (R+4)%12]
-//         E°(R5-8)      root–b3–b5–root| [(R-2)%12, (R-4)%12, (R-5)%12, (R-2)%12]
+// Dim:    C°(R0-4,8-11) b5–root–b3–b5 | [(R+4)%12, (R+5)%12, (R+4)%12, (R+4)%12]
+//         E°(R5-7)      root–b3–b5–root| [(R-2)%12, (R-4)%12, (R-5)%12, (R-2)%12]
+//         Ab°(R8) C°-shape → [0,1,0,0] (D4/B4/D5 open, G4 fret1)
 function getFormulaFrets(rootIdx: number, quality: string): (number | null)[] | null {
   const R = rootIdx
 
@@ -101,20 +103,21 @@ function getFormulaFrets(rootIdx: number, quality: string): (number | null)[] | 
   }
 
   if (quality === "min7") {
-    // Cm7-shape: b3 on D4/D5, b7 on G4, root on B4
-    if (R <= 3) return [(R + 1) % 12, (R + 3) % 12, (R + 1) % 12, (R + 1) % 12]
+    if (R === 0) return [5, 3, 1, 5]   // Cm7: 5th-b7-root-5th (Betto Correa)
+    if (R === 2) return [0, 2, 1, 3]   // Dm7: open root-5th-b7-b3 (Betto Correa)
+    // Dbm7/Ebm7: 5th-b7-root-5th (C-shape family)
+    if (R <= 3) return [(R + 5) % 12, (R + 3) % 12, (R + 1) % 12, (R + 5) % 12]
     // Em7-shape: root on D4, partial barre (b3/5th/b7) on G4/B4/D5
-    if (R <= 8) return [(R - 2 + 12) % 12, (R - 4 + 12) % 12, (R - 4 + 12) % 12, (R - 4 + 12) % 12]
-    // Am7-shape: 5th/root on D4/G4, b3 on B4, b7 on D5
-    return [(R + 5) % 12, (R + 5) % 12, (R + 4) % 12, (R + 8) % 12]
+    return [(R - 2 + 12) % 12, (R - 4 + 12) % 12, (R - 4 + 12) % 12, (R - 4 + 12) % 12]
   }
 
   if (quality === "dim") {
-    // E°-shape (R 5-8): root on D4/D5, b3 on G4, b5 on B4
-    if (R >= 5 && R <= 8) {
+    // E°-shape (R 5-7): root on D4/D5, b3 on G4, b5 on B4
+    if (R >= 5 && R <= 7) {
       return [(R - 2 + 12) % 12, (R - 4 + 12) % 12, (R - 5 + 12) % 12, (R - 2 + 12) % 12]
     }
-    // C°-shape (all other R): b5 on D4/D5, root on G4, b3 on B4
+    // C°-shape: b5 on D4/D5, root on G4, b3 on B4
+    // R=8 (Ab°) gives [0,1,0,0] (open D4/B4/D5, G4 fret 1) — very practical
     return [(R + 4) % 12, (R + 5) % 12, (R + 4) % 12, (R + 4) % 12]
   }
 
@@ -179,10 +182,18 @@ function getThreeVoicings(chordNotes: string[]): Voicing[] {
   const formulaFrets = getFormulaFrets(rootIdx, quality)
 
   const v0 = formulaFrets ? makeVoicing(formulaFrets) : findVoicing(chordNotes, 2)
-  // E7 second shape from Betto Correa PDF: [2,1,3,2] = E,G#,D,E (root,3rd,b7,root)
-  const v1 = (rootIdx === 4 && quality === "dom7")
-    ? makeVoicing([2, 1, 3, 2])
-    : findVoicing(chordNotes, 4)
+
+  let v1: Voicing
+  if (rootIdx === 4 && quality === "dom7") {
+    v1 = makeVoicing([2, 1, 3, 2])   // E7 2ª forma: E,G#,D,E
+  } else if (rootIdx === 4 && quality === "min7") {
+    v1 = makeVoicing([5, 7, 5, 9])   // Em7 2ª forma: G,D,E,B (Betto Correa)
+  } else if (rootIdx === 9 && quality === "min7") {
+    v1 = makeVoicing([7, 5, 8, 9])   // Am7 2ª forma (Betto Correa)
+  } else {
+    v1 = findVoicing(chordNotes, 4)
+  }
+
   const v2 = findVoicing(chordNotes, 7)
   return [v0, v1, v2]
 }
