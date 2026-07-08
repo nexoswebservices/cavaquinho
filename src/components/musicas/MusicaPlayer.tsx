@@ -3,7 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react"
 import { YoutubeEmbed } from "./YoutubeEmbed"
 import { PlayerControls } from "./PlayerControls"
-import { MedidaCard } from "./MedidaCard"
+import { PartituraCompleta } from "./PartituraCompleta"
 
 interface AcordeMedida {
   batida: number
@@ -38,7 +38,6 @@ interface MusicaPlayerProps {
 
 export function MusicaPlayer({ estudo, isSaved: initialSaved }: MusicaPlayerProps) {
   const ytPlayerRef = useRef<YT.Player | null>(null)
-  const medidaRefs = useRef<(HTMLDivElement | null)[]>([])
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const saveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -72,16 +71,7 @@ export function MusicaPlayer({ estudo, isSaved: initialSaved }: MusicaPlayerProp
     }
   }, [])
 
-  // Auto-scroll to active measure
-  useEffect(() => {
-    if (currentMeasure >= 0 && medidaRefs.current[currentMeasure]) {
-      medidaRefs.current[currentMeasure]?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      })
-    }
-  }, [currentMeasure])
+  // Scroll handled inside PartituraCompleta
 
   // Restart polling when introSecs changes
   useEffect(() => {
@@ -169,7 +159,7 @@ export function MusicaPlayer({ estudo, isSaved: initialSaved }: MusicaPlayerProp
         />
       </div>
 
-      {/* Measures scroll */}
+      {/* Partitura contínua */}
       <div>
         <p className="text-xs text-slate-500 uppercase tracking-wide mb-3">
           {medidas.length} medidas
@@ -177,22 +167,12 @@ export function MusicaPlayer({ estudo, isSaved: initialSaved }: MusicaPlayerProp
             <span className="ml-2 text-violet-400">· M{currentMeasure + 1}</span>
           )}
         </p>
-        <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
-          {medidas.map((m, i) => (
-            <div
-              key={m.numero}
-              ref={(el) => { medidaRefs.current[i] = el }}
-            >
-              <MedidaCard
-                numero={m.numero}
-                letra={m.letra}
-                acordes={m.acordes}
-                isActive={i === currentMeasure}
-                view={view}
-              />
-            </div>
-          ))}
-        </div>
+        <PartituraCompleta
+          medidas={medidas}
+          activeMeasure={currentMeasure}
+          view={view}
+          compasso={estudo.compasso}
+        />
       </div>
     </div>
   )
