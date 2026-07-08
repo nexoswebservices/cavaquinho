@@ -4,18 +4,18 @@
 **App reconstruído:** https://cavaquinho.nexoswebservices.com  
 **Repositório local:** `c:\Users\renat\Downloads\Hamonico`  
 **Data do levantamento inicial:** 2026-06-09  
-**Última atualização:** 2026-07-03
+**Última atualização:** 2026-07-08
 
 ---
 
 ## 1. Status Geral
 
-**✅ 14 MÓDULOS LIVE — ÁUDIO, PARTITURA, ARPEJOS, IMPROVISOS, CIFRAS, PARTITURAS, CONTEÚDO EXPANDIDO + PROGRESSÕES AVANÇADAS**
+**✅ 14 MÓDULOS LIVE — PLAYER INTERATIVO IA, ÁUDIO, PARTITURA, ARPEJOS, IMPROVISOS, PROGRESSÕES AVANÇADAS**
 
 | Fase | Feature | Status |
 |---|---|---|
-| 1 | Cifras + Favoritos + Repertórios | ✅ Live (576 cifras, 112 artistas, transposição, acordes clicáveis, play tab) |
-| 2 | Análise Harmônica | ✅ Live (+ fluxo cifra→análise→progressões) |
+| 1 | **Músicas (player AI)** | ✅ Live — YouTube URL → Claude Haiku gera tab → player sincronizado com vídeo |
+| 2 | Análise Harmônica | ✅ Live (+ fluxo análise→progressões) |
 | 3 | Progressões (unificada) | ✅ Live (campo harmônico c/ tensões + cadências + sequências + formação + ciclo de quintas) |
 | 4 | Treino de Cadências | ✅ Live (9 padrões c/ exemplos de músicas, integrado em /progressoes) |
 | 5 | Quiz | ✅ Live (10 tipos: graus, cadências, funções, tensões, SubV) |
@@ -25,7 +25,7 @@
 | 9 | Metrônomo + Afinador | ✅ Live (flutuante, acessível em todas as páginas) |
 | 10 | Arpejos | ✅ Live (8 padrões + arpejos do campo harmônico, partitura + tablatura) |
 | 11 | Improvisos | ✅ Live (12 escalas, 8 frases, backing tracks, braço inteiro) |
-| 12 | Cifras Interativas | ✅ Live (transposição, acordes clicáveis, auto-scroll, play tab) |
+| 12 | ~~Cifras Interativas~~ | 🗑️ **Removida** — substituída pelo player /musicas com geração AI |
 | 13 | Partituras | ✅ Live (ensino, visualizador ABC, gerador cifra→partitura, exercícios) |
 | 14 | Conteúdo Expandido | ✅ Live (tensões, funções, SubV, acordes sus, campos combinados, ciclo de quintas, menores harm/mel, +4 progressões avançadas) |
 
@@ -44,8 +44,10 @@
 | Banco de dados | MySQL (Hostinger `srv1804.hstgr.io`) |
 | Autenticação | NextAuth v4 (credentials + Prisma Adapter, JWT) — temporariamente bypass |
 | Áudio | Web Audio API (sampler + metrônomo + afinador) |
-| Deploy | Vercel (auto-deploy no push para `main`) |
-| Domínio | `cavaquinho.nexoswebservices.com` |
+| AI geração | Anthropic SDK — `claude-haiku-4-5-20251001` (geração de tabs estruturadas) |
+| Player sync | YouTube iframe API (`YT.Player`, `getCurrentTime`, `setPlaybackRate`) |
+| Deploy | Vercel — projeto `nexoswebservices-projects/cavaquinho` (auto-deploy no push para `main`) |
+| Domínio | `cavaquinho.nexoswebservices.com` (CNAME → cname.vercel-dns.com, TXT verificado) |
 
 ---
 
@@ -60,20 +62,27 @@
 ### Conexões remotas ativas
 | Serviço | Endereço | Uso |
 |---|---|---|
-| **Vercel** | Auto-deploy no push para `main` | Hosting do app Next.js |
+| **Vercel** | `nexoswebservices-projects/cavaquinho` — auto-deploy no push `main` | Hosting do app Next.js |
 | **MySQL (Hostinger)** | `srv1804.hstgr.io:3306` / `u828037891_cavaquinho` | Banco de dados de produção |
-| **Domínio** | `cavaquinho.nexoswebservices.com` | DNS configurado na Vercel |
+| **Domínio** | `cavaquinho.nexoswebservices.com` | CNAME → `cname.vercel-dns.com`, TXT `_vercel` verificado |
+| **Anthropic API** | `claude-haiku-4-5-20251001` | Geração de tabs estruturadas a partir de título/artista |
 
 ### Fluxo de deploy
 ```
 Código local → git push origin main → Vercel build automático → Live em ~2 min
 ```
 
-### Seed de dados (cifras)
+### Seed de dados
 ```bash
-# Rodar seed contra produção (bash)
+# Cria apenas o usuário admin (seed.ts simplificado — cifras removidas)
 DATABASE_URL="mysql://u828037891_cavaquinho:I9c3UhVlw5pMdiWCqoMb@srv1804.hstgr.io:3306/u828037891_cavaquinho" \
   npx ts-node --compiler-options '{"module":"CommonJS"}' prisma/seed.ts
+```
+
+### Schema push (Hostinger não suporta shadow DB)
+```bash
+# Usar em vez de prisma migrate dev:
+npx prisma db push --accept-data-loss
 ```
 
 ### Ferramentas de verificação
@@ -103,8 +112,7 @@ DATABASE_URL="mysql://u828037891_cavaquinho:I9c3UhVlw5pMdiWCqoMb@srv1804.hstgr.i
 | role | String (default: "user") |
 | createdAt | DateTime |
 | progress | UserProgress[] |
-| favoritos | CifraFavorito[] |
-| repertorios | Repertorio[] |
+| savedStudos | EstudoSalvo[] |
 
 ### 4.2 `UserProgress`
 | Campo | Tipo |
@@ -117,43 +125,47 @@ DATABASE_URL="mysql://u828037891_cavaquinho:I9c3UhVlw5pMdiWCqoMb@srv1804.hstgr.i
 | completedAt | DateTime? |
 | @@unique([userId, moduleId, lessonId]) | |
 
-### 4.3 `Cifra`
-**576 cifras** extraídas dos PDFs de cadernos musicais.
+### 4.3 `Estudo` *(novo — substituiu Cifra)*
+Tab gerada por IA a partir de URL YouTube.
 | Campo | Tipo |
 |---|---|
 | id | String (cuid) |
 | titulo | String |
-| artista | String? |
-| tom | String? |
-| conteudo | String (@db.Text) |
-| progressao | String? (@db.Text) |
-| createdAt | DateTime |
-
-### 4.4 `CifraFavorito`
-| Campo | Tipo |
-|---|---|
-| id | String (cuid) |
-| userId / cifraId | String |
-| createdAt | DateTime |
-| @@unique([userId, cifraId]) | |
-
-### 4.5 `Repertorio`
-| Campo | Tipo |
-|---|---|
-| id | String (cuid) |
-| userId | String |
-| nome / descricao | String |
-| cor | String (default: "violet") |
-| emoji | String (default: "🎵") |
+| artista | String |
+| youtubeId | String (@unique) |
+| tom | String |
+| bpm | Int |
+| compasso | String (default: "4/4") |
+| introSecs | Float (default: 0) — offset do slider, salvo por música |
+| tabData | Json — `{ medidas: Medida[] }` completo |
 | createdAt / updatedAt | DateTime |
+| salvos | EstudoSalvo[] |
+| @@index([artista]) | |
 
-### 4.6 `RepertorioItem`
+### 4.4 `EstudoSalvo` *(novo)*
 | Campo | Tipo |
 |---|---|
 | id | String (cuid) |
-| repertorioId / cifraId | String |
-| ordem | Int (default: 0) |
-| @@unique([repertorioId, cifraId]) | |
+| userId / estudoId | String |
+| createdAt | DateTime |
+| @@unique([userId, estudoId]) | |
+
+### Formato `tabData.medidas[]`
+```typescript
+interface Medida {
+  numero: number        // 1-based
+  letra: string         // letra da música nesta medida
+  acordes: {
+    batida: number      // 1 | 2 | 3 | 4
+    acorde: string      // "Cm7", "G7"
+    duration: string    // "w" | "h" | "q" | "8"
+    notas: string[]     // ["C","Eb","G","Bb"] — sempre sharps
+    tab: number[]       // [D4_fret, G4_fret, B4_fret, D5_fret]
+  }[]
+}
+```
+
+> **Modelos removidos em 2026-07-08:** `Cifra`, `CifraFavorito`, `Repertorio`, `RepertorioItem`
 
 ---
 
@@ -163,10 +175,7 @@ DATABASE_URL="mysql://u828037891_cavaquinho:I9c3UhVlw5pMdiWCqoMb@srv1804.hstgr.i
 Hamonico/
 ├── prisma/
 │   ├── schema.prisma
-│   ├── seed.ts                          ← deleteMany + createMany em batch
-│   └── data/
-│       ├── cifras.json                  ← 576 cifras (extraídas dos PDFs)
-│       └── cifras.ts
+│   └── seed.ts                          ← cria apenas usuário admin (cifras removidas)
 ├── public/
 │   └── samples/
 │       └── cavaquinho/                  ← 17 samples WAV de cavaquinho real (~4.4MB)
@@ -193,21 +202,28 @@ Hamonico/
 │   │   │   ├── escola/[modulo]/[licao]/page.tsx
 │   │   │   ├── escola/quiz/page.tsx
 │   │   │   ├── escola/meu-progresso/page.tsx
-│   │   │   ├── cifras/page.tsx               ← Lista agrupada por artista A-Z
-│   │   │   ├── cifras/[id]/page.tsx          ← Tabs: Cifra | Análise Harmônica
-│   │   │   ├── cifras/repertorios/page.tsx
-│   │   │   ├── cifras/repertorios/[id]/page.tsx
+│   │   │   ├── musicas/page.tsx              ← Input URL + listas "Minhas salvas" / "Músicas geradas"
+│   │   │   ├── musicas/[id]/page.tsx         ← Player completo (busca Estudo do DB)
 │   │   │   ├── analise/page.tsx              ← Aceita ?p= query param
-│   │   │   ├── progressoes/page.tsx          ← Página unificada com 5 tabs
+│   │   │   ├── progressoes/page.tsx          ← Página unificada com 6 tabs
 │   │   │   ├── progressoes/[slug]/page.tsx   ← Detalhe de sequência com músicas
 │   │   │   ├── biblioteca/page.tsx           ← Redirect → /progressoes
 │   │   │   ├── cadencias/page.tsx            ← Redirect → /progressoes
 │   │   │   ├── quiz/page.tsx                 ← redirect → /escola/quiz
 │   │   │   └── estudos/page.tsx              ← redirect → /escola/meu-progresso
-│   │   ├── api/ (...)
+│   │   ├── api/
+│   │   │   ├── auth/[...nextauth]/route.ts
+│   │   │   ├── auth/register/route.ts
+│   │   │   ├── progress/route.ts
+│   │   │   ├── musicas/
+│   │   │   │   ├── route.ts                  ← GET: listar estudos
+│   │   │   │   ├── generate/route.ts         ← POST: URL → cache → oEmbed → Claude → DB
+│   │   │   │   └── [id]/
+│   │   │   │       ├── route.ts              ← PATCH: update introSecs
+│   │   │   │       └── salvar/route.ts       ← POST/DELETE: salvar na lista do user
 │   │   ├── layout.tsx, page.tsx, providers.tsx, globals.css
 │   ├── components/
-│   │   ├── layout/Navbar.tsx                 ← 6 links: Escola | Cifras | Progressões | Arpejos | Improvisos | Análise
+│   │   ├── layout/Navbar.tsx                 ← 6 links: Escola | Músicas | Progressões | Arpejos | Improvisos | Análise
 │   │   ├── ui/
 │   │   │   ├── Metronomo.tsx                 ← Painel flutuante com tabs Metrônomo | Afinador
 │   │   │   ├── Afinador.tsx                  ← Detecção de pitch via microfone (autocorrelação)
@@ -215,16 +231,14 @@ Hamonico/
 │   │   ├── escola/
 │   │   │   ├── EscolaSubNav.tsx
 │   │   │   ├── ModuleGrid.tsx, ProgressBar.tsx, LessonActions.tsx
-│   │   ├── cifras/
-│   │   │   ├── ChordSheet.tsx                ← Acordes clicáveis, transposição, play tab, 212+ formatos
-│   │   │   ├── ChordTooltip.tsx              ← Tooltip com braço + play ao clicar acorde
-│   │   │   ├── CifraControls.tsx             ← Barra sticky: tom, fonte, auto-scroll
-│   │   │   ├── CifraAnalise.tsx              ← TheoryTab: blocos coloridos por função
-│   │   │   ├── CifraTabs.tsx                 ← Tabs Cifra | Análise + transposição compartilhada
-│   │   │   ├── CifraList.tsx                 ← Agrupado por artista A-Z + busca
-│   │   │   ├── CifraFavoriteButton.tsx, AddToRepertorioButton.tsx
-│   │   │   ├── NovoRepertorioForm.tsx, DeleteRepertorioButton.tsx
-│   │   │   └── RepertorioItens.tsx
+│   │   ├── musicas/
+│   │   │   ├── GerarMusica.tsx               ← Input URL + botão Gerar (client)
+│   │   │   ├── MusicasList.tsx               ← Grid de cards de músicas
+│   │   │   ├── MusicaPlayer.tsx              ← Estado central do player (polling, sync)
+│   │   │   ├── YoutubeEmbed.tsx              ← YouTube iframe API wrapper (YT.Player)
+│   │   │   ├── MedidaCard.tsx                ← 1 medida: acordes + hover BracoCavaquinho
+│   │   │   ├── PartituraCompleta.tsx         ← Layout contínuo: linhas de 4 medidas (VexFlow + TAB SVG + letra)
+│   │   │   └── PlayerControls.tsx            ← Speed, intro slider, view toggle
 │   │   ├── analise/
 │   │   │   └── AnalisadorHarmonico.tsx       ← Preload via ?p=, salvar nas progressões
 │   │   ├── biblioteca/
@@ -283,40 +297,48 @@ Hamonico/
 - **Quiz com 10 tipos**: graus, cadências, campo, completar + funções harmônicas, tensões, dominante substituto
 - Progresso por módulo, barra geral, botão "Marcar como concluída"
 
-### 6.3 Cifras Interativas — 576 músicas, 112 artistas
-- **Base expandida:** extraídas de 2 PDFs (SAMBA RAIZ 319p + PAGODES ATUAIS 307p) via `scripts/extract-cifras.py`
-- **Fontes:** Cartola, Clara Nunes, Alcione, Noel Rosa, Pixinguinha, Belo, Ferrugem, Thiaguinho, Turma do Pagode, Sorriso Maroto, Xande de Pilares...
-- `/cifras` — **agrupadas por artista A-Z** com busca por música ou artista
-- `/cifras/[id]` — **duas tabs**:
-  - **Cifra**: ChordSheet com acordes clicáveis, controle de fonte
-  - **Análise Harmônica**: visualização TheoryTab com blocos coloridos
-- **Transposição de tom**: botões −/+ para transpor todos os acordes em tempo real, preservando espaçamento e qualidade. Botão "Original" para resetar. Análise Harmônica também transpõe.
-- **Acordes clicáveis**: clique em qualquer acorde → tooltip com diagrama do braço do cavaquinho (BracoCavaquinho) + botão play com som real (sampler)
-- **Auto-scroll**: botão toggle + slider de velocidade, para prática mãos-livres
-- **Barra de controles sticky**: tom, tamanho de fonte, auto-scroll — fixa abaixo da navbar
-- **Play nas tablaturas**: botão ▶ verde ao lado de cada linha de tablatura, toca as notas em sequência via sampler
-- **Reconhecimento de 212+ formatos de acorde**: A7M, F#m7b5, E7#9, G7+, B5+7, Em7/-5, C#7/b9, etc.
-- **Base limpa**: 576 cifras separadas (128 extraídas de concatenações), 21 símbolos soltos removidos
+### 6.3 Músicas — Player Interativo AI (estilo Songsterr) *(novo — substituiu Cifras)*
 
-### 6.4 Fluxo Cifra → Análise → Progressões
-Fluxo completo implementado e testado em produção:
+**Pipeline de geração:**
+```
+1. Usuário cola URL do YouTube em /musicas
+2. Extrai youtubeId via regex
+3. Cache check: prisma.estudo.findUnique({ where: { youtubeId } })
+   → HIT: retorna id sem chamar Claude
+4. YouTube oEmbed → titulo + artista (sem API key)
+5. Claude Haiku (max_tokens 8192) → JSON estruturado com medidas, acordes, tabs
+6. prisma.estudo.create(...)
+7. Redireciona para /musicas/[id]
+```
+
+**Player `/musicas/[id]`:**
+- **Vídeo YouTube** embutido via iframe API (`YT.Player`) ao lado dos controles
+- **Partitura contínua** (estilo Songsterr): medidas fluem em linhas de 4, scroll vertical
+  - VexFlow por linha (todos os acordes da linha em uma única canvas)
+  - TAB 4 cordas (D5/B4/G4/D4) mostrando todos os frets por acorde
+  - Letra da música por medida
+- **Sincronização**: polling 100ms → `getCurrentTime` → beat → medida ativa (highlight violeta)
+- **Slider de intro** (0–120s): ajusta offset do início, salvo via PATCH no DB (debounce 1s)
+- **Velocidade**: 0.5x / 0.75x / 1x / 1.25x via `setPlaybackRate`
+- **Vista toggle**: Partitura + Tab / Só Tab
+- **Hover acorde → BracoCavaquinho**: diagrama do shape correto em tooltip
+- **Clique acorde → sampler**: toca as notas reais
+- **Salvar ♡**: persiste em `EstudoSalvo`, aparece em "Minhas salvas" no /musicas
+- **Cache-first**: mesma URL YouTube nunca re-chama Claude
+
+### 6.4 Fluxo Análise → Progressões
+*(Anteriormente integrado às Cifras; continua funcionando via /analise)*
 
 ```
-Cifra (/cifras/[id])
-  └→ Tab "Análise Harmônica"
-       ├─ Progressão: Cm | C7 | Fm | G7 | G# | G#7
-       ├─ Blocos coloridos por função (tônica, subdominante, dominante, secundária, modal)
-       ├─ Tonalidade detectada com confiança %
-       ├─ Resumo: acordes, % diatônicos, dom. secundárias, empréstimos modais
-       └→ Botão "Abrir no Analisador →"
-            └→ /analise?p=Cm+C7+Fm+G7+G#+G#7  (auto-analisa)
-                 ├─ Tabela de graus em C menor
-                 ├─ Cadências detectadas
-                 └→ Botão "Salvar na Biblioteca"
-                      └→ /progressoes → tab "Minhas Progressões"
-                           ├─ Progressão salva (localStorage)
-                           ├─ Botão "Analisar" (volta ao analisador)
-                           └─ Botão "✕" (remover)
+/analise (textarea ou ?p= query param)
+  └→ Progressão: Cm | C7 | Fm | G7 | G# | G#7
+       ├─ Tabela de graus em C menor
+       ├─ Cadências detectadas
+       └→ Botão "Salvar na Biblioteca"
+            └→ /progressoes → tab "Minhas Progressões"
+                 ├─ Progressão salva (localStorage)
+                 ├─ Botão "Analisar" (volta ao analisador)
+                 └─ Botão "✕" (remover)
 ```
 
 ### 6.5 Análise Harmônica Visual (TheoryTab)
@@ -433,15 +455,14 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 
 ## 7. Navegação
 
-### Navbar principal (7 links)
+### Navbar principal (6 links)
 | Link | Rota | Escopo |
 |---|---|---|
 | Escola | `/escola` | 28 lições em 4 módulos, Quiz (10 tipos), Meu Progresso |
-| Cifras | `/cifras` | 576 cifras interativas com transposição, acordes clicáveis, play tab |
+| Músicas | `/musicas` | Player AI estilo Songsterr — YouTube URL → partitura + TAB + letra sincronizadas |
 | Progressões | `/progressoes` | Campo harmônico c/ tensões, cadências, sequências, formação, ciclo de quintas (6 tabs) |
 | Arpejos | `/arpejos` | 8 padrões + arpejos do campo harmônico, partitura, tablatura, play |
 | Improvisos | `/improvisos` | 12 escalas, 8 frases, exercícios, backing tracks (4 tabs) |
-| Partituras | `/partituras` | Ensino (6 lições + quiz), visualizador ABC, gerador cifra→partitura, exercícios (4 tabs) |
 | Análise | `/analise` | Analisador harmônico (aceita ?p=) |
 
 ### Elemento flutuante
@@ -454,7 +475,6 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 |---|---|
 | `/biblioteca` | `/progressoes` |
 | `/cadencias` | `/progressoes` |
-| `/cifras` | `/cifras` (mantido) |
 | `/quiz` | `/escola/quiz` |
 | `/estudos` | `/escola/meu-progresso` |
 
@@ -464,10 +484,10 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 | `/api/auth/[...nextauth]` | NextAuth | — | Login/session |
 | `/api/auth/register` | POST | — | Cadastro |
 | `/api/progress` | GET, POST | 401 | Progresso nas lições |
-| `/api/cifras/[id]/favorito` | POST, DELETE | 401 | Favoritar/desfavoritar |
-| `/api/repertorios` | GET, POST | 401 | Listar/criar repertórios |
-| `/api/repertorios/[id]` | DELETE | 401 | Excluir repertório |
-| `/api/repertorios/[id]/itens` | POST, DELETE, PATCH | 401 | Gerenciar músicas |
+| `/api/musicas` | GET | — | Listar estudos públicos |
+| `/api/musicas/generate` | POST | — | URL YouTube → Estudo (cache-first, Claude Haiku) |
+| `/api/musicas/[id]` | PATCH | — | Atualizar introSecs (debounce 1s) |
+| `/api/musicas/[id]/salvar` | POST, DELETE | 401 | Salvar/remover da lista pessoal |
 
 ---
 
@@ -616,6 +636,15 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | 2026-07-03 | Fix shapes min7 (2ª forma): Cm7 [5,5,4,5], Dm7 [3,5,3,7], Em7 [5,7,5,9], Gm7 [5,3,6,7], Am7 [7,5,8,9] (Betto Correa) |
 | 2026-07-03 | Fix exibição "cortando o Si na nona casa": Em7 e Am7 2ª formas hard-coded eliminam open strings, diagrama compacto a partir da 5ª casa |
 | 2026-07-03 | Fix dim Ab° (R=8): C°-shape [0,1,0,0] em vez de E°-shape [6,4,3,6]; E°-shape restrito a R=5..7 |
+| 2026-07-08 | **Pivot Cifras → Músicas (Player Interativo AI)**: removidos Cifra/CifraFavorito/Repertorio/RepertorioItem do schema |
+| 2026-07-08 | Novos models: `Estudo` (youtubeId unique, tabData JSON, introSecs) + `EstudoSalvo` (userId+estudoId unique) |
+| 2026-07-08 | Pipeline: URL YouTube → oEmbed → Claude Haiku (max_tokens 8192) → JSON medidas → DB (cache-first por youtubeId) |
+| 2026-07-08 | Player `/musicas/[id]`: YouTube iframe API, polling 100ms `getCurrentTime` → medida ativa, scroll automático |
+| 2026-07-08 | Layout partitura contínua (PartituraCompleta): linhas de 4 medidas, VexFlow multi-stave + TAB SVG 4 cordas + letra |
+| 2026-07-08 | Hover acorde → BracoCavaquinho tooltip; clique → sampler; slider intro 0–120s; velocidade 0.5x–1.25x; salvar ♡ |
+| 2026-07-08 | Vercel deploy configurado: projeto `nexoswebservices-projects/cavaquinho`, domínio `cavaquinho.nexoswebservices.com` |
+| 2026-07-08 | ANTHROPIC_API_KEY configurada em Vercel (Production/Preview/Development) e `.env.local` |
+| 2026-07-08 | DNS Hostinger: TXT `_vercel` + CNAME `cavaquinho` → `cname.vercel-dns.com` (verificado) |
 
 ---
 
@@ -626,8 +655,9 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | App live | https://cavaquinho.nexoswebservices.com |
 | Admin | admin@harmoniaflow.com / admin123 |
 | DB host | srv1804.hstgr.io:3306 / u828037891_cavaquinho |
-| Vercel | deploy automático no push para `main` |
+| Vercel | deploy automático no push para `main` (`nexoswebservices-projects/cavaquinho`) |
 | Branch | `main` |
+| ANTHROPIC_API_KEY | em `.env.local`, `.env.production.local` e Vercel env vars (Production/Preview/Development) |
 | PDFs fonte | `C:\Users\renat\Downloads\Harmonico\SAMBA RAIZ.pdf` (319p) |
 | | `C:\Users\renat\Downloads\Harmonico\PAGODES ATUAIS ..pdf` (307p) |
 | Samples fonte | `C:\Users\renat\Downloads\Hamonico\PACK SAMPLES CAVAQUINHO - Kitdepontos.COm.Br.zip` |

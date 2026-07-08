@@ -1,0 +1,12 @@
+node_modules/
+.next/
+*.zip
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.xlsx
+*.xls
+.playwright-mcp/
+scripts/__pycache__/
+HARMONIAFLOW_LEVANTAMENTO*.md
