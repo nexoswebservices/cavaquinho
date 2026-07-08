@@ -1,9 +1,10 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { PartituraView, type NoteData } from "@/components/partitura/PartituraView"
 import { TablaturaView, type TabNote } from "@/components/partitura/TablaturaView"
 import { initSampler, playChord } from "@/lib/sampler"
+import { BracoCavaquinho } from "@/components/progressoes/BracoCavaquinho"
 
 const TO_SHARP: Record<string, string> = {
   Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#",
@@ -27,6 +28,7 @@ interface MedidaCardProps {
 
 export function MedidaCard({ numero, letra, acordes, isActive, view }: MedidaCardProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
 
   // Build NoteData[] for VexFlow (root note of each chord)
   const vexNotes: NoteData[] = acordes.map((a) => {
@@ -57,7 +59,7 @@ export function MedidaCard({ numero, letra, acordes, isActive, view }: MedidaCar
     <div
       ref={ref}
       data-medida={numero}
-      className={`flex-shrink-0 w-52 rounded-xl border transition-all duration-200 overflow-hidden ${
+      className={`flex-shrink-0 w-52 rounded-xl border transition-all duration-200 ${
         isActive
           ? "border-violet-500 shadow-lg shadow-violet-900/40 bg-[#1a1135]"
           : "border-white/5 bg-[#120d24]"
@@ -68,14 +70,22 @@ export function MedidaCard({ numero, letra, acordes, isActive, view }: MedidaCar
         <span className="text-xs text-slate-600 font-mono">M{numero}</span>
         <div className="flex gap-1 flex-wrap justify-end">
           {acordes.map((a, i) => (
-            <button
-              key={i}
-              onClick={() => handlePlayChord(a.notas)}
-              className="text-xs font-mono text-violet-300 hover:text-violet-200 hover:bg-violet-600/20 px-1.5 py-0.5 rounded transition-colors"
-              title={`Tocar ${a.acorde}`}
-            >
-              {a.acorde}
-            </button>
+            <div key={i} className="relative">
+              {hoveredIdx === i && a.notas.length > 0 && (
+                <div className="absolute bottom-full right-0 mb-2 z-50 bg-[#0f0a20] border border-violet-500/40 rounded-xl p-3 shadow-2xl shadow-black/60 pointer-events-none">
+                  <p className="text-xs text-violet-300 font-mono text-center mb-2">{a.acorde}</p>
+                  <BracoCavaquinho chordNotes={a.notas} voicingIndex={0} />
+                </div>
+              )}
+              <button
+                onMouseEnter={() => setHoveredIdx(i)}
+                onMouseLeave={() => setHoveredIdx(null)}
+                onClick={() => handlePlayChord(a.notas)}
+                className="text-xs font-mono text-violet-300 hover:text-violet-200 hover:bg-violet-600/20 px-1.5 py-0.5 rounded transition-colors"
+              >
+                {a.acorde}
+              </button>
+            </div>
           ))}
         </div>
       </div>

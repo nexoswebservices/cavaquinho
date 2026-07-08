@@ -62,7 +62,7 @@ export function PlayerControls({
         <input
           type="range"
           min={0}
-          max={60}
+          max={120}
           step={0.5}
           value={introSecs}
           onChange={(e) => onIntroSecsChange(Number(e.target.value))}
