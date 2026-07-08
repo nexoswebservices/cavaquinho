@@ -4,7 +4,7 @@
 **App reconstruído:** https://cavaquinho.nexoswebservices.com  
 **Repositório local:** `c:\Users\renat\Downloads\Hamonico`  
 **Data do levantamento inicial:** 2026-06-09  
-**Última atualização:** 2026-07-01
+**Última atualização:** 2026-07-03
 
 ---
 
@@ -557,11 +557,14 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 - ~~Arpejos vinculados ao campo harmônico~~ ✅ (2026-06-28)
 - ~~Modos gregos com tablatura (Dórico + Mixolídio)~~ ✅ (2026-06-28)
 - ~~Diagramas de acordes corretos (BracoCavaquinho formula-based)~~ ✅ (2026-07-01)
+- ~~Shapes min7 corrigidos pelo Dicionário Betto Correa (1ª e 2ª formas)~~ ✅ (2026-07-03)
+- ~~Fix dim Ab°: C°-shape [0,1,0,0] em vez de E°-shape [6,4,3,6]~~ ✅ (2026-07-03)
 - ~~4 novas progressões avançadas (Dom. Sec. E7, Samba Empréstimo, Samba Completo, SubV)~~ ✅ (2026-07-01)
 - ~~har-2b: Campo Harmônico Menor Harmônico~~ ✅ (2026-07-01)
 - ~~har-2c: Campo Harmônico Menor Melódico~~ ✅ (2026-07-01)
 
 ### Funcionalidades pendentes
+- **Verificação dos diminutos restantes** — F#dim, Gdim, Adim, Bdim e demais shapes calculados pelo algoritmo precisam ser comparados com referências (usuário confirmou que apenas Fdim [3,1,0,3] está correto)
 - **Painel Admin** (CRUD de cifras e usuários)
 - **Área de Usuário** (perfil, trocar senha)
 - **Campo `progressao`** auto-extraído do conteúdo das cifras
@@ -609,6 +612,10 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | 2026-07-01 | +4 progressões avançadas: Dom. Sec. E7, Samba com Empréstimo, Samba Completo, Com Sub. Trítono (PADROES + PROGRESSOES_COMUNS) |
 | 2026-07-01 | buildExemplo extendido: índices -4 (V7/vi), -5 (V7/ii), -6 (SubV) para cálculo dinâmico por tonalidade |
 | 2026-07-01 | +2 lições Harmonia: har-2b (Menor Harmônico) e har-2c (Menor Melódico) — total 28 lições, Harmonia com 10 |
+| 2026-07-03 | Fix shapes min7 (1ª forma): Cm7 hard-coded [5,3,1,5], Dm7 hard-coded [0,2,1,3] (Betto Correa) |
+| 2026-07-03 | Fix shapes min7 (2ª forma): Cm7 [5,5,4,5], Dm7 [3,5,3,7], Em7 [5,7,5,9], Gm7 [5,3,6,7], Am7 [7,5,8,9] (Betto Correa) |
+| 2026-07-03 | Fix exibição "cortando o Si na nona casa": Em7 e Am7 2ª formas hard-coded eliminam open strings, diagrama compacto a partir da 5ª casa |
+| 2026-07-03 | Fix dim Ab° (R=8): C°-shape [0,1,0,0] em vez de E°-shape [6,4,3,6]; E°-shape restrito a R=5..7 |
 
 ---
 

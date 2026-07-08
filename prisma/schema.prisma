@@ -17,8 +17,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   progress    UserProgress[]
-  favoritos   CifraFavorito[]
-  repertorios Repertorio[]
+  savedStudos EstudoSalvo[]
 }
 
 enum Role {
@@ -42,59 +41,33 @@ model UserProgress {
   @@index([userId])
 }
 
-model Cifra {
-  id         String   @id @default(cuid())
-  titulo     String
-  artista    String?
-  tom        String?
-  conteudo   String   @db.Text
-  progressao String?  @db.Text
-  createdAt  DateTime @default(now())
-
-  favoritos CifraFavorito[]
-  itens     RepertorioItem[]
-
-  @@index([titulo])
-}
-
-model CifraFavorito {
+model Estudo {
   id        String   @id @default(cuid())
-  userId    String
-  cifraId   String
-  createdAt DateTime @default(now())
-
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cifra Cifra @relation(fields: [cifraId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, cifraId])
-  @@index([userId])
-}
-
-model Repertorio {
-  id        String   @id @default(cuid())
-  userId    String
-  nome      String
-  descricao String?
-  cor       String   @default("violet")
-  emoji     String   @default("🎵")
+  titulo    String
+  artista   String
+  youtubeId String   @unique
+  tom       String
+  bpm       Int
+  compasso  String   @default("4/4")
+  introSecs Float    @default(0)
+  tabData   Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  itens RepertorioItem[]
+  salvos EstudoSalvo[]
 
-  @@index([userId])
+  @@index([artista])
 }
 
-model RepertorioItem {
-  id           String @id @default(cuid())
-  repertorioId String
-  cifraId      String
-  ordem        Int    @default(0)
+model EstudoSalvo {
+  id        String   @id @default(cuid())
+  userId    String
+  estudoId  String
+  createdAt DateTime @default(now())
 
-  repertorio Repertorio @relation(fields: [repertorioId], references: [id], onDelete: Cascade)
-  cifra      Cifra      @relation(fields: [cifraId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  estudo Estudo @relation(fields: [estudoId], references: [id], onDelete: Cascade)
 
-  @@unique([repertorioId, cifraId])
-  @@index([repertorioId])
+  @@unique([userId, estudoId])
+  @@index([userId])
 }

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 
 const NAV_LINKS = [
   { href: "/escola", label: "Escola", match: "/escola" },
-  { href: "/cifras", label: "Cifras", match: "/cifras" },
+  { href: "/musicas", label: "Músicas", match: "/musicas" },
   { href: "/progressoes", label: "Progressões", match: "/progressoes" },
   { href: "/arpejos", label: "Arpejos", match: "/arpejos" },
   { href: "/improvisos", label: "Improvisos", match: "/improvisos" },
