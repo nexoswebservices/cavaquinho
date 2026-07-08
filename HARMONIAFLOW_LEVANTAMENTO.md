@@ -8,6 +8,74 @@
 
 ---
 
+## 0. Protocolo de Entrega (Standing Instruction)
+
+> **Obrigatório antes de qualquer entrega ao usuário**
+
+### 0.1 Fluxo de revisão interna
+
+```
+1. REVISAR o que foi pedido vs o que foi implementado
+   └─ Listar explicitamente cada requisito e confirmar se está presente
+
+2. CONECTAR via Playwright ao site em produção
+   └─ npx vercel --prod (se deploy manual necessário)
+   └─ Aguardar build completar e verificar status
+
+3. TESTAR cada funcionalidade entregue no site live:
+   └─ Navegar para a rota relevante
+   └─ Verificar layout, dados, interatividade
+   └─ Inspecionar console para erros (browser_evaluate ou log file)
+   └─ DOM check quando o visual não for suficiente (browser_evaluate)
+
+4. SE FALHAR ou houver condição em falta:
+   └─ Identificar a causa raiz (não apenas o sintoma)
+   └─ Corrigir no código local
+   └─ Re-deploy e re-testar até passar
+
+5. REPORTAR ao usuário apenas após confirmação visual no live
+```
+
+### 0.2 Comandos de verificação padrão
+
+```bash
+# Deploy manual (quando auto-deploy Vercel não estiver funcionando)
+npx vercel --prod
+
+# Verificar status de deployments
+npx vercel ls --scope nexoswebservices-projects
+
+# Verificar container DOM de um componente (via Playwright browser_evaluate)
+# Exemplo: checar se PartituraCompleta está no DOM
+document.querySelector('[class*="bg-\\[#080512\\]"]')?.children.length
+
+# Verificar layout real da seção
+const p = Array.from(document.querySelectorAll('p')).find(e => e.textContent?.includes('medidas'))
+p?.nextElementSibling?.className
+```
+
+### 0.3 Checklist de entrega Músicas/Player
+
+| Item | Como verificar |
+|---|---|
+| Página /musicas carrega | Screenshot via Playwright |
+| Cards de músicas geradas aparecem | Ver seção "MÚSICAS GERADAS" |
+| Player /musicas/[id] abre | Clicar no card e screenshot |
+| YouTube iframe presente | Snapshot: iframe com "Player de vídeo do YouTube" |
+| PartituraCompleta renderiza (não MedidaCard) | `browser_evaluate`: container class deve ser `rounded-xl border...bg-[#080512]`, children = nº de linhas (não nº de medidas) |
+| Controles visíveis | BPM, Velocidade, Início, Vista toggle |
+| Sem erros críticos no console | Verificar log file do Playwright |
+
+### 0.4 Causa raiz do problema de deploy (2026-07-08)
+
+**Problema:** Commits com código novo (PartituraCompleta) não foram deployed porque o Vercel **não está fazendo auto-deploy** do GitHub — precisa de `npx vercel --prod` manual.
+
+**Sintoma:** `vercel ls` mostra sempre o mesmo deployment (horas atrás) mesmo após pushes.
+
+**Solução:** Sempre executar `npx vercel --prod` após commit + push para garantir que o código novo chegue ao live.
+
+---
+
 ## 1. Status Geral
 
 **✅ 14 MÓDULOS LIVE — PLAYER INTERATIVO IA, ÁUDIO, PARTITURA, ARPEJOS, IMPROVISOS, PROGRESSÕES AVANÇADAS**
