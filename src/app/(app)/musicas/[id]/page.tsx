@@ -7,6 +7,14 @@ import { MusicaPlayer } from "@/components/musicas/MusicaPlayer"
 
 export const dynamic = "force-dynamic"
 
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const estudo = await import("@/lib/db").then(({ prisma }) =>
+    prisma.estudo.findUnique({ where: { id: params.id }, select: { titulo: true, artista: true } })
+  )
+  if (!estudo) return {}
+  return { title: `${estudo.titulo} — ${estudo.artista} | Cavaquinho` }
+}
+
 export default async function MusicaPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
   const userId = session?.user?.id
