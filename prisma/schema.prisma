@@ -71,3 +71,13 @@ model EstudoSalvo {
   @@unique([userId, estudoId])
   @@index([userId])
 }
+
+model PartituraIndex {
+  id         String   @id @default(cuid())
+  artista    String
+  postTitulo String   @db.Text
+  postUrl    String   @unique
+  createdAt  DateTime @default(now())
+
+  @@index([artista])
+}
