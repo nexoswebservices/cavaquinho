@@ -15,3 +15,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   })
   return NextResponse.json({ introSecs: estudo.introSecs })
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  await prisma.estudo.delete({ where: { id: params.id } })
+  return NextResponse.json({ ok: true })
+}

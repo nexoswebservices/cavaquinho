@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useState, useCallback, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { YoutubeEmbed } from "./YoutubeEmbed"
 import { PlayerControls } from "./PlayerControls"
 import { PartituraCompleta } from "./PartituraCompleta"
@@ -37,6 +38,7 @@ interface MusicaPlayerProps {
 }
 
 export function MusicaPlayer({ estudo, isSaved: initialSaved }: MusicaPlayerProps) {
+  const router = useRouter()
   const ytPlayerRef = useRef<YT.Player | null>(null)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const saveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -47,6 +49,7 @@ export function MusicaPlayer({ estudo, isSaved: initialSaved }: MusicaPlayerProp
   const [currentMeasure, setCurrentMeasure] = useState(-1)
   const [isPlaying, setIsPlaying] = useState(false)
   const [saved, setSaved] = useState(initialSaved)
+  const [deleting, setDeleting] = useState(false)
 
   const medidas: Medida[] = estudo.tabData?.medidas ?? []
   const beatsPerMeasure = estudo.compasso === "3/4" ? 3 : 4
@@ -120,24 +123,26 @@ export function MusicaPlayer({ estudo, isSaved: initialSaved }: MusicaPlayerProp
     if (res.ok) setSaved(!saved)
   }
 
+  async function handleDelete() {
+    if (!confirm(`Excluir "${estudo.titulo}"? Esta ação não pode ser desfeita.`)) return
+    setDeleting(true)
+    await fetch(`/api/musicas/${estudo.id}`, { method: "DELETE" })
+    router.push("/musicas")
+  }
+
+  async function handleRegenerate() {
+    if (!confirm(`Excluir e regenerar "${estudo.titulo}"? O estudo atual será apagado.`)) return
+    setDeleting(true)
+    await fetch(`/api/musicas/${estudo.id}`, { method: "DELETE" })
+    router.push(`/musicas?regen=https://youtu.be/${estudo.youtubeId}`)
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-white leading-tight">{estudo.titulo}</h1>
-          <p className="text-slate-400 text-sm">{estudo.artista}</p>
-        </div>
-        <button
-          onClick={toggleSave}
-          className={`flex-shrink-0 px-3 py-1.5 rounded-xl border text-sm transition-colors ${
-            saved
-              ? "bg-violet-600/20 border-violet-500/40 text-violet-300"
-              : "bg-[#120d24] border-white/10 text-slate-400 hover:border-violet-500/30 hover:text-violet-300"
-          }`}
-        >
-          {saved ? "♥ Salvo" : "♡ Salvar"}
-        </button>
+      <div>
+        <h1 className="text-xl font-bold text-white leading-tight">{estudo.titulo}</h1>
+        <p className="text-slate-400 text-sm">{estudo.artista}</p>
       </div>
 
       {/* Video + Controls */}
@@ -173,6 +178,39 @@ export function MusicaPlayer({ estudo, isSaved: initialSaved }: MusicaPlayerProp
           view={view}
           compasso={estudo.compasso}
         />
+      </div>
+
+      {/* Botões de ação — canto inferior direito */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-2 z-50">
+        <button
+          onClick={toggleSave}
+          title={saved ? "Remover dos favoritos" : "Favoritar"}
+          className={`w-11 h-11 rounded-full border text-lg flex items-center justify-center shadow-lg transition-colors ${
+            saved
+              ? "bg-violet-600 border-violet-500 text-white"
+              : "bg-[#120d24] border-white/15 text-slate-400 hover:border-violet-500/50 hover:text-violet-300"
+          }`}
+        >
+          {saved ? "♥" : "♡"}
+        </button>
+
+        <button
+          onClick={handleRegenerate}
+          disabled={deleting}
+          title="Regenerar (apaga e gera novamente)"
+          className="w-11 h-11 rounded-full border bg-[#120d24] border-white/15 text-slate-400 hover:border-amber-500/50 hover:text-amber-300 text-base flex items-center justify-center shadow-lg transition-colors disabled:opacity-40"
+        >
+          🔄
+        </button>
+
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          title="Excluir"
+          className="w-11 h-11 rounded-full border bg-[#120d24] border-white/15 text-slate-400 hover:border-red-500/50 hover:text-red-400 text-base flex items-center justify-center shadow-lg transition-colors disabled:opacity-40"
+        >
+          🗑
+        </button>
       </div>
     </div>
   )

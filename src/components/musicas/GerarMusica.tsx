@@ -1,23 +1,33 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export function GerarMusica() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [url, setUrl] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  async function handleGerar() {
-    if (!url.trim()) return
+  // Auto-preencher e gerar se vier do botão Alterar (regenerar)
+  useEffect(() => {
+    const regen = searchParams.get("regen")
+    if (regen) {
+      setUrl(regen)
+      handleGerarUrl(regen)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function handleGerarUrl(targetUrl: string) {
     setLoading(true)
     setError("")
     try {
       const res = await fetch("/api/musicas/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: targetUrl }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? "Erro ao gerar")
@@ -26,6 +36,11 @@ export function GerarMusica() {
       setError(e instanceof Error ? e.message : "Erro desconhecido")
       setLoading(false)
     }
+  }
+
+  async function handleGerar() {
+    if (!url.trim()) return
+    await handleGerarUrl(url.trim())
   }
 
   return (
