@@ -161,7 +161,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ id: estudo.id, cached: false, source })
   } catch (err) {
-    console.error("generate error:", err)
-    return NextResponse.json({ error: "Erro ao gerar tab" }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error("generate error:", msg)
+    return NextResponse.json({ error: "Erro ao gerar tab", detail: msg }, { status: 500 })
   }
 }
