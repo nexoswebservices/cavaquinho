@@ -3,6 +3,8 @@ import Anthropic from "@anthropic-ai/sdk"
 import { prisma } from "@/lib/db"
 import { searchPartituraIndex } from "@/lib/partitura-search"
 import { fetchPartituraImageUrls, extractTabFromPartituraImage } from "@/lib/partitura-vision"
+import { fetchLetra } from "@/lib/letras-scraper"
+import { chordToTab } from "@/lib/cavaquinho-tab"
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -20,16 +22,42 @@ function extractYoutubeId(url: string): string | null {
   return null
 }
 
-async function generateViaClaudeText(titulo: string, artista: string): Promise<Record<string, unknown>> {
+// Post-process tabData: recalculate tab[] for each acorde using formula
+function applyFormulasTabs(tabData: Record<string, unknown>): Record<string, unknown> {
+  const medidas = tabData.medidas as Array<Record<string, unknown>>
+  if (!Array.isArray(medidas)) return tabData
+
+  return {
+    ...tabData,
+    medidas: medidas.map((m) => {
+      const acordes = m.acordes as Array<Record<string, unknown>> | undefined
+      if (!Array.isArray(acordes)) return m
+      return {
+        ...m,
+        acordes: acordes.map((a) => ({ ...a, tab: chordToTab(a.acorde as string) })),
+      }
+    }),
+  }
+}
+
+async function generateViaClaudeText(
+  titulo: string,
+  artista: string,
+  letra?: string
+): Promise<Record<string, unknown>> {
+  const letraBlock = letra
+    ? `\n\nLetra oficial:\n---\n${letra}\n---\n\nMapeie cada trecho da letra acima nas medidas correspondentes.`
+    : ""
+
   const message = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 8192,
-    system: `Você é um especialista em música brasileira (samba, pagode, MPB) e em cifras para cavaquinho (afinação D-G-B-D, trastes 0-12).
+    system: `Você é um especialista em música brasileira (samba, pagode, MPB) e cifras para cavaquinho.
 Responda SOMENTE com JSON válido, sem markdown, sem texto extra.`,
     messages: [
       {
         role: "user",
-        content: `Gere a cifra estruturada completa para "${titulo}" de ${artista}.
+        content: `Gere a cifra estruturada completa de "${titulo}" por ${artista} para cavaquinho (afinação D-G-B-D).${letraBlock}
 
 Retorne EXATAMENTE este JSON (sem markdown):
 {
@@ -54,12 +82,12 @@ Retorne EXATAMENTE este JSON (sem markdown):
 }
 
 Regras:
-- tab: 4 números [D4, G4, B4, D5], frets 0-12. Use shapes reais do cavaquinho.
-- duration: "w"=whole(4 beats), "h"=half(2 beats), "q"=quarter(1 beat)
-- notas: use sempre sharps (C#, D#, F#, G#, A#), nunca bemóis
+- tab: 4 números [D4, G4, B4, D5], frets 0-12
+- duration: "w"=4 beats, "h"=2 beats, "q"=1 beat
+- notas: sempre sharps (C#, D#, F#, G#, A#), nunca bemóis
 - Inclua a música COMPLETA com todas estrofes e refrões
 - BPM típico: samba 80-120, pagode 70-100, bossa nova 100-140
-- Máximo 80 medidas. Se a música for longa, agrupe mais acordes por medida.`,
+- Máximo 80 medidas`,
       },
     ],
   })
@@ -77,11 +105,11 @@ export async function POST(req: NextRequest) {
     const youtubeId = extractYoutubeId(url)
     if (!youtubeId) return NextResponse.json({ error: "URL do YouTube inválida" }, { status: 400 })
 
-    // Cache check
+    // Cache hit
     const existing = await prisma.estudo.findUnique({ where: { youtubeId } })
     if (existing) return NextResponse.json({ id: existing.id, cached: true })
 
-    // Get title + artist via oEmbed
+    // oEmbed: título + artista
     const oembedRes = await fetch(
       `https://www.youtube.com/oembed?url=https://youtu.be/${youtubeId}&format=json`
     )
@@ -90,22 +118,31 @@ export async function POST(req: NextRequest) {
     const titulo = oembed.title as string
     const artista = (oembed.author_name as string).replace(/ - Topic$/, "")
 
-    // Tentativa 1: buscar partitura no índice → Claude Vision
+    // Buscar letra em paralelo com busca de partitura
+    const [letraResult, indexMatch] = await Promise.all([
+      fetchLetra(artista, titulo),
+      searchPartituraIndex(titulo, artista),
+    ])
+
     let tabData: Record<string, unknown> | null = null
     let source: "partitura" | "claude" = "claude"
 
-    const indexMatch = await searchPartituraIndex(titulo, artista)
+    // Tentativa 1: partitura do nandinhocavaco → Claude Vision
     if (indexMatch) {
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
       if (imageUrls.length > 0) {
         tabData = await extractTabFromPartituraImage(imageUrls[0], titulo, artista)
-        if (tabData) source = "partitura"
+        if (tabData) {
+          tabData = applyFormulasTabs(tabData)
+          source = "partitura"
+        }
       }
     }
 
-    // Tentativa 2 (fallback): Claude gera por texto
+    // Tentativa 2 (fallback): Claude gera por texto, usando letra real se disponível
     if (!tabData) {
-      tabData = await generateViaClaudeText(titulo, artista)
+      tabData = await generateViaClaudeText(titulo, artista, letraResult?.plainLyrics)
+      tabData = applyFormulasTabs(tabData)
     }
 
     const tabJson = JSON.parse(JSON.stringify(tabData))
