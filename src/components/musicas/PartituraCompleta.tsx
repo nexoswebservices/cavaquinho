@@ -1,11 +1,36 @@
 "use client"
 
-import { useEffect, useRef, useMemo } from "react"
+import { useEffect, useRef, useMemo, useState } from "react"
+import { BracoCavaquinho } from "@/components/progressoes/BracoCavaquinho"
 import { initSampler, playChord } from "@/lib/sampler"
 
-const SHARP_NOTES = new Set(["C#", "D#", "F#", "G#", "A#"])
 const FLAT_MAP: Record<string, string> = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#" }
 const TO_SHARP: Record<string, string> = { ...FLAT_MAP }
+const SHARP_NOTES = new Set(["C#", "D#", "F#", "G#", "A#"])
+const CHROMATIC = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+// Cavaquinho strings top→bottom in the TAB display: D5(0), B4(1), G4(2), D4(3)
+const OPEN_CHROMAS = [
+  CHROMATIC.indexOf("D"), // D5 — string 0 (top)
+  CHROMATIC.indexOf("B"), // B4 — string 1
+  CHROMATIC.indexOf("G"), // G4 — string 2
+  CHROMATIC.indexOf("D"), // D4 — string 3 (bottom)
+]
+const STRING_LABELS = ["D5", "B4", "G4", "D4"]
+
+// Maps a note name → the lowest-fret position on the cavaquinho neck
+function noteToMelodyTab(noteName: string): { stringIdx: number; fret: number } | null {
+  const sharp = TO_SHARP[noteName] ?? noteName
+  const noteChroma = CHROMATIC.indexOf(sharp)
+  if (noteChroma === -1) return null
+
+  let best: { stringIdx: number; fret: number } | null = null
+  OPEN_CHROMAS.forEach((openChroma, si) => {
+    const fret = (noteChroma - openChroma + 12) % 12
+    if (fret <= 12 && (!best || fret < best.fret)) best = { stringIdx: si, fret }
+  })
+  return best
+}
 
 function noteToVexKey(note: string, octave: number) {
   const n = FLAT_MAP[note] ?? note
@@ -14,34 +39,15 @@ function noteToVexKey(note: string, octave: number) {
   return { key: `${base.toLowerCase()}/${octave}`, accidental: hasSharp ? "#" as const : undefined }
 }
 
-interface AcordeMedida {
-  batida: number
-  acorde: string
-  duration: string
-  notas: string[]
-  tab: number[]
-}
-
-interface Medida {
-  numero: number
-  letra: string
-  acordes: AcordeMedida[]
-}
-
-interface PartituraCompletaProps {
-  medidas: Medida[]
-  activeMeasure: number
-  view: "both" | "tab"
-  compasso: string
-}
+interface AcordeMedida { batida: number; acorde: string; duration: string; notas: string[]; tab: number[] }
+interface Medida { numero: number; letra: string; acordes: AcordeMedida[] }
+interface PartituraCompletaProps { medidas: Medida[]; activeMeasure: number; view: "both" | "tab"; compasso: string }
 
 const MEASURES_PER_ROW = 4
-
-// Strings top-to-bottom = D5, B4, G4, D4 (matches cavaquinho)
-const TUNING = ["D5", "B4", "G4", "D4"]
-const STRING_GAP = 15
-const TAB_TOP = 8
-const TAB_H = TAB_TOP * 2 + (TUNING.length - 1) * STRING_GAP + 14
+const STRING_GAP = 18
+const TAB_TOP = 10
+const NUM_STRINGS = 4
+const TAB_H = TAB_TOP * 2 + (NUM_STRINGS - 1) * STRING_GAP + 16
 
 interface RowProps {
   medidas: Medida[]
@@ -56,8 +62,17 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
   const vfRef = useRef<HTMLDivElement>(null)
   const n = medidas.length
   const beatsPerMeasure = compasso === "3/4" ? 3 : 4
+  // selectedChord: "mi-uniqueIdx" key, or null
+  const [selectedKey, setSelectedKey] = useState<string | null>(null)
 
-  // Render VexFlow — only re-runs when medidas or view change, NOT activeMeasure
+  // Close popup when clicking outside
+  useEffect(() => {
+    if (!selectedKey) return
+    function handleClick() { setSelectedKey(null) }
+    document.addEventListener("click", handleClick)
+    return () => document.removeEventListener("click", handleClick)
+  }, [selectedKey])
+
   useEffect(() => {
     if (!showPartitura) return
     const container = vfRef.current
@@ -70,7 +85,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
       container.innerHTML = ""
 
       const totalW = container.clientWidth || 800
-      const staveH = 100
+      const staveH = 110
       const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG)
       renderer.resize(totalW, staveH)
       const ctx = renderer.getContext()
@@ -79,10 +94,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
       for (let i = 0; i < medidas.length; i++) {
         const mw = totalW / n
         const stave = new VF.Stave(x, 10, mw)
-        if (i === 0 && isFirstRow) {
-          stave.addClef("treble")
-          stave.addTimeSignature(compasso)
-        }
+        if (i === 0 && isFirstRow) { stave.addClef("treble"); stave.addTimeSignature(compasso) }
         stave.setContext(ctx).draw()
 
         const vexNotes = medidas[i].acordes.map((a) => {
@@ -92,7 +104,6 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
           if (accidental) sn.addModifier(new VF.Accidental(accidental))
           return sn
         })
-
         if (vexNotes.length > 0) {
           const voice = new VF.Voice({ numBeats: beatsPerMeasure, beatValue: 4 }).setMode(VF.Voice.Mode.SOFT)
           voice.addTickables(vexNotes)
@@ -100,8 +111,24 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
           new VF.Formatter().joinVoices([voice]).format([voice], fmtW)
           voice.draw(ctx, stave)
         }
-
         x += mw
+      }
+
+      // Override VexFlow's default black with a light color for dark background
+      const svgEl = container.querySelector("svg")
+      if (svgEl) {
+        svgEl.querySelectorAll<SVGElement>("path, rect, polygon, line").forEach((el) => {
+          if (!el.getAttribute("fill") || el.getAttribute("fill") === "black" || el.getAttribute("fill") === "#000000") {
+            el.setAttribute("fill", "#cbd5e1")
+          }
+          if (!el.getAttribute("stroke") || el.getAttribute("stroke") === "black" || el.getAttribute("stroke") === "#000000") {
+            el.setAttribute("stroke", "#cbd5e1")
+          }
+        })
+        svgEl.querySelectorAll<SVGTextElement>("text").forEach((el) => {
+          const fill = el.getAttribute("fill")
+          if (!fill || fill === "black" || fill === "#000000") el.setAttribute("fill", "#e2e8f0")
+        })
       }
     }
 
@@ -110,7 +137,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [medidas, showPartitura, isFirstRow, compasso, n, beatsPerMeasure])
 
-  async function handlePlay(notas: string[]) {
+  async function handlePlayChord(notas: string[]) {
     await initSampler()
     const pairs: [string, number][] = notas.map((n) => [TO_SHARP[n] ?? n, 4])
     playChord(pairs)
@@ -118,50 +145,77 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
 
   return (
     <div className="relative">
-      {/* Active column highlight — pure CSS, no VexFlow re-render */}
+      {/* Active column highlight */}
       {activeInRow >= 0 && (
-        <div
-          className="absolute inset-0 pointer-events-none z-10"
-          style={{
-            left: `${(activeInRow / n) * 100}%`,
-            width: `${(1 / n) * 100}%`,
-            background: "rgba(109,40,217,0.08)",
-            borderLeft: "1px solid rgba(139,92,246,0.35)",
-            borderRight: "1px solid rgba(139,92,246,0.35)",
-          }}
-        />
+        <div className="absolute inset-0 pointer-events-none z-10" style={{
+          left: `${(activeInRow / n) * 100}%`,
+          width: `${(1 / n) * 100}%`,
+          background: "rgba(109,40,217,0.10)",
+          borderLeft: "2px solid rgba(139,92,246,0.45)",
+          borderRight: "2px solid rgba(139,92,246,0.45)",
+        }} />
       )}
 
-      {/* Chord names + measure numbers */}
+      {/* Chord names — deduplicated consecutive repeats */}
       <div className="flex border-t border-white/5">
-        {medidas.map((m, i) => (
-          <div
-            key={i}
-            className="flex-1 min-w-0 px-2 pt-1.5 pb-0.5"
-            style={{ borderRight: i < n - 1 ? "1px solid rgba(255,255,255,0.04)" : undefined }}
-          >
-            <div className="flex items-center gap-1 flex-wrap">
-              <span className="text-[9px] text-slate-600 font-mono mr-0.5">M{rowStart + i + 1}</span>
-              {m.acordes.map((a, j) => (
-                <button
-                  key={j}
-                  onClick={() => handlePlay(a.notas)}
-                  className="text-[11px] font-mono text-violet-400 hover:text-violet-200 hover:bg-violet-600/20 px-1 rounded transition-colors leading-none py-0.5"
-                >
-                  {a.acorde}
-                </button>
-              ))}
+        {medidas.map((m, mi) => {
+          const uniqueAcordes = m.acordes.filter(
+            (a, ci) => ci === 0 || a.acorde !== m.acordes[ci - 1].acorde
+          )
+          return (
+            <div key={mi} className="flex-1 min-w-0 px-2 pt-1.5 pb-0.5"
+              style={{ borderRight: mi < n - 1 ? "1px solid rgba(255,255,255,0.05)" : undefined }}>
+              <div className="flex items-center gap-1 flex-wrap">
+                <span className="text-[9px] text-slate-600 font-mono mr-0.5">M{rowStart + mi + 1}</span>
+                {uniqueAcordes.map((a, ui) => {
+                  const key = `${mi}-${ui}`
+                  const isOpen = selectedKey === key
+                  return (
+                    <div key={ui} className="relative">
+                      {/* BracoCavaquinho popup on click */}
+                      {isOpen && (
+                        <div
+                          className="absolute bottom-full left-0 mb-2 z-50 bg-[#0d0920] border border-violet-500/40 rounded-xl p-3 shadow-2xl shadow-black/70"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <p className="text-xs text-violet-300 font-mono text-center mb-2">{a.acorde}</p>
+                          <BracoCavaquinho chordNotes={a.notas} voicingIndex={0} />
+                          <button
+                            onClick={() => handlePlayChord(a.notas)}
+                            className="mt-2 w-full text-[10px] text-violet-400 hover:text-violet-200 py-1 rounded bg-violet-600/20 hover:bg-violet-600/30 transition-colors"
+                          >
+                            ▶ tocar
+                          </button>
+                        </div>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedKey(isOpen ? null : key)
+                        }}
+                        className={`text-[12px] font-mono px-1.5 py-0.5 rounded transition-colors leading-none ${
+                          isOpen
+                            ? "text-violet-100 bg-violet-600/30 ring-1 ring-violet-400/50"
+                            : "text-violet-400 hover:text-violet-200 hover:bg-violet-600/20"
+                        }`}
+                      >
+                        {a.acorde}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
-      {/* Partitura VexFlow */}
+      {/* VexFlow partitura */}
       {showPartitura && (
-        <div ref={vfRef} className="w-full" style={{ minHeight: 100 }} />
+        <div ref={vfRef} className="w-full" style={{ minHeight: 110 }} />
       )}
 
-      {/* 4-string TAB */}
+      {/* Melody TAB — single note per beat, correct string */}
       <svg
         viewBox={`0 0 800 ${TAB_H}`}
         preserveAspectRatio="none"
@@ -170,55 +224,65 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
         xmlns="http://www.w3.org/2000/svg"
       >
         {/* TAB label */}
-        <text x={3} y={TAB_TOP + ((TUNING.length - 1) * STRING_GAP) / 2 + 4} fontSize={7} fill="#475569" fontWeight="bold">TAB</text>
+        <text x={4} y={TAB_TOP + ((NUM_STRINGS - 1) * STRING_GAP) / 2 + 4}
+          fontSize={7} fill="#4b5563" fontWeight="bold" fontFamily="monospace">TAB</text>
 
-        {/* 4 string lines spanning full width */}
-        {TUNING.map((_, si) => {
+        {/* 4 string lines */}
+        {STRING_LABELS.map((label, si) => {
           const y = TAB_TOP + si * STRING_GAP
-          return <line key={`s${si}`} x1={18} y1={y} x2={800} y2={y} stroke="#1e293b" strokeWidth={0.7} />
+          return (
+            <g key={`s${si}`}>
+              <text x={20} y={y + 3.5} fontSize={6} fill="#374151" textAnchor="end" fontFamily="monospace">
+                {label}
+              </text>
+              <line x1={22} y1={y} x2={800} y2={y} stroke="#1e3a4a" strokeWidth={si === 0 ? 1.2 : 0.8} />
+            </g>
+          )
         })}
 
         {/* Vertical bar lines */}
         {Array.from({ length: n + 1 }, (_, bi) => {
-          const bx = bi === 0 ? 18 : bi * (800 / n)
+          const bx = bi === 0 ? 22 : bi * (800 / n)
           return (
-            <line
-              key={`b${bi}`}
-              x1={bx} y1={TAB_TOP - 3}
-              x2={bx} y2={TAB_TOP + (TUNING.length - 1) * STRING_GAP + 3}
-              stroke="#334155"
-              strokeWidth={bi === 0 ? 1.5 : 0.8}
-            />
+            <line key={`b${bi}`} x1={bx} y1={TAB_TOP - 4} x2={bx}
+              y2={TAB_TOP + (NUM_STRINGS - 1) * STRING_GAP + 4}
+              stroke="#374151" strokeWidth={bi === 0 ? 2 : 0.8} />
           )
         })}
 
-        {/* Fret numbers — all 4 strings per chord */}
+        {/* Melody fret number per chord beat — one note on the right string */}
         {medidas.map((m, mi) => {
-          const mxStart = mi === 0 ? 18 : mi * (800 / n)
+          const mxStart = mi === 0 ? 22 : mi * (800 / n)
           const mxEnd = (mi + 1) * (800 / n)
           const mw = mxEnd - mxStart
           const nc = m.acordes.length || 1
+          const isActive = mi === activeInRow
+
           return m.acordes.map((a, ci) => {
             const cx = mxStart + ((ci + 0.5) / nc) * mw
-            return a.tab.map((fret, si) => {
-              const y = TAB_TOP + si * STRING_GAP
-              const isActive = mi === activeInRow
-              return (
-                <g key={`${mi}-${ci}-${si}`}>
-                  <rect x={cx - 7} y={y - 6} width={14} height={13} fill="#0a0714" rx={2} />
-                  <text
-                    x={cx} y={y + 4}
-                    fontSize={9}
-                    fill={isActive ? "#a78bfa" : "#64748b"}
-                    textAnchor="middle"
-                    fontFamily="monospace"
-                    fontWeight={isActive ? "bold" : "normal"}
-                  >
-                    {fret}
-                  </text>
-                </g>
-              )
-            })
+            const root = a.notas[0] ?? "C"
+            const pos = noteToMelodyTab(root)
+            if (!pos) return null
+
+            const y = TAB_TOP + pos.stringIdx * STRING_GAP
+            const fretStr = String(pos.fret)
+            const boxW = fretStr.length > 1 ? 17 : 13
+
+            return (
+              <g key={`${mi}-${ci}`}>
+                <rect x={cx - boxW / 2} y={y - 6.5} width={boxW} height={14} fill="#060a12" rx={2} />
+                <text
+                  x={cx} y={y + 4}
+                  fontSize={10}
+                  fill={isActive ? "#a78bfa" : "#94a3b8"}
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontWeight={isActive ? "bold" : "normal"}
+                >
+                  {fretStr}
+                </text>
+              </g>
+            )
           })
         })}
       </svg>
@@ -226,14 +290,9 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
       {/* Lyrics */}
       <div className="flex border-b border-white/5 mb-1">
         {medidas.map((m, i) => (
-          <div
-            key={i}
-            className="flex-1 min-w-0 px-2 pb-1.5"
-            style={{ borderRight: i < n - 1 ? "1px solid rgba(255,255,255,0.04)" : undefined }}
-          >
-            {m.letra && (
-              <p className="text-[11px] text-slate-400 truncate italic leading-tight">{m.letra}</p>
-            )}
+          <div key={i} className="flex-1 min-w-0 px-2 pb-1.5"
+            style={{ borderRight: i < n - 1 ? "1px solid rgba(255,255,255,0.04)" : undefined }}>
+            {m.letra && <p className="text-[11px] text-slate-400 truncate italic leading-tight">{m.letra}</p>}
           </div>
         ))}
       </div>
@@ -244,9 +303,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
 export function PartituraCompleta({ medidas, activeMeasure, view, compasso }: PartituraCompletaProps) {
   const rows = useMemo(() => {
     const result: Medida[][] = []
-    for (let i = 0; i < medidas.length; i += MEASURES_PER_ROW) {
-      result.push(medidas.slice(i, i + MEASURES_PER_ROW))
-    }
+    for (let i = 0; i < medidas.length; i += MEASURES_PER_ROW) result.push(medidas.slice(i, i + MEASURES_PER_ROW))
     return result
   }, [medidas])
 
@@ -260,14 +317,13 @@ export function PartituraCompleta({ medidas, activeMeasure, view, compasso }: Pa
   }, [activeRowIdx])
 
   return (
-    <div className="rounded-xl border border-white/5 bg-[#080512] overflow-hidden">
+    <div className="rounded-xl border border-white/5 bg-[#070b11] divide-y divide-white/5">
       {rows.map((rowMedidas, ri) => {
         const rowStart = ri * MEASURES_PER_ROW
         const activeInRow =
           activeMeasure >= rowStart && activeMeasure < rowStart + rowMedidas.length
             ? activeMeasure - rowStart
             : -1
-
         return (
           <div key={ri} ref={(el) => { rowRefs.current[ri] = el }}>
             <PartituraRow

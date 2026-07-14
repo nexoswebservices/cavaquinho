@@ -1,7 +1,5 @@
 import { notFound } from "next/navigation"
-import { getServerSession } from "next-auth"
 import Link from "next/link"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { MusicaPlayer } from "@/components/musicas/MusicaPlayer"
 
@@ -16,17 +14,8 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 }
 
 export default async function MusicaPage({ params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions)
-  const userId = session?.user?.id
-
   const estudo = await prisma.estudo.findUnique({ where: { id: params.id } })
   if (!estudo) notFound()
-
-  const saved = userId
-    ? !!(await prisma.estudoSalvo.findUnique({
-        where: { userId_estudoId: { userId, estudoId: estudo.id } },
-      }))
-    : false
 
   return (
     <div>
@@ -50,7 +39,6 @@ export default async function MusicaPage({ params }: { params: { id: string } })
           introSecs: estudo.introSecs,
           tabData: estudo.tabData as { medidas: never[] },
         }}
-        isSaved={saved}
       />
     </div>
   )

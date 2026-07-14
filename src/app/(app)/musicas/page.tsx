@@ -47,7 +47,7 @@ export default async function MusicasPage() {
           <h2 className="text-sm font-medium text-slate-400 uppercase tracking-wide mb-4">
             Minhas salvas
           </h2>
-          <MusicasList estudos={savedEstudos} />
+          <MusicasList estudos={savedEstudos} allSaved={true} />
         </div>
       )}
 

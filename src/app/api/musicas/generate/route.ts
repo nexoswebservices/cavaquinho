@@ -127,14 +127,16 @@ export async function POST(req: NextRequest) {
     let tabData: Record<string, unknown> | null = null
     let source: "partitura" | "claude" = "claude"
 
-    // Tentativa 1: partitura do nandinhocavaco → Claude Vision
+    // Tentativa 1: partitura do nandinhocavaco → Claude Vision (lê melodia nota a nota)
     if (indexMatch) {
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
-      if (imageUrls.length > 0) {
-        tabData = await extractTabFromPartituraImage(imageUrls[0], titulo, artista)
+      // Tentar todas as imagens filtradas até obter uma transcrição válida
+      for (const imageUrl of imageUrls.slice(0, 4)) {
+        tabData = await extractTabFromPartituraImage(imageUrl, titulo, artista)
         if (tabData) {
-          tabData = applyFormulasTabs(tabData)
+          // NÃO aplicar chordToTab aqui: Vision já retorna notas de melodia individuais
           source = "partitura"
+          break
         }
       }
     }
@@ -142,6 +144,7 @@ export async function POST(req: NextRequest) {
     // Tentativa 2 (fallback): Claude gera por texto, usando letra real se disponível
     if (!tabData) {
       tabData = await generateViaClaudeText(titulo, artista, letraResult?.plainLyrics)
+      // Fallback de texto usa chord voicings → recalcular tabs com formulas
       tabData = applyFormulasTabs(tabData)
     }
 
