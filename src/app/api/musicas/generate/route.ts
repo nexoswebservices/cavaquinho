@@ -126,24 +126,23 @@ export async function POST(req: NextRequest) {
 
     let tabData: Record<string, unknown> | null = null
     let source: "partitura" | "claude" = "claude"
-    const dbg: Record<string, unknown> = {}
+    const dbg: { indexMatch: string | null; imageUrls: string[]; visionAttempts: { url: string; medidas: number | null }[]; finalMedidas: number } = {
+      indexMatch: null,
+      imageUrls: [],
+      visionAttempts: [],
+      finalMedidas: 0,
+    }
 
     // Tentativa 1: partitura do nandinhocavaco → Claude Vision (lê melodia nota a nota)
     if (indexMatch) {
-      dbg.indexMatch = { postTitulo: indexMatch.postTitulo, postUrl: indexMatch.postUrl }
+      dbg.indexMatch = indexMatch.postUrl
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
       dbg.imageUrls = imageUrls.slice(0, 4)
       // Tentar todas as imagens filtradas até obter uma transcrição válida
       for (const imageUrl of imageUrls.slice(0, 4)) {
         const visionResult = await extractTabFromPartituraImage(imageUrl, titulo, artista)
-        const medCount = Array.isArray((visionResult as Record<string, unknown> | null)?.medidas)
-          ? ((visionResult as Record<string, unknown>).medidas as unknown[]).length
-          : null
-        ;(dbg.visionAttempts as unknown[] | undefined ?? ((dbg.visionAttempts = []) as unknown[])).push({
-          url: imageUrl,
-          medidas: medCount,
-          ok: visionResult !== null,
-        })
+        const medidas = visionResult ? (visionResult.medidas as unknown[]).length : null
+        dbg.visionAttempts.push({ url: imageUrl, medidas })
         if (visionResult) {
           tabData = visionResult
           // NÃO aplicar chordToTab aqui: Vision já retorna notas de melodia individuais
@@ -151,8 +150,6 @@ export async function POST(req: NextRequest) {
           break
         }
       }
-    } else {
-      dbg.indexMatch = null
     }
 
     // Tentativa 2 (fallback): Claude gera por texto, usando letra real se disponível
@@ -162,9 +159,7 @@ export async function POST(req: NextRequest) {
       tabData = applyFormulasTabs(tabData)
     }
 
-    dbg.medidas = Array.isArray((tabData as Record<string, unknown>).medidas)
-      ? ((tabData as Record<string, unknown>).medidas as unknown[]).length
-      : 0
+    dbg.finalMedidas = Array.isArray(tabData.medidas) ? (tabData.medidas as unknown[]).length : 0
 
     const tabJson = JSON.parse(JSON.stringify(tabData))
 
