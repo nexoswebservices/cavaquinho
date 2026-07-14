@@ -126,19 +126,33 @@ export async function POST(req: NextRequest) {
 
     let tabData: Record<string, unknown> | null = null
     let source: "partitura" | "claude" = "claude"
+    const dbg: Record<string, unknown> = {}
 
     // Tentativa 1: partitura do nandinhocavaco → Claude Vision (lê melodia nota a nota)
     if (indexMatch) {
+      dbg.indexMatch = { postTitulo: indexMatch.postTitulo, postUrl: indexMatch.postUrl }
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
+      dbg.imageUrls = imageUrls.slice(0, 4)
       // Tentar todas as imagens filtradas até obter uma transcrição válida
       for (const imageUrl of imageUrls.slice(0, 4)) {
-        tabData = await extractTabFromPartituraImage(imageUrl, titulo, artista)
-        if (tabData) {
+        const visionResult = await extractTabFromPartituraImage(imageUrl, titulo, artista)
+        const medCount = Array.isArray((visionResult as Record<string, unknown> | null)?.medidas)
+          ? ((visionResult as Record<string, unknown>).medidas as unknown[]).length
+          : null
+        ;(dbg.visionAttempts as unknown[] | undefined ?? ((dbg.visionAttempts = []) as unknown[])).push({
+          url: imageUrl,
+          medidas: medCount,
+          ok: visionResult !== null,
+        })
+        if (visionResult) {
+          tabData = visionResult
           // NÃO aplicar chordToTab aqui: Vision já retorna notas de melodia individuais
           source = "partitura"
           break
         }
       }
+    } else {
+      dbg.indexMatch = null
     }
 
     // Tentativa 2 (fallback): Claude gera por texto, usando letra real se disponível
@@ -147,6 +161,10 @@ export async function POST(req: NextRequest) {
       // Fallback de texto usa chord voicings → recalcular tabs com formulas
       tabData = applyFormulasTabs(tabData)
     }
+
+    dbg.medidas = Array.isArray((tabData as Record<string, unknown>).medidas)
+      ? ((tabData as Record<string, unknown>).medidas as unknown[]).length
+      : 0
 
     const tabJson = JSON.parse(JSON.stringify(tabData))
 
@@ -162,7 +180,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return NextResponse.json({ id: estudo.id, cached: false, source })
+    return NextResponse.json({ id: estudo.id, cached: false, source, dbg })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error("generate error:", msg)
