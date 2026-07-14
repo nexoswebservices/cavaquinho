@@ -126,24 +126,15 @@ export async function POST(req: NextRequest) {
 
     let tabData: Record<string, unknown> | null = null
     let source: "partitura" | "claude" = "claude"
-    const dbg: { indexMatch: string | null; imageUrls: string[]; visionAttempts: { url: string; medidas: number | null }[]; finalMedidas: number } = {
-      indexMatch: null,
-      imageUrls: [],
-      visionAttempts: [],
-      finalMedidas: 0,
-    }
 
     // Tentativa 1: partitura do nandinhocavaco → Claude Vision (lê melodia nota a nota)
     if (indexMatch) {
-      dbg.indexMatch = indexMatch.postUrl
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
-      dbg.imageUrls = imageUrls.slice(0, 4)
-      // Tentar todas as imagens filtradas até obter uma transcrição válida
       for (const imageUrl of imageUrls.slice(0, 4)) {
         const visionResult = await extractTabFromPartituraImage(imageUrl, titulo, artista)
-        const medidas = visionResult ? (visionResult.medidas as unknown[]).length : null
-        dbg.visionAttempts.push({ url: imageUrl, medidas })
-        if (visionResult) {
+        // Só aceitar se Vision extraiu ao menos 4 medidas (resultado mínimo aceitável)
+        const medidas = visionResult ? (visionResult.medidas as unknown[]).length : 0
+        if (visionResult && medidas >= 4) {
           tabData = visionResult
           // NÃO aplicar chordToTab aqui: Vision já retorna notas de melodia individuais
           source = "partitura"
@@ -159,8 +150,6 @@ export async function POST(req: NextRequest) {
       tabData = applyFormulasTabs(tabData)
     }
 
-    dbg.finalMedidas = Array.isArray(tabData.medidas) ? (tabData.medidas as unknown[]).length : 0
-
     const tabJson = JSON.parse(JSON.stringify(tabData))
 
     const estudo = await prisma.estudo.create({
@@ -175,7 +164,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return NextResponse.json({ id: estudo.id, cached: false, source, dbg })
+    return NextResponse.json({ id: estudo.id, cached: false, source })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error("generate error:", msg)
