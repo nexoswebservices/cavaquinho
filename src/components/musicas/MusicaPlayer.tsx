@@ -1,5 +1,4 @@
 "use client"
-// v2
 import { useRef, useState, useCallback, useEffect } from "react"
 import { YoutubeEmbed } from "./YoutubeEmbed"
 import { PlayerControls } from "./PlayerControls"
@@ -142,7 +141,7 @@ export function MusicaPlayer({ estudo }: MusicaPlayerProps) {
       {/* Partitura contínua */}
       <div>
         <p className="text-xs text-slate-500 uppercase tracking-wide mb-3">
-          {medidas.length} medidas
+          {medidas.length} {medidas.length === 1 ? "medida" : "medidas"}
           {isPlaying && currentMeasure >= 0 && (
             <span className="ml-2 text-violet-400">· M{currentMeasure + 1}</span>
           )}
