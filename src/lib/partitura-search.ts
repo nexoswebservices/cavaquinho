@@ -7,6 +7,10 @@ export interface PartituraMatch {
   postUrl: string
 }
 
+function stripAccents(s: string): string {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "")
+}
+
 /**
  * Busca no índice de partituras por título e artista.
  * Retorna o match mais relevante ou null.
@@ -15,38 +19,35 @@ export async function searchPartituraIndex(
   titulo: string,
   artista: string
 ): Promise<PartituraMatch | null> {
-  // Extrair palavras significativas do título (>3 chars)
+  // Extrair palavras significativas do título (>3 chars), sem pontuação
   const tituloWords = titulo
     .toLowerCase()
     .split(/\s+/)
+    .map((w) => w.replace(/[^\wáéíóúàèìòùãõâêîôûäëïöüçñ]/g, ""))
     .filter((w) => w.length > 3)
 
   if (tituloWords.length === 0) return null
 
-  // Tentar match no postTitulo (que contém artista + músicas do post)
+  // Versão sem acentos para queries LIKE (MySQL pode ser accent-sensitive)
+  const tituloWordsNorm = tituloWords.map(stripAccents)
+
   const candidates = await prisma.partituraIndex.findMany({
     where: {
       OR: [
-        // Primeiro palavra significativa do título
-        { postTitulo: { contains: tituloWords[0] } },
-        // Segunda palavra se existir
-        ...(tituloWords[1]
-          ? [{ postTitulo: { contains: tituloWords[1] } }]
-          : []),
-        // Artista (primeiros 8 chars para tolerar variações)
+        ...tituloWordsNorm.map((w) => ({ postTitulo: { contains: w } })),
         { artista: { contains: artista.substring(0, 8) } },
       ],
     },
-    take: 10,
+    take: 50,
   })
 
   if (candidates.length === 0) return null
 
-  // Ranquear: priorizar matches que contêm mais palavras do título
+  // Ranquear por quantidade de palavras do título encontradas (sem acentos)
   const ranked = candidates
     .map((c) => {
-      const text = (c.postTitulo + " " + c.artista).toLowerCase()
-      const score = tituloWords.filter((w) => text.includes(w)).length
+      const text = stripAccents((c.postTitulo + " " + c.artista).toLowerCase())
+      const score = tituloWordsNorm.filter((w) => text.includes(w)).length
       return { ...c, score }
     })
     .filter((c) => c.score > 0)
