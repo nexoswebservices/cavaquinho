@@ -60,9 +60,8 @@ export async function extractTabFromPartituraImage(
   try {
     const message = await client.messages.create({
       model: "claude-sonnet-5",
-      max_tokens: 8192,
-      system: `Você é especialista em leitura de partituras e transcrição para cavaquinho (afinação D4-G4-B4-D5).
-Responda SOMENTE com JSON válido, sem markdown, sem texto extra.`,
+      max_tokens: 4096,
+      system: `Você é especialista em leitura de partituras. Responda SOMENTE com JSON válido, sem markdown, sem texto extra.`,
       messages: [
         {
           role: "user",
@@ -73,49 +72,37 @@ Responda SOMENTE com JSON válido, sem markdown, sem texto extra.`,
             },
             {
               type: "text",
-              text: `Esta é a partitura de "${titulo}" por ${artista}, transcrita para cavaquinho.
+              text: `Esta é a partitura de "${titulo}" por ${artista}.
 
-A partitura mostra a MELODIA NOTA A NOTA que o cavaquinho executa, com cifras de acompanhamento acima do pentagrama.
-
-TAREFA: Transcreva cada nota da melodia. Cada item em "acordes" = UMA nota individual da melodia.
+TAREFA: Leia apenas os SÍMBOLOS DE ACORDE escritos acima do pentagrama em cada compasso.
 
 Retorne exatamente este JSON:
 {
   "tom": "C",
-  "bpm": 120,
+  "bpm": 90,
   "compasso": "4/4",
   "medidas": [
     {
       "numero": 1,
-      "letra": "trecho da letra cantada nesta medida (vazio se intro/instrumental)",
+      "letra": "",
       "acordes": [
-        {
-          "batida": 1,
-          "acorde": "C",
-          "duration": "8",
-          "notas": ["E"],
-          "tab": [2, -1, -1, -1]
-        }
+        { "batida": 1, "acorde": "C",  "duration": "w", "notas": ["C"], "tab": [0,0,0,0] },
+        { "batida": 3, "acorde": "Dm7","duration": "h", "notas": ["D"], "tab": [0,0,0,0] }
       ]
     }
   ]
 }
 
-Regras CRÍTICAS:
-- notas: array com APENAS UMA nota da melodia (NÃO os tons do acorde)
-  - É a nota que o músico toca na corda, não o voicing
-  - Use sempre sharps: C#, D#, F#, G#, A#. Nunca bemóis.
-  - Exemplos corretos: ["G"], ["E"], ["C#"], ["D"]
-  - Exemplos ERRADOS: ["G","B","D"], ["C","E","G"] ← esses são acordes, não use
-- tab: [D4fret, G4fret, B4fret, D5fret]
-  - Apenas UMA corda tem fret ≥ 0, as outras = -1
-  - Afinação: D4(corda mais grossa)=0, G4=0, B4=0, D5(mais fina)=0
-  - Exemplo nota G: se tocar na corda G4 solta = [-1, 0, -1, -1]
-- duration: "w"=4 beats, "h"=2 beats, "q"=1 beat, "8"=0.5 beat, "16"=0.25 beat
-- acorde: a cifra que aparece ACIMA desta nota na partitura
-- batida: posição rítmica no compasso (1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5...)
-- Inclua TODAS as notas de TODOS os compassos visíveis
-- Para passagens rápidas (colcheias/semicolcheias): liste CADA nota separadamente`,
+Regras:
+- Leia SOMENTE os símbolos de acorde acima do pentagrama (ex: C, Dm7, F/G, E7, Fmaj7)
+- Se o compasso tem UM acorde → duration "w" (4 beats), batida 1
+- Se tem DOIS acordes → duration "h" (2 beats) cada, batidas 1 e 3
+- Se tem TRÊS → duration "q" para cada um, batidas 1, 2, 3
+- "notas" e "tab" são placeholders — coloque a fundamental do acorde em "notas" e zeros em "tab"
+- "letra" deixe vazio ""
+- tom: tonalidade da música (ex: "C" para Dó maior, "Am" para Lá menor)
+- bpm: estime pelo gênero (pagode ~90, samba ~100, baião ~110)
+- Inclua TODOS os compassos visíveis na imagem, em ordem`,
             },
           ],
         },

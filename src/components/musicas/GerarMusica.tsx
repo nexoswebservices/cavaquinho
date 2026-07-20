@@ -15,19 +15,19 @@ export function GerarMusica() {
     const regen = searchParams.get("regen")
     if (regen) {
       setUrl(regen)
-      handleGerarUrl(regen)
+      handleGerarUrl(regen, true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function handleGerarUrl(targetUrl: string) {
+  async function handleGerarUrl(targetUrl: string, force = false) {
     setLoading(true)
     setError("")
     try {
       const res = await fetch("/api/musicas/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: targetUrl }),
+        body: JSON.stringify({ url: targetUrl, force }),
       })
       const text = await res.text()
       let data: { id?: string; error?: string; detail?: string }

@@ -99,15 +99,18 @@ Regras:
 
 export async function POST(req: NextRequest) {
   try {
-    const { url } = await req.json()
+    const { url, force } = await req.json()
     if (!url) return NextResponse.json({ error: "URL obrigatória" }, { status: 400 })
 
     const youtubeId = extractYoutubeId(url)
     if (!youtubeId) return NextResponse.json({ error: "URL do YouTube inválida" }, { status: 400 })
 
-    // Cache hit
+    // Cache hit — pular se force=true (regenerar)
     const existing = await prisma.estudo.findUnique({ where: { youtubeId } })
-    if (existing) return NextResponse.json({ id: existing.id, cached: true })
+    if (existing) {
+      if (!force) return NextResponse.json({ id: existing.id, cached: true })
+      await prisma.estudo.delete({ where: { id: existing.id } })
+    }
 
     // oEmbed: título + artista
     const oembedRes = await fetch(
@@ -135,8 +138,8 @@ export async function POST(req: NextRequest) {
         // Só aceitar se Vision extraiu ao menos 4 medidas (resultado mínimo aceitável)
         const medidas = visionResult ? (visionResult.medidas as unknown[]).length : 0
         if (visionResult && medidas >= 4) {
-          tabData = visionResult
-          // NÃO aplicar chordToTab aqui: Vision já retorna notas de melodia individuais
+          // Vision agora retorna chord names → recalcular tabs com fórmulas
+          tabData = applyFormulasTabs(visionResult)
           source = "partitura"
           break
         }
