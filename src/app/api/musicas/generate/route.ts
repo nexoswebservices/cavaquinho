@@ -130,15 +130,16 @@ export async function POST(req: NextRequest) {
     let tabData: Record<string, unknown> | null = null
     let source: "partitura" | "claude" = "claude"
 
-    // Tentativa 1: partitura do nandinhocavaco → Claude Vision (lê melodia nota a nota)
+    // Tentativa 1: partitura do nandinhocavaco → Claude Vision
+    console.error(`[generate] titulo="${titulo}" artista="${artista}" indexMatch=${JSON.stringify(indexMatch?.postUrl ?? null)}`)
     if (indexMatch) {
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
+      console.error(`[generate] imageUrls.length=${imageUrls.length}`)
       for (const imageUrl of imageUrls.slice(0, 4)) {
         const visionResult = await extractTabFromPartituraImage(imageUrl, titulo, artista)
-        // Só aceitar se Vision extraiu ao menos 4 medidas (resultado mínimo aceitável)
         const medidas = visionResult ? (visionResult.medidas as unknown[]).length : 0
+        console.error(`[generate] vision medidas=${medidas}`)
         if (visionResult && medidas >= 4) {
-          // Vision agora retorna chord names → recalcular tabs com fórmulas
           tabData = applyFormulasTabs(visionResult)
           source = "partitura"
           break
