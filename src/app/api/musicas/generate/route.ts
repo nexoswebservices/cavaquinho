@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return NextResponse.json({ id: estudo.id, cached: false, source })
+    return NextResponse.json({ id: estudo.id, cached: false, source, _debug: indexMatch?.postUrl ?? null })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error("generate error:", msg)
