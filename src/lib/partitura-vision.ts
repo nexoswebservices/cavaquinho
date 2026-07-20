@@ -59,7 +59,7 @@ export async function extractTabFromPartituraImage(
   let raw: string
   try {
     const message = await client.messages.create({
-      model: "claude-sonnet-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 4096,
       system: `Você é especialista em leitura de partituras. Responda SOMENTE com JSON válido, sem markdown, sem texto extra.`,
       messages: [

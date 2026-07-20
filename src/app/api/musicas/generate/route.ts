@@ -130,15 +130,12 @@ export async function POST(req: NextRequest) {
     let tabData: Record<string, unknown> | null = null
     let source: "partitura" | "claude" = "claude"
 
-    // Tentativa 1: partitura do nandinhocavaco → Claude Vision
-    console.error(`[generate] titulo="${titulo}" artista="${artista}" indexMatch=${JSON.stringify(indexMatch?.postUrl ?? null)}`)
+    // Tentativa 1: partitura do nandinhocavaco → Claude Vision (Haiku, extrai chord names)
     if (indexMatch) {
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
-      console.error(`[generate] imageUrls.length=${imageUrls.length}`)
       for (const imageUrl of imageUrls.slice(0, 4)) {
         const visionResult = await extractTabFromPartituraImage(imageUrl, titulo, artista)
         const medidas = visionResult ? (visionResult.medidas as unknown[]).length : 0
-        console.error(`[generate] vision medidas=${medidas}`)
         if (visionResult && medidas >= 4) {
           tabData = applyFormulasTabs(visionResult)
           source = "partitura"
