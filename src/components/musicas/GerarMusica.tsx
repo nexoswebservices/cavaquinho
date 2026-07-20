@@ -29,7 +29,13 @@ export function GerarMusica() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: targetUrl }),
       })
-      const data = await res.json()
+      const text = await res.text()
+      let data: { id?: string; error?: string; detail?: string }
+      try {
+        data = JSON.parse(text)
+      } catch {
+        throw new Error(`Resposta inválida do servidor: ${text.slice(0, 120)}`)
+      }
       if (!res.ok) throw new Error(data.error ?? "Erro ao gerar")
       router.push(`/musicas/${data.id}`)
     } catch (e: unknown) {
