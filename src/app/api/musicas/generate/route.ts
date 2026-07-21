@@ -6,6 +6,8 @@ import { fetchPartituraImageUrls, extractTabFromPartituraImage } from "@/lib/par
 import { fetchLetra } from "@/lib/letras-scraper"
 import { chordToTab } from "@/lib/cavaquinho-tab"
 
+export const maxDuration = 60
+
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 function extractYoutubeId(url: string): string | null {
@@ -130,17 +132,23 @@ export async function POST(req: NextRequest) {
     let tabData: Record<string, unknown> | null = null
     let source: "partitura" | "claude" = "claude"
 
-    // Tentativa 1: partitura do nandinhocavaco → Claude Vision (Haiku, extrai chord names)
+    // Tentativa 1: partitura do nandinhocavaco → Claude Vision (Opus, extrai chord names)
     if (indexMatch) {
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
+      console.log(`[generate] partitura match: ${indexMatch.postUrl} | ${imageUrls.length} imagens`)
       for (const imageUrl of imageUrls.slice(0, 4)) {
+        console.log(`[generate] tentando vision: ${imageUrl}`)
         const visionResult = await extractTabFromPartituraImage(imageUrl, titulo, artista)
         const medidas = visionResult ? (visionResult.medidas as unknown[]).length : 0
+        console.log(`[generate] vision result: ${medidas} medidas`)
         if (visionResult && medidas >= 4) {
           tabData = applyFormulasTabs(visionResult)
           source = "partitura"
           break
         }
+      }
+      if (!tabData) {
+        console.log(`[generate] vision falhou para todas as imagens, usando fallback Claude texto`)
       }
     }
 

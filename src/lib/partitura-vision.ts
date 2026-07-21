@@ -17,7 +17,7 @@ export async function fetchPartituraImageUrls(postUrl: string): Promise<string[]
   const raw = html.match(regex) ?? []
 
   const normalized = raw
-    .map((url) => url.replace(/\/s\d+(-[a-z])?\//, "/s16000/").replace(/=s\d+(-[a-z])?$/, "=s16000"))
+    .map((url) => url.replace(/\/s\d+(-[a-z])?\//, "/s1600/").replace(/=s\d+(-[a-z])?$/, "=s1600"))
     .filter((url) => {
       const u = url.toLowerCase()
       // Excluir logos, capas, banners e imagens de sidebar
@@ -55,6 +55,8 @@ export async function extractTabFromPartituraImage(
   // Detectar tipo real da imagem pela URL
   const mediaType = /\.(jpg|jpeg)/i.test(imagemUrl) ? "image/jpeg" : "image/png"
   const base64 = Buffer.from(buffer).toString("base64")
+
+  console.log(`[vision] imagem: ${imagemUrl.slice(-80)}, tamanho: ${buffer.byteLength} bytes`)
 
   let raw: string
   try {
@@ -110,17 +112,23 @@ Regras:
     })
 
     raw = (message.content[0] as { type: string; text: string }).text.trim()
-  } catch {
+    console.log(`[vision] resposta: ${raw.slice(0, 120)}`)
+  } catch (err) {
+    console.error(`[vision] erro Anthropic: ${err instanceof Error ? err.message : String(err)}`)
     return null
   }
 
   try {
     const jsonStr = raw.replace(/^```json?\s*/i, "").replace(/\s*```$/i, "").trim()
     const parsed = JSON.parse(jsonStr)
-    // Validar que tem medidas com pelo menos algumas notas
-    if (!Array.isArray(parsed.medidas) || parsed.medidas.length < 2) return null
+    if (!Array.isArray(parsed.medidas) || parsed.medidas.length < 2) {
+      console.error(`[vision] JSON inválido ou medidas insuficientes: ${parsed.medidas?.length ?? 0}`)
+      return null
+    }
+    console.log(`[vision] OK: ${parsed.medidas.length} medidas, tom=${parsed.tom}`)
     return parsed
-  } catch {
+  } catch (err) {
+    console.error(`[vision] parse JSON erro: ${err instanceof Error ? err.message : String(err)}, raw: ${raw.slice(0, 200)}`)
     return null
   }
 }
