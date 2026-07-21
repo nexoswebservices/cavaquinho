@@ -1,5 +1,5 @@
 // Scraper de cifras em texto do cifraclub.com.br
-// Chords estão em tags <b> ou <strong> no HTML
+// Chords estão em tags <strong> no HTML
 
 export interface ChordWithLyric {
   chord: string  // nome normalizado (ex: "Cmaj7")
@@ -17,66 +17,78 @@ function slugifyCC(text: string): string {
   return text
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[̀-ͯ]/g, "")   // remove acentos (escape Unicode correto)
     .replace(/[^a-z0-9\s-]/g, " ")
     .trim()
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
 }
 
-// Remove sufixos comuns do título para encontrar a música
+// Extrai apenas o título da música de um título do YouTube
+// "Grupo Menos É Mais, NATTAN - Pela Última Vez (Ao Vivo)" → "Pela Última Vez"
 function cleanTitulo(titulo: string): string {
-  return titulo
+  // YouTube: "Artista1, Artista2 - Título (qualifier)"
+  // Pegar tudo depois do último " - "
+  const dashIdx = titulo.lastIndexOf(" - ")
+  const songPart = dashIdx >= 0 ? titulo.slice(dashIdx + 3) : titulo
+
+  return songPart
     .replace(/\s*\(ao vivo[^)]*\)/gi, "")
     .replace(/\s*\(live[^)]*\)/gi, "")
     .replace(/\s*\(acústico[^)]*\)/gi, "")
     .replace(/\s*\(part\.[^)]*\)/gi, "")
     .replace(/\s*\(feat\.[^)]*\)/gi, "")
-    .replace(/\s*ft\.\s*.*/gi, "")
-    .replace(/,\s*[A-Z][A-Z\s]+$/, "") // Remove "NATTAN" após vírgula no título
+    .replace(/\s*\(clipe[^)]*\)/gi, "")
     .trim()
 }
 
-// Normaliza notação brasileira e estrangeira para parseChordSymbol
+// Extrai artistas convidados do título YouTube ("…, NATTAN - …" → "nattan")
+function extractFeatSlugs(titulo: string): string[] {
+  const dashIdx = titulo.lastIndexOf(" - ")
+  const artistPart = dashIdx >= 0 ? titulo.slice(0, dashIdx) : ""
+
+  // "Grupo Menos É Mais, NATTAN" → ["nattan"]
+  const parts = artistPart.split(",").slice(1)
+  return parts.map((p) => slugifyCC(p.trim())).filter((s) => s.length > 0)
+}
+
+// Normaliza notação brasileira → parseChordSymbol entende
 export function normalizarAcorde(raw: string): string {
   return raw
     .trim()
-    // Notação brasileira: 7M → maj7
     .replace(/7M/g, "maj7")
     .replace(/9M/g, "maj9")
-    // Cifraclub usa "m" minúsculo para menor
-    // Sem mudança necessária, parseChordSymbol já trata
 }
 
-// Detecta se um token é um símbolo de acorde válido
-function parece_acorde(token: string): boolean {
-  return /^[A-G][b#]?/.test(token) && token.length < 20
+// Verifica se token parece ser símbolo de acorde
+function pareceAcorde(token: string): boolean {
+  return /^[A-G][b#]?/.test(token) && token.length < 20 && token.length > 0
 }
 
-// Extrai acordes e letras do HTML do cifraclub
+// Extrai acordes + letra do HTML da página do cifraclub
 function extrairDaHtml(html: string): ChordWithLyric[] {
   // Remove scripts e estilos
-  const semScripts = html
+  const sem = html
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
 
-  // Extrai o bloco da cifra: entre as tags <pre> ou div#cifra_cnt
+  // Tenta isolar o bloco da cifra
   const blocoMatch =
-    semScripts.match(/<pre[^>]*id=["']?cifra_cnt["']?[^>]*>([\s\S]*?)<\/pre>/i) ||
-    semScripts.match(/<div[^>]*class=["'][^"']*cifra[^"']*["'][^>]*>([\s\S]*?)<\/div>/i) ||
-    semScripts.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i)
+    sem.match(/<pre[^>]*id=["']?cifra_cnt["']?[^>]*>([\s\S]*?)<\/pre>/i) ||
+    sem.match(/<div[^>]*class=["'][^"']*cifra[_-]?cont[^"']*["'][^>]*>([\s\S]*?)<\/div>/i) ||
+    sem.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i)
 
-  const bloco = blocoMatch ? blocoMatch[1] : semScripts
+  const bloco = blocoMatch ? blocoMatch[1] : sem
 
-  // Encontra todos os acordes em <b> ou <strong>
   const resultado: ChordWithLyric[] = []
   const regex = /<(?:b|strong)[^>]*>([^<]+)<\/(?:b|strong)>([\s\S]*?)(?=<(?:b|strong)|$)/gi
-  let match: RegExpExecArray | null
+  let m: RegExpExecArray | null
 
-  while ((match = regex.exec(bloco)) !== null) {
-    const candidato = match[1].trim()
-    const lyricRaw = match[2]
-      .replace(/<[^>]+>/g, " ") // remove tags HTML
+  while ((m = regex.exec(bloco)) !== null) {
+    const candidato = m[1].trim()
+    const lyricRaw = m[2]
+      .replace(/<[^>]+>/g, " ")
       .replace(/&nbsp;/g, " ")
       .replace(/&amp;/g, "&")
       .replace(/&lt;/g, "<")
@@ -84,7 +96,7 @@ function extrairDaHtml(html: string): ChordWithLyric[] {
       .replace(/\s+/g, " ")
       .trim()
 
-    if (parece_acorde(candidato)) {
+    if (pareceAcorde(candidato)) {
       resultado.push({
         chord: normalizarAcorde(candidato),
         lyric: lyricRaw.slice(0, 120),
@@ -95,110 +107,135 @@ function extrairDaHtml(html: string): ChordWithLyric[] {
   return resultado
 }
 
-// Detecta o tom da página do cifraclub (aparece como "Tom: C" ou similar)
 function detectarTom(html: string): string {
-  const match =
-    html.match(/tom[:\s]+([A-G][b#]?m?)/i) ||
-    html.match(/key[:\s]+([A-G][b#]?m?)/i)
-  return match ? match[1] : "C"
+  const m = html.match(/tom[:\s]+([A-G][b#]?m?)/i) || html.match(/key[:\s]+([A-G][b#]?m?)/i)
+  return m ? m[1] : "C"
 }
 
-// Estima BPM por gênero a partir do HTML da página
 function detectarBpm(html: string): number {
-  const match = html.match(/(\d{2,3})\s*bpm/i)
-  if (match) return parseInt(match[1])
+  const m = html.match(/(\d{2,3})\s*bpm/i)
+  if (m) return parseInt(m[1])
   if (/pagode|samba/i.test(html)) return 90
   if (/bossa/i.test(html)) return 110
   if (/forró|baião/i.test(html)) return 120
   return 90
 }
 
-// Tenta encontrar URL da música no cifraclub via página do artista
-async function encontrarUrlMusica(
-  artistaSlug: string,
-  tituloLimpo: string
-): Promise<string | null> {
-  const tituloSlug = slugifyCC(tituloLimpo)
-
-  // Tentativa 1: URL direta
-  const candidatos = [
-    `https://www.cifraclub.com.br/${artistaSlug}/${tituloSlug}/`,
-    `https://www.cifraclub.com.br/${artistaSlug.replace(/^grupo-/, "")}/${tituloSlug}/`,
-  ]
-
-  for (const url of candidatos) {
-    try {
-      const r = await fetch(url, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; CavaquinhoBot/1.0)" },
-      })
-      if (r.ok) return url
-    } catch {
-      // continua
-    }
-  }
-
-  // Tentativa 2: buscar na página do artista
+async function tentarUrl(url: string): Promise<string | null> {
   try {
-    const artistaUrl = `https://www.cifraclub.com.br/${artistaSlug}/`
-    const r = await fetch(artistaUrl, {
+    const r = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; CavaquinhoBot/1.0)" },
+      redirect: "follow",
+    })
+    // Considera OK apenas se retornou página real (não redirecionou para home/artista)
+    if (!r.ok) return null
+    const finalUrl = r.url
+    // Se redirecionou para página do artista (sem slug de música), ignora
+    const parts = new URL(finalUrl).pathname.split("/").filter(Boolean)
+    if (parts.length < 2) return null
+    return finalUrl
+  } catch {
+    return null
+  }
+}
+
+// Busca o HTML de uma URL e retorna o conteúdo
+async function fetchHtml(url: string): Promise<string | null> {
+  try {
+    const r = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; CavaquinhoBot/1.0)" },
     })
     if (!r.ok) return null
-    const html = await r.text()
+    return await r.text()
+  } catch {
+    return null
+  }
+}
 
-    // Encontrar links de músicas que batem com o título
-    const linkRegex = /href="(\/[^"]+\/[^"]+\/)"[^>]*>([^<]+)/gi
+// Encontra URL da cifra no cifraclub
+async function encontrarUrlMusica(
+  artistaSlug: string,
+  tituloSlug: string,
+  featSlugs: string[]
+): Promise<string | null> {
+  const base = `https://www.cifraclub.com.br`
+  const semGrupo = artistaSlug.replace(/^grupo-/, "")
+
+  // Candidatos em ordem de prioridade
+  const candidatos: string[] = [
+    `${base}/${artistaSlug}/${tituloSlug}/`,
+    `${base}/${semGrupo}/${tituloSlug}/`,
+  ]
+
+  // Com feat artist no slug
+  for (const feat of featSlugs) {
+    candidatos.push(`${base}/${artistaSlug}/${tituloSlug}-part-${feat}/`)
+    candidatos.push(`${base}/${artistaSlug}/${tituloSlug}-feat-${feat}/`)
+    candidatos.push(`${base}/${semGrupo}/${tituloSlug}-part-${feat}/`)
+  }
+
+  for (const url of candidatos) {
+    const found = await tentarUrl(url)
+    if (found) {
+      console.log(`[cifraclub] URL direta: ${found}`)
+      return found
+    }
+  }
+
+  // Fallback: buscar na página do artista
+  console.log(`[cifraclub] tentando via página do artista: ${base}/${artistaSlug}/`)
+  const artistaHtml = await fetchHtml(`${base}/${artistaSlug}/`)
+  if (artistaHtml) {
+    const linkRegex = /href="(\/[a-z0-9-]+\/[a-z0-9-]+\/)"/gi
+    const tituloWords = tituloSlug.split("-").filter((w) => w.length > 3)
+    let bestMatch: { url: string; score: number } | null = null
     let m: RegExpExecArray | null
-    const tituloNorm = slugifyCC(tituloLimpo)
 
-    while ((m = linkRegex.exec(html)) !== null) {
+    while ((m = linkRegex.exec(artistaHtml)) !== null) {
       const href = m[1]
-      const linkSlug = href.split("/").filter(Boolean).pop() ?? ""
-      // Verifica se o slug do link contém as palavras principais do título
-      const palavras = tituloNorm.split("-").filter((w) => w.length > 3)
-      const match = palavras.filter((p) => linkSlug.includes(p)).length
-      if (match >= Math.min(2, palavras.length)) {
-        return `https://www.cifraclub.com.br${href}`
+      const slug = href.split("/").filter(Boolean).pop() ?? ""
+      const score = tituloWords.filter((w) => slug.includes(w)).length
+      if (score >= Math.min(2, tituloWords.length)) {
+        if (!bestMatch || score > bestMatch.score) {
+          bestMatch = { url: `${base}${href}`, score }
+        }
       }
     }
-  } catch {
-    // continua
+
+    if (bestMatch) {
+      console.log(`[cifraclub] encontrado via artista: ${bestMatch.url} (score=${bestMatch.score})`)
+      return bestMatch.url
+    }
   }
 
   return null
 }
 
-// Função principal: busca acordes do cifraclub para uma música
+// Função principal
 export async function getCifraclubChords(
   artista: string,
   titulo: string
 ): Promise<CifraclubResult | null> {
   const tituloLimpo = cleanTitulo(titulo)
   const artistaSlug = slugifyCC(artista)
+  const tituloSlug = slugifyCC(tituloLimpo)
+  const featSlugs = extractFeatSlugs(titulo)
 
-  console.log(`[cifraclub] buscando: "${tituloLimpo}" / "${artista}" (slug: ${artistaSlug})`)
+  console.log(`[cifraclub] artista="${artista}" → slug="${artistaSlug}"`)
+  console.log(`[cifraclub] título limpo="${tituloLimpo}" → slug="${tituloSlug}"`)
+  console.log(`[cifraclub] feats: [${featSlugs.join(", ")}]`)
 
-  const pageUrl = await encontrarUrlMusica(artistaSlug, tituloLimpo)
+  const pageUrl = await encontrarUrlMusica(artistaSlug, tituloSlug, featSlugs)
   if (!pageUrl) {
-    console.log(`[cifraclub] música não encontrada`)
+    console.log(`[cifraclub] não encontrado`)
     return null
   }
 
-  console.log(`[cifraclub] URL encontrada: ${pageUrl}`)
-
-  let html: string
-  try {
-    const r = await fetch(pageUrl, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; CavaquinhoBot/1.0)" },
-    })
-    if (!r.ok) return null
-    html = await r.text()
-  } catch {
-    return null
-  }
+  const html = await fetchHtml(pageUrl)
+  if (!html) return null
 
   const chords = extrairDaHtml(html)
-  console.log(`[cifraclub] ${chords.length} acordes extraídos`)
+  console.log(`[cifraclub] ${chords.length} acordes extraídos de ${pageUrl}`)
 
   if (chords.length === 0) return null
 
