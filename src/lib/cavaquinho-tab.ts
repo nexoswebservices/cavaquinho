@@ -109,12 +109,15 @@ export function parseChordSymbol(symbol: string): { rootIdx: number; quality: st
 
   let suffix = noSlash.slice(rootMatch[1].length).replace(/\([^)]*\)/g, "").trim()
 
+  // Notação brasileira: 7M = Maj7 (ex: C7M → Cmaj7)
+  suffix = suffix.replace(/^7M/, "maj7").replace(/^9M/, "maj9")
+
   let quality: string
-  if (/^(maj7|M7)/i.test(suffix))                               quality = "maj7"
-  else if (/^(mM7|mmaj7)/i.test(suffix))                        quality = "maj7"  // minor-major7 → treat as maj7
-  else if (/^(m7|min7)/i.test(suffix))                          quality = "min7"
+  if (/^(maj7|maj9|M7)/i.test(suffix))                          quality = "maj7"
+  else if (/^(mM7|mmaj7)/i.test(suffix))                        quality = "maj7"
+  else if (/^(m7|min7|m9|m11|m13)/i.test(suffix))              quality = "min7"
   else if (/^(m|min)(?!aj)/i.test(suffix))                      quality = "minor"
-  else if (/^7/.test(suffix))                                    quality = "dom7"
+  else if (/^(7|9|11|13)/.test(suffix))                         quality = "dom7"  // X7, X9, X11 → dominant
   else if (/^(dim|°)/.test(suffix))                             quality = "dim"
   else if (/^(ø|m7b5|hdim|halfdim)/i.test(suffix))             quality = "halfdim"
   else if (/^(aug|\+)/.test(suffix))                             quality = "aug"
