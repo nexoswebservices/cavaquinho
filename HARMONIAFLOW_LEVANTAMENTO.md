@@ -4,7 +4,7 @@
 **App reconstruído:** https://cavaquinho.nexoswebservices.com  
 **Repositório local:** `c:\Users\renat\Downloads\Hamonico`  
 **Data do levantamento inicial:** 2026-06-09  
-**Última atualização:** 2026-07-08
+**Última atualização:** 2026-07-21
 
 ---
 
@@ -66,13 +66,24 @@ p?.nextElementSibling?.className
 | Controles visíveis | BPM, Velocidade, Início, Vista toggle |
 | Sem erros críticos no console | Verificar log file do Playwright |
 
-### 0.4 Causa raiz do problema de deploy (2026-07-08)
+### 0.4 Problemas de deploy conhecidos e soluções
 
-**Problema:** Commits com código novo (PartituraCompleta) não foram deployed porque o Vercel **não está fazendo auto-deploy** do GitHub — precisa de `npx vercel --prod` manual.
+**Problema 1 (2026-07-08):** Vercel não fazia auto-deploy do GitHub após pushes.
+- **Solução:** `npx vercel --prod` manual, ou reconectar o repositório GitHub nas configurações do projeto Vercel.
 
-**Sintoma:** `vercel ls` mostra sempre o mesmo deployment (horas atrás) mesmo após pushes.
+**Problema 2 (2026-07-08 a 2026-07-19):** Site `cavaquinho.nexoswebservices.com` servia código antigo com botões ♡🔄🗑 flutuantes mesmo após o código ter sido limpo no repositório.
+- **Causa raiz:** O domínio apontava para um deployment antigo de um projeto Vercel diferente (pessoal, deletado). O registo TXT `_vercel.nexoswebservices.com` tinha o token do projeto antigo.
+- **Solução aplicada (2026-07-19):**
+  1. Identificado que o DNS está no **Hostinger** (SOA: `dns.hostinger.com`)
+  2. Actualizado TXT `_vercel` via hPanel Hostinger: token `7d0b61d455a36be71a62` → `93af89d543d9da862e4d`
+  3. Acionada verificação via API Vercel → `"verified": true`
+  4. buildId `CBG58XtOAXSTX8p3py-wo` confirmado idêntico nos dois domínios
 
-**Solução:** Sempre executar `npx vercel --prod` após commit + push para garantir que o código novo chegue ao live.
+**Problema 3 (cache webpack):** Build antigo servia chunks em cache mesmo com código novo.
+- **Solução:** build script em `package.json` limpa `.next/` antes de cada build:
+  ```json
+  "build": "prisma generate && node -e \"try{require('fs').rmSync('.next',{recursive:true,force:true})}catch(e){}\" && next build"
+  ```
 
 ---
 
@@ -82,7 +93,7 @@ p?.nextElementSibling?.className
 
 | Fase | Feature | Status |
 |---|---|---|
-| 1 | **Músicas (player AI)** | ✅ Live — YouTube URL → Claude Haiku gera tab → player sincronizado com vídeo |
+| 1 | **Músicas (player AI)** | ✅ Live — YouTube URL → CifraClub (texto) → validação → tab → player sincronizado com vídeo |
 | 2 | Análise Harmônica | ✅ Live (+ fluxo análise→progressões) |
 | 3 | Progressões (unificada) | ✅ Live (campo harmônico c/ tensões + cadências + sequências + formação + ciclo de quintas) |
 | 4 | Treino de Cadências | ✅ Live (9 padrões c/ exemplos de músicas, integrado em /progressoes) |
@@ -112,10 +123,10 @@ p?.nextElementSibling?.className
 | Banco de dados | MySQL (Hostinger `srv1804.hstgr.io`) |
 | Autenticação | NextAuth v4 (credentials + Prisma Adapter, JWT) — temporariamente bypass |
 | Áudio | Web Audio API (sampler + metrônomo + afinador) |
-| AI geração | Anthropic SDK — `claude-haiku-4-5-20251001` (geração de tabs estruturadas) |
+| Fonte de cifras | CifraClub scraping (texto — primário); `claude-opus-4-8` Vision via partitura-vision.ts (offline/admin) |
 | Player sync | YouTube iframe API (`YT.Player`, `getCurrentTime`, `setPlaybackRate`) |
 | Deploy | Vercel — projeto `nexoswebservices-projects/cavaquinho` (auto-deploy no push para `main`) |
-| Domínio | `cavaquinho.nexoswebservices.com` (CNAME → cname.vercel-dns.com, TXT verificado) |
+| Domínio | `cavaquinho.nexoswebservices.com` (CNAME → cname.vercel-dns.com, TXT `_vercel` token `93af89d543d9da862e4d`, verificado 2026-07-19) |
 
 ---
 
@@ -132,7 +143,7 @@ p?.nextElementSibling?.className
 |---|---|---|
 | **Vercel** | `nexoswebservices-projects/cavaquinho` — auto-deploy no push `main` | Hosting do app Next.js |
 | **MySQL (Hostinger)** | `srv1804.hstgr.io:3306` / `u828037891_cavaquinho` | Banco de dados de produção |
-| **Domínio** | `cavaquinho.nexoswebservices.com` | CNAME → `cname.vercel-dns.com`, TXT `_vercel` verificado |
+| **Domínio** | `cavaquinho.nexoswebservices.com` | CNAME → `cname.vercel-dns.com`; DNS gerido no **Hostinger** (hpanel.hostinger.com, conta nexoswebservices@gmail.com); TXT `_vercel` token `93af89d543d9da862e4d` verificado 2026-07-19 |
 | **Anthropic API** | `claude-haiku-4-5-20251001` | Geração de tabs estruturadas a partir de título/artista |
 
 ### Fluxo de deploy
@@ -233,6 +244,17 @@ interface Medida {
 }
 ```
 
+### 4.5 `PartituraIndex` *(índice de partituras do nandinhocavaco.com.br)*
+| Campo | Tipo |
+|---|---|
+| id | String (cuid) |
+| artista | String |
+| postTitulo | String |
+| postUrl | String (@unique) |
+| createdAt | DateTime |
+
+Populado via endpoint admin `/api/admin/seed-partitura` (temporário) e script `scripts/index-partituras.ts`. Usado por `searchPartituraIndex()` para encontrar a URL da partitura a exibir no player.
+
 > **Modelos removidos em 2026-07-08:** `Cifra`, `CifraFavorito`, `Repertorio`, `RepertorioItem`
 
 ---
@@ -285,7 +307,7 @@ Hamonico/
 │   │   │   ├── progress/route.ts
 │   │   │   ├── musicas/
 │   │   │   │   ├── route.ts                  ← GET: listar estudos
-│   │   │   │   ├── generate/route.ts         ← POST: URL → cache → oEmbed → Claude → DB
+│   │   │   │   ├── generate/route.ts         ← POST: URL → oEmbed → CifraClub → 3 checkpoints → DB
 │   │   │   │   └── [id]/
 │   │   │   │       ├── route.ts              ← PATCH: update introSecs
 │   │   │   │       └── salvar/route.ts       ← POST/DELETE: salvar na lista do user
@@ -334,6 +356,11 @@ Hamonico/
 │   │   ├── markdown.ts, teoria.ts, quiz.ts
 │   │   ├── transpose.ts                      ← Transposição de acordes (preserva espaçamento)
 │   │   ├── sampler.ts                        ← Engine Web Audio API (playNote, playChord, playArpejo, playBackingTrack)
+│   │   ├── cavaquinho-tab.ts                 ← chord-to-tab por fórmulas D-G-B-D; notação brasileira (7M=maj7, X9=dom7)
+│   │   ├── cifraclub-scraper.ts              ← Scrape CifraClub: busca URL + extrai chords de <strong>; normaliza notação BR
+│   │   ├── letras-scraper.ts                 ← Scrape de letra via lrclib.net (fetchLetra)
+│   │   ├── partitura-search.ts               ← Busca fuzzy no índice nandinhocavaco.com.br (take:50, strip accents)
+│   │   ├── partitura-vision.ts               ← Baixa PNG do Blogger (s1600) + claude-opus-4-8 Vision — uso offline/admin
 │   │   ├── arpejos-data.ts                   ← 8 padrões de arpejo
 │   │   ├── escalas-data.ts                   ← 12 escalas (pentatônicas, blues, modos)
 │   │   ├── frases-data.ts                    ← 8 frases curadas com partitura + tablatura
@@ -367,17 +394,36 @@ Hamonico/
 
 ### 6.3 Músicas — Player Interativo AI (estilo Songsterr) *(novo — substituiu Cifras)*
 
-**Pipeline de geração:**
+**Pipeline de geração (cifraclub-first, com checkpoints de validação):**
 ```
 1. Usuário cola URL do YouTube em /musicas
 2. Extrai youtubeId via regex
 3. Cache check: prisma.estudo.findUnique({ where: { youtubeId } })
-   → HIT: retorna id sem chamar Claude
+   → HIT: retorna id sem nova geração
 4. YouTube oEmbed → titulo + artista (sem API key)
-5. Claude Haiku (max_tokens 8192) → JSON estruturado com medidas, acordes, tabs
-6. prisma.estudo.create(...)
-7. Redireciona para /musicas/[id]
+5. Em paralelo:
+   ├── CifraClub scraping → cifra em texto (fonte primária)
+   ├── nandinhocavaco.com.br índice → postUrl (para exibição da partitura original)
+   └── lrclib.net → letra (complementar)
+6. CHECKPOINT 1: CifraClub encontrou a música?
+   → NÃO: retorna erro 422 claro (não salva, não alucina)
+7. CHECKPOINT 2: cada acorde passa por parseChordSymbol()?
+   → Acordes inválidos são descartados; se restarem < 3 → erro 422
+8. CHECKPOINT 3: chordToTab() gera frets válidos (0–12)?
+   → Acordes com tab inválida descartados
+9. Monta tabData: acordes validados + letra do CifraClub + partituraUrl
+10. prisma.estudo.create(...)
+11. Retorna { id, source: "cifraclub", medidas: N, partituraUrl }
 ```
+
+**Decisões de arquitetura (2026-07-21):**
+- Claude Haiku removido do pipeline principal — alucinava extensões jazz (C7+/9, Am7/9) mesmo quando a partitura mostrava C simples
+- Claude Vision (Opus) movido para uso offline/admin — funciona localmente mas timeout em serverless Vercel (10–60s)
+- CifraClub texto é confiável, rápido, sem alucinação — chords em `<strong>` tags no HTML
+- Partitura do nandinhocavaco.com.br continua indexada e é exibida como imagem de referência para o aluno
+- Notação brasileira normalizada: `7M → maj7`, `X9/X11 → dom7`, `Xm9 → min7`
+- `cleanTitulo()` extrai só o título após o último " - " no título do YouTube
+- `extractFeatSlugs()` gera variantes de URL com "part-ARTIST" para colaborações
 
 **Player `/musicas/[id]`:**
 - **Vídeo YouTube** embutido via iframe API (`YT.Player`) ao lado dos controles
@@ -391,7 +437,6 @@ Hamonico/
 - **Vista toggle**: Partitura + Tab / Só Tab
 - **Hover acorde → BracoCavaquinho**: diagrama do shape correto em tooltip
 - **Clique acorde → sampler**: toca as notas reais
-- **Salvar ♡**: persiste em `EstudoSalvo`, aparece em "Minhas salvas" no /musicas
 - **Cache-first**: mesma URL YouTube nunca re-chama Claude
 
 ### 6.4 Fluxo Análise → Progressões
@@ -553,7 +598,7 @@ Botão flutuante no canto inferior direito, acessível em todas as páginas do a
 | `/api/auth/register` | POST | — | Cadastro |
 | `/api/progress` | GET, POST | 401 | Progresso nas lições |
 | `/api/musicas` | GET | — | Listar estudos públicos |
-| `/api/musicas/generate` | POST | — | URL YouTube → Estudo (cache-first, Claude Haiku) |
+| `/api/musicas/generate` | POST | — | URL YouTube → CifraClub → 3 checkpoints → Estudo (cache-first, sem IA no caminho principal) |
 | `/api/musicas/[id]` | PATCH | — | Atualizar introSecs (debounce 1s) |
 | `/api/musicas/[id]/salvar` | POST, DELETE | 401 | Salvar/remover da lista pessoal |
 
@@ -713,6 +758,27 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | 2026-07-08 | Vercel deploy configurado: projeto `nexoswebservices-projects/cavaquinho`, domínio `cavaquinho.nexoswebservices.com` |
 | 2026-07-08 | ANTHROPIC_API_KEY configurada em Vercel (Production/Preview/Development) e `.env.local` |
 | 2026-07-08 | DNS Hostinger: TXT `_vercel` + CNAME `cavaquinho` → `cname.vercel-dns.com` (verificado) |
+| 2026-07-09 | **Pipeline partitura-first (H-E)**: `PartituraIndex` model no schema (artista, postTitulo, postUrl) |
+| 2026-07-09 | Índice populado: script `scripts/index-partituras.ts` scrapu 240 labels → **2.396 posts** de nandinhocavaco.com.br |
+| 2026-07-09 | `src/lib/partitura-search.ts`: busca fuzzy no índice por título+artista (OR de palavras significativas, score ranking) |
+| 2026-07-09 | `src/lib/partitura-vision.ts`: baixa PNG do Blogger CDN (s16000) → `claude-sonnet-5` Vision → tabData JSON |
+| 2026-07-09 | generate/route.ts atualizado: tenta partitura (`source: "partitura"`) antes de Claude texto (`source: "claude"`) |
+| 2026-07-09 | tsconfig.json: exclui `scripts/` do build Next.js; scripts/tsconfig.json separado para execução local |
+| 2026-07-13 | Levantamento muted.io: roadmap de melhorias visuais (Círculo de Quintas 3 anéis, braço interativo, pentatônica 5 posições) — registado na Secção 12 |
+| 2026-07-15 | Feat: `src/lib/letras-scraper.ts` — scrape de letra via lrclib.net; integrado no pipeline generate em paralelo com busca partitura |
+| 2026-07-15 | Feat: `src/lib/cavaquinho-tab.ts` — engine chord-to-tab por fórmulas D-G-B-D; aplicado no fallback Claude-texto via `applyFormulasTabs()` |
+| 2026-07-15 | Guard mínimo 4 medidas para aceitar resultado do Vision; sem guard a Vision retornava 1–2 medidas em imagens sem partitura |
+| 2026-07-15 | Build script: `rmSync('.next', {recursive:true,force:true})` antes de `next build` — evita servir chunks em cache de build anterior |
+| 2026-07-19 | Fix domínio: TXT `_vercel.nexoswebservices.com` actualizado no Hostinger hPanel (token `7d0b61d455a36be71a62` → `93af89d543d9da862e4d`); Vercel domain `verified: true`; domínio customizado confirma buildId `CBG58XtOAXSTX8p3py-wo` igual ao vercel.app |
+| 2026-07-19 | MusicaPlayer limpo: botões ♡🔄🗑 flutuantes (`fixed bottom-6 right-6`) confirmados removidos no deployment activo |
+| 2026-07-20 | Fix `searchPartituraIndex`: `take:50` (era 10 — cortava entradas com muitos resultados do mesmo artista); OR query com todas as palavras (não só 2 primeiras); `stripAccents()` no scoring (ultima=última); strip pontuação das palavras ("mais,"→"mais") |
+| 2026-07-20 | Debug Vision: imagem reduzida s16000→s1600; `maxDuration=60` na rota generate; logging detalhado `[vision]` e `[generate]` para diagnóstico em produção |
+| 2026-07-21 | **Diagnóstico definitivo do player errado:** Vision timeout em Vercel (10-60s) → cai no Haiku → Haiku alucina C7+/9, Am7/9, tom G errado, 14 medidas; partitura real lida diretamente mostra C, Dm7, Fmaj7, F/G, E7, F6, Gsus4 em 41 compassos |
+| 2026-07-21 | **Refactor pipeline: CifraClub-first com 3 checkpoints de validação** |
+| 2026-07-21 | — `src/lib/cifraclub-scraper.ts` (NOVO): busca URL via slug+feat variants, extrai acordes de `<strong>` tags, normaliza notação brasileira (7M→maj7, X9→dom7), `cleanTitulo()` extrai só título após " - " do título YouTube, `extractFeatSlugs()` para "/pela-ultima-vez-part-nattan/" |
+| 2026-07-21 | — `cavaquinho-tab.ts`: `parseChordSymbol` estendido: `7M→maj7` (notação BR), `X9/X11/X13→dom7`, `Xm9/Xm11→min7` |
+| 2026-07-21 | — `generate/route.ts` reescrito: remove Haiku e Vision do caminho principal; 3 checkpoints (`getCifraclubChords` → `parseChordSymbol` → `chordToTab`); erro 422 claro se cifra não encontrada ou acordes insuficientes; armazena `partituraUrl` e `fonte` no tabData |
+| 2026-07-21 | — Vision (`partitura-vision.ts`) mantido mas movido para uso offline/admin — correto localmente, problemático em serverless |
 
 ---
 
@@ -736,4 +802,100 @@ Módulo client-side reutilizado em `/analise`, `/progressoes` e `CifraAnalise`.
 | [HookTheory TheoryTab](https://www.hooktheory.com/theorytab) | Modelo para visualização de progressões sobre cifras |
 | [HookTheory Hookpad](https://www.hooktheory.com/hookpad) | Modelo para editor interativo de progressões |
 | [CifraClub formato cavaco](https://www.cifraclub.com.br/) | Referência de formato de apresentação de cifras |
+| [muted.io Circle of Fifths](https://muted.io/circle-of-fifths/) | Referência visual para seção `/harmonia` — ver Seção 12 |
+
+---
+
+## 12. Melhorias Futuras — Inspiração muted.io
+
+> Levantamento feito em 2026-07-13 após visita ao [muted.io](https://muted.io).
+> **Não implementar agora** — registrado para roadmap futuro.
+
+### 12.1 Círculo de Quintas Visual Avançado (nova rota `/harmonia` ou melhoria de `/progressoes`)
+
+**Referência:** https://muted.io/circle-of-fifths/
+
+O muted.io tem um SVG interativo com 3 anéis concêntricos:
+- Anel externo: 12 tonalidades maiores (com rótulo de função: tônica I, dominante V, subdominante IV, mediante vi, etc.)
+- Anel médio: 12 relativas menores
+- Anel interno: armaduras de clave (# e b)
+- Toggle Maior ↔ Menor (Iônico ↔ Eólico)
+- Clique em qualquer fatia = seleciona a tônica e ilumina as relações
+
+**O que adaptar para o Cavaquinho:**
+- Ao clicar em uma fatia (ex: Sol maior), exibir ao lado os **7 acordes diatônicos com o BracoCavaquinho** de cada um
+- Iluminar as 3 fatias do "triângulo básico" do samba: I (tônica), IV (subdominante), V7 (dominante)
+- Botão "Tocar campo harmônico" → sampler toca os 7 acordes em sequência
+- Integrar com `/progressoes` — clicar num tom gera a progressão básica
+
+**Implementação sugerida:**
+```
+src/components/progressoes/CirculoQuintasAvancado.tsx
+- SVG puro com 36 fatias (12 × 3 anéis)
+- Estado: tonicaSelecionada (string), modo ("maior"|"menor")
+- Reutiliza: campoHarmonico() de teoria.ts, BracoCavaquinho, sampler
+```
+
+**Diferencial vs. o que já existe:** o Ciclo de Quintas atual em `/progressoes` (tab 5) já é interativo mas mostra apenas os 12 tons como bolinhas clicáveis. A versão muted.io-inspirada teria os **3 anéis concêntricos** com funções harmônicas visíveis diretamente no círculo.
+
+---
+
+### 12.2 Acordes na Tonalidade — Cards com Braço (melhoria de `/progressoes`)
+
+**Referência:** https://muted.io/chords-in-keys/
+
+Cards para cada grau diatônico (I ii iii IV V vi vii°) mostrando:
+- Grau romano + nome da função (Tônica, Subdominante, Dominante)
+- Nome do acorde na tonalidade selecionada
+- Notas formadoras (ex: C E G)
+- **BracoCavaquinho** já integrado — shape do acorde
+- Botão play → sampler toca o acorde
+- Expansão para 7ª: I7M, ii7, iii7... com tensões disponíveis
+
+**O que já temos:** a tab "Campo Harmônico" em `/progressoes` já mostra os 7 graus com função e tensões, mas sem o BracoCavaquinho embutido em cada card. A melhoria seria adicionar o diagrama de forma inline/expandível.
+
+---
+
+### 12.3 Braço do Cavaquinho Interativo — Escala Visual (melhoria de `/improvisos`)
+
+**Referência:** https://muted.io/guitar-fretboard/ / https://muted.io/ukulele-fretboard/
+
+Braço completo (trastes 0–12, 4 cordas D-G-B-D) onde:
+- Seletor de escala + tom → ilumina todas as notas no braço
+- Cor diferente por grau (tônica = roxo, 2ª = azul, 3ª = verde...)
+- Clique em qualquer nota → toca via sampler
+- Toggle: mostrar nome da nota / mostrar número do dedo / mostrar grau
+
+**O que já temos:** `BracoEscala.tsx` em `/improvisos` já faz isso, mas com layout fixo e sem interação nota a nota (só mostra o padrão). A versão avançada permitiria **clicar nota por nota** e ver o nome/grau em tempo real.
+
+---
+
+### 12.4 Pentatônica Exploratória (nova aba em `/improvisos`)
+
+**Referência:** https://muted.io/pentatonic/
+
+Mostra as **5 posições da pentatônica menor** no braço inteiro do cavaquinho, cada posição numa cor diferente, com botões para navegar entre elas. Muito relevante para samba/pagode.
+
+---
+
+### 12.5 Progressões Contextualizadas ao Samba (melhoria de `/progressoes`)
+
+**Referência:** https://muted.io/chord-progressions/
+
+O muted.io lista progressões genéricas (I–V–vi–IV, ii–V–I...). A versão Cavaquinho teria:
+- "Progressões clássicas do samba/pagode" com nomes em português
+- Exemplos de músicas reais que usam cada progressão (já temos isso!)
+- Player: toca a progressão no tom selecionado via sampler
+
+---
+
+### Resumo de prioridade
+
+| Feature | Esforço | Impacto | Prioridade |
+|---|---|---|---|
+| Círculo de Quintas 3 anéis (12.1) | Médio (SVG novo + lógica existente) | Alto | ⭐⭐⭐ |
+| Campo Harmônico com BracoCavaquinho inline (12.2) | Baixo (reutiliza componentes) | Alto | ⭐⭐⭐ |
+| Braço interativo nota a nota (12.3) | Médio | Médio | ⭐⭐ |
+| Pentatônica 5 posições (12.4) | Baixo | Médio | ⭐⭐ |
+| Progressões do samba com player (12.5) | Baixo (já existe base) | Alto | ⭐⭐⭐ |
 | Cursos Hotmart (Layon Bacelar) | Conteúdo para novos módulos na Escola (pendente acesso) |
