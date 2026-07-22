@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/db"
 import { searchPartituraIndex } from "@/lib/partitura-search"
 import { fetchPartituraImageUrls, extractTabFromPartituraImage } from "@/lib/partitura-vision"
-import { getCifraclubChords } from "@/lib/cifraclub-scraper"
+import { getCifraclubChords, cleanTitulo } from "@/lib/cifraclub-scraper"
 import { buildMedidasFromChordList, validateVisionMedidas } from "@/lib/tab-checkpoints"
 
 export const maxDuration = 60
@@ -26,10 +26,16 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
   await prisma.estudo.update({ where: { id: estudo.id }, data: { status: "processando" } })
 
   const { titulo, artista } = estudo
+  // O título bruto do YouTube inclui o nome do artista antes do hífen
+  // ("Grupo Menos É Mais, NATTAN - Pela Última Vez") — se passarmos isso
+  // direto pra busca de partitura, palavras do NOME DO ARTISTA batem com
+  // qualquer outra música do mesmo artista no índice e a busca pode
+  // confiantemente devolver a música errada. Usa só o título da música.
+  const tituloMusica = cleanTitulo(titulo)
 
   try {
     // 1) Partitura oficial primeiro
-    const indexMatch = await searchPartituraIndex(titulo, artista)
+    const indexMatch = await searchPartituraIndex(tituloMusica, artista)
 
     if (indexMatch) {
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
@@ -38,7 +44,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
       // Em paralelo — a versão antiga (2026-07-09) tentava uma imagem de cada
       // vez com await sequencial e estourava os 60s do serverless.
       const resultados = await Promise.allSettled(
-        candidatos.map((url) => extractTabFromPartituraImage(url, titulo, artista))
+        candidatos.map((url) => extractTabFromPartituraImage(url, tituloMusica, artista))
       )
 
       for (const r of resultados) {

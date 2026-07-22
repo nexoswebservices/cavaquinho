@@ -38,7 +38,7 @@ function acharSeparadores(titulo: string): { first: number; second: number } {
 // Extrai apenas o título da música de um título do YouTube
 // "Grupo Menos É Mais, NATTAN - Pela Última Vez (Ao Vivo)" → "Pela Última Vez"
 // "Cartola - AS ROSAS NÃO FALAM - Angenor de Oliveira" → "AS ROSAS NÃO FALAM"
-function cleanTitulo(titulo: string): string {
+export function cleanTitulo(titulo: string): string {
   const { first, second } = acharSeparadores(titulo)
   const songPart =
     first < 0 ? titulo : second >= 0 ? titulo.slice(first + 3, second) : titulo.slice(first + 3)

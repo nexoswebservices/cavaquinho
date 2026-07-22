@@ -43,14 +43,20 @@ export async function searchPartituraIndex(
 
   if (candidates.length === 0) return null
 
-  // Ranquear por quantidade de palavras do título encontradas (sem acentos)
+  // Ranqueia por palavras do título encontradas SÓ no postTitulo (não no
+  // nome do artista — se contasse o artista, qualquer outra música do mesmo
+  // artista no índice bateria com o nome dele e podia vencer por engano).
+  // Exige pelo menos 2 palavras (ou todas, se o título só tiver 1) pra
+  // aceitar o match, senão um único termo genérico compartilhado ("vivo",
+  // "amor"...) confiaria numa música errada.
+  const minScore = Math.min(2, tituloWordsNorm.length)
   const ranked = candidates
     .map((c) => {
-      const text = stripAccents((c.postTitulo + " " + c.artista).toLowerCase())
+      const text = stripAccents(c.postTitulo.toLowerCase())
       const score = tituloWordsNorm.filter((w) => text.includes(w)).length
       return { ...c, score }
     })
-    .filter((c) => c.score > 0)
+    .filter((c) => c.score >= minScore)
     .sort((a, b) => b.score - a.score)
 
   return ranked[0] ?? null
