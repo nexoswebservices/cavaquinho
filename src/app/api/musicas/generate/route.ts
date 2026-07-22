@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { searchPartituraIndex } from "@/lib/partitura-search"
-import { getCifraclubChords } from "@/lib/cifraclub-scraper"
+import { getCifraclubChords, extractArtistaPrincipal } from "@/lib/cifraclub-scraper"
 import { fetchLetra } from "@/lib/letras-scraper"
 import { chordToTab, parseChordSymbol } from "@/lib/cavaquinho-tab"
 
@@ -57,9 +57,13 @@ export async function POST(req: NextRequest) {
     if (!oembedRes.ok) return NextResponse.json({ error: "Vídeo não encontrado" }, { status: 404 })
     const oembed = await oembedRes.json()
     const titulo = oembed.title as string
-    const artista = (oembed.author_name as string).replace(/ - Topic$/, "")
+    const canal = (oembed.author_name as string).replace(/ - Topic$/, "")
+    // O canal do YouTube costuma ser quem postou o vídeo, não quem gravou a
+    // música (covers, coletâneas, reposts). Preferimos o artista extraído do
+    // próprio título do vídeo; o canal só entra como fallback.
+    const artista = extractArtistaPrincipal(titulo) ?? canal
 
-    console.log(`[generate] título: "${titulo}" | artista: "${artista}"`)
+    console.log(`[generate] título: "${titulo}" | canal: "${canal}" | artista usado: "${artista}"`)
 
     // Buscar em paralelo: cifraclub + partitura index + letra
     const [cifraResult, indexMatch, letraResult] = await Promise.all([

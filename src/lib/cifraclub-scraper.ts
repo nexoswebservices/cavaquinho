@@ -25,13 +25,23 @@ function slugifyCC(text: string): string {
     .replace(/^-|-$/g, "")
 }
 
+// Localiza o 1º e o 2º " - " do título. Usamos o 1º (não o último) porque
+// muitos títulos do YouTube têm um 3º segmento com crédito de compositor,
+// ex: "Cartola - AS ROSAS NÃO FALAM - Angenor de Oliveira" — usar o último
+// hífen pegaria "Angenor de Oliveira" como se fosse o nome da música.
+function acharSeparadores(titulo: string): { first: number; second: number } {
+  const first = titulo.indexOf(" - ")
+  const second = first >= 0 ? titulo.indexOf(" - ", first + 3) : -1
+  return { first, second }
+}
+
 // Extrai apenas o título da música de um título do YouTube
 // "Grupo Menos É Mais, NATTAN - Pela Última Vez (Ao Vivo)" → "Pela Última Vez"
+// "Cartola - AS ROSAS NÃO FALAM - Angenor de Oliveira" → "AS ROSAS NÃO FALAM"
 function cleanTitulo(titulo: string): string {
-  // YouTube: "Artista1, Artista2 - Título (qualifier)"
-  // Pegar tudo depois do último " - "
-  const dashIdx = titulo.lastIndexOf(" - ")
-  const songPart = dashIdx >= 0 ? titulo.slice(dashIdx + 3) : titulo
+  const { first, second } = acharSeparadores(titulo)
+  const songPart =
+    first < 0 ? titulo : second >= 0 ? titulo.slice(first + 3, second) : titulo.slice(first + 3)
 
   return songPart
     .replace(/\s*\(ao vivo[^)]*\)/gi, "")
@@ -45,12 +55,23 @@ function cleanTitulo(titulo: string): string {
 
 // Extrai artistas convidados do título YouTube ("…, NATTAN - …" → "nattan")
 function extractFeatSlugs(titulo: string): string[] {
-  const dashIdx = titulo.lastIndexOf(" - ")
-  const artistPart = dashIdx >= 0 ? titulo.slice(0, dashIdx) : ""
+  const { first } = acharSeparadores(titulo)
+  const artistPart = first >= 0 ? titulo.slice(0, first) : ""
 
   // "Grupo Menos É Mais, NATTAN" → ["nattan"]
   const parts = artistPart.split(",").slice(1)
   return parts.map((p) => slugifyCC(p.trim())).filter((s) => s.length > 0)
+}
+
+// Extrai o artista principal do título do vídeo ("Cartola - As Rosas Não
+// Falam - ..." → "Cartola"). O nome do canal do YouTube (oEmbed author_name)
+// não é confiável como artista: costuma ser quem postou o vídeo (cover,
+// coletânea, repost), não quem gravou a música.
+export function extractArtistaPrincipal(titulo: string): string | null {
+  const { first } = acharSeparadores(titulo)
+  if (first < 0) return null
+  const principal = titulo.slice(0, first).split(",")[0].trim()
+  return principal.length > 0 ? principal : null
 }
 
 // Normaliza notação brasileira → parseChordSymbol entende
