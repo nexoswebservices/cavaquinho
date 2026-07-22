@@ -272,7 +272,9 @@ export function detectCadences(degrees: DegreeInfo[]): Cadence[] {
     for (const [pattern, label] of patterns) {
       if (i + pattern.length > D.length) continue
       const slice = D.slice(i, i + pattern.length)
-      const match = pattern.every((p, k) => slice[k].toLowerCase() === p.toLowerCase())
+      // Comparação sensível a maiúsculas: o caso do algarismo romano distingue
+      // grau maior (I, IV, V7) de grau menor (i, iv, v7) — ver analyzeDegrees.
+      const match = pattern.every((p, k) => slice[k] === p)
       if (match) {
         cadences.push({ start: i, chords: slice, label })
         i += pattern.length - 1

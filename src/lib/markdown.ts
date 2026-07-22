@@ -22,11 +22,14 @@ export function renderMarkdown(md: string): string {
       const isHeader = false
       return `<tr>${cells.map((c: string) => `<td>${c}</td>`).join("")}</tr>`
     })
-    // Listas não ordenadas
-    .replace(/^- (.+)$/gm, "<li>$1</li>")
-    .replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul>${m}</ul>`)
-    // Listas ordenadas
-    .replace(/^\d+\. (.+)$/gm, "<li>$1</li>")
+    // Listas ordenadas e não ordenadas — usam tags temporárias distintas ("oli"/"uli")
+    // enquanto são agrupadas, pra um tipo de lista não "engolir" o <li> do outro tipo
+    // já processado. Só viram <li> de verdade depois de já dentro do <ol>/<ul> certo.
+    .replace(/^\d+\. (.+)$/gm, "<oli>$1</oli>")
+    .replace(/(<oli>.*<\/oli>\n?)+/g, (m) => `<ol>${m}</ol>`)
+    .replace(/^- (.+)$/gm, "<uli>$1</uli>")
+    .replace(/(<uli>.*<\/uli>\n?)+/g, (m) => `<ul>${m}</ul>`)
+    .replace(/<(\/?)(?:o|u)li>/g, "<$1li>")
     // Parágrafos
     .replace(/\n\n/g, "</p><p>")
 

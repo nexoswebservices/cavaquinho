@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { PartituraView } from "@/components/partitura/PartituraView"
 import { QUIZ_NOTAS } from "@/lib/partituras-data"
 import { initSampler, isReady, playNote } from "@/lib/sampler"
@@ -32,14 +32,24 @@ export function QuizNota() {
   const pool = QUIZ_NOTAS[nivel]
   const current = pool[currentIdx % pool.length]
 
-  const getOptions = useCallback(() => {
+  // Ordem inicial determinística (sem Math.random) para o HTML do servidor
+  // bater com a primeira renderização no cliente. O embaralhamento real só
+  // acontece depois de montado (useEffect abaixo), evitando erro de hidratação.
+  const buildOptions = useCallback(() => {
+    const correct = current.name
+    const others = pool.filter((n) => n.name !== correct).map((n) => n.name)
+    return [correct, ...others.slice(0, 3)]
+  }, [current, pool])
+
+  const [options, setOptions] = useState<string[]>(buildOptions)
+
+  useEffect(() => {
     const correct = current.name
     const others = pool.filter((n) => n.name !== correct).map((n) => n.name)
     const wrong = shuffle(others).slice(0, 3)
-    return shuffle([correct, ...wrong])
+    setOptions(shuffle([correct, ...wrong]))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, pool])
-
-  const options = getOptions()
 
   const handleAnswer = useCallback(async (answer: string) => {
     if (answered) return

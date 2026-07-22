@@ -73,13 +73,18 @@ function extrairDaHtml(html: string): ChordWithLyric[] {
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
 
-  // Tenta isolar o bloco da cifra
-  const blocoMatch =
-    sem.match(/<pre[^>]*id=["']?cifra_cnt["']?[^>]*>([\s\S]*?)<\/pre>/i) ||
-    sem.match(/<div[^>]*class=["'][^"']*cifra[_-]?cont[^"']*["'][^>]*>([\s\S]*?)<\/div>/i) ||
-    sem.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i)
+  // O conteúdo da cifra fica sempre num único <pre> dentro de .cifra_cnt.
+  // (Regras baseadas em div com class="cifra..." não funcionam: o CifraClub
+  // aninha várias divs vazias ali dentro e o primeiro </div> fecha antes de
+  // qualquer acorde aparecer.)
+  const blocoMatch = sem.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i)
 
-  const bloco = blocoMatch ? blocoMatch[1] : sem
+  let bloco = blocoMatch ? blocoMatch[1] : sem
+
+  // Remove os blocos de tablatura (<span class="tablatura">...<span class="cnt">...</span></span>):
+  // eles repetem os mesmos acordes já capturados na letra e sua "arte" ASCII
+  // seria capturada como se fosse trecho de letra.
+  bloco = bloco.replace(/<span class="tablatura">[\s\S]*?<\/span>\s*<\/span>/g, " ")
 
   const resultado: ChordWithLyric[] = []
   const regex = /<(?:b|strong)[^>]*>([^<]+)<\/(?:b|strong)>([\s\S]*?)(?=<(?:b|strong)|$)/gi
@@ -108,8 +113,12 @@ function extrairDaHtml(html: string): ChordWithLyric[] {
 }
 
 function detectarTom(html: string): string {
-  const m = html.match(/tom[:\s]+([A-G][b#]?m?)/i) || html.match(/key[:\s]+([A-G][b#]?m?)/i)
-  return m ? m[1] : "C"
+  // Estrutura real: <span id="cifra_tom">tom: <a ...>Dm</a></span>
+  const m =
+    html.match(/id=["']cifra_tom["'][^]*?<a[^>]*>([^<]+)<\/a>/i) ||
+    html.match(/tom[:\s]+([A-G][b#]?m?)/i) ||
+    html.match(/key[:\s]+([A-G][b#]?m?)/i)
+  return m ? m[1].trim() : "C"
 }
 
 function detectarBpm(html: string): number {
