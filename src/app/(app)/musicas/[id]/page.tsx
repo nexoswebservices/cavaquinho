@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { prisma } from "@/lib/db"
 import { MusicaPlayer } from "@/components/musicas/MusicaPlayer"
+import { GerandoStatus } from "@/components/musicas/GerandoStatus"
 
 export const dynamic = "force-dynamic"
 
@@ -27,19 +28,28 @@ export default async function MusicaPage({ params }: { params: { id: string } })
         <span className="text-slate-300 truncate">{estudo.titulo}</span>
       </div>
 
-      <MusicaPlayer
-        estudo={{
-          id: estudo.id,
-          titulo: estudo.titulo,
-          artista: estudo.artista,
-          youtubeId: estudo.youtubeId,
-          tom: estudo.tom,
-          bpm: estudo.bpm,
-          compasso: estudo.compasso,
-          introSecs: estudo.introSecs,
-          tabData: estudo.tabData as { medidas: never[] },
-        }}
-      />
+      {estudo.status !== "pronto" ? (
+        <GerandoStatus
+          id={estudo.id}
+          status={estudo.status}
+          createdAt={estudo.createdAt.toISOString()}
+          erro={estudo.erro}
+        />
+      ) : (
+        <MusicaPlayer
+          estudo={{
+            id: estudo.id,
+            titulo: estudo.titulo,
+            artista: estudo.artista,
+            youtubeId: estudo.youtubeId,
+            tom: estudo.tom,
+            bpm: estudo.bpm,
+            compasso: estudo.compasso,
+            introSecs: estudo.introSecs,
+            tabData: estudo.tabData as { medidas: never[] },
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -50,7 +50,10 @@ model Estudo {
   bpm       Int
   compasso  String   @default("4/4")
   introSecs Float    @default(0)
-  tabData   Json
+  tabData   Json?
+  status    String   @default("pronto") // "pendente" | "processando" | "pronto" | "falhou"
+  fonte     String? // "partitura" | "cifra"
+  erro      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

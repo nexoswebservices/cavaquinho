@@ -12,14 +12,14 @@ export default async function MusicasPage() {
 
   const [estudos, salvos] = await Promise.all([
     prisma.estudo.findMany({
-      select: { id: true, titulo: true, artista: true, tom: true, bpm: true, youtubeId: true },
+      select: { id: true, titulo: true, artista: true, tom: true, bpm: true, youtubeId: true, status: true },
       orderBy: { createdAt: "desc" },
       take: 50,
     }),
     userId
       ? prisma.estudoSalvo.findMany({
           where: { userId },
-          select: { estudo: { select: { id: true, titulo: true, artista: true, tom: true, bpm: true, youtubeId: true } } },
+          select: { estudo: { select: { id: true, titulo: true, artista: true, tom: true, bpm: true, youtubeId: true, status: true } } },
           orderBy: { createdAt: "desc" },
         })
       : [],

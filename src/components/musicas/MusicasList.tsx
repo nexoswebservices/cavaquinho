@@ -11,6 +11,7 @@ interface EstudoCard {
   tom: string
   bpm: number
   youtubeId: string
+  status: string
 }
 
 interface MusicasListProps {
@@ -78,6 +79,20 @@ function MusicaCard({ e, allSaved }: { e: EstudoCard; allSaved: boolean }) {
       </Link>
 
       {/* Action buttons */}
+      {e.status !== "pronto" ? (
+        <div className="border-t border-white/5 px-3 py-1.5 flex items-center gap-1.5 text-xs">
+          {e.status === "falhou" ? (
+            <span className="text-red-400">Falhou ao gerar</span>
+          ) : (
+            <span className="flex items-center gap-1.5 text-violet-300">
+              <svg className="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4" strokeDashoffset="10" />
+              </svg>
+              Gerando…
+            </span>
+          )}
+        </div>
+      ) : (
       <div className="border-t border-white/5 px-3 py-1.5 flex items-center gap-1">
         <button
           onClick={toggleSave}
@@ -108,6 +123,7 @@ function MusicaCard({ e, allSaved }: { e: EstudoCard; allSaved: boolean }) {
           🗑 <span className="hidden sm:inline">Excluir</span>
         </button>
       </div>
+      )}
     </div>
   )
 }
