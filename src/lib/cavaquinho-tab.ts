@@ -91,10 +91,27 @@ function greedyFrets(chordNotes: string[], startFret: number): (number | null)[]
 }
 
 const CHORD_INTERVALS: Record<string, number[]> = {
+  major:   [0, 4, 7],
+  minor:   [0, 3, 7],
+  dom7:    [0, 4, 7, 10],
+  maj7:    [0, 4, 7, 11],
+  min7:    [0, 3, 7, 10],
+  dim:     [0, 3, 6],
   halfdim: [0, 3, 6, 10],
   aug:     [0, 4, 8],
   sus4:    [0, 5, 7],
   sus2:    [0, 2, 7],
+}
+
+// Nomes das notas que formam o acorde (ex: "Dm7" → ["D","F","A","C"]).
+// Usado pra alimentar o diagrama do braço (BracoCavaquinho), que precisa
+// das notas de verdade — não dá pra desenhar o shape a partir só do tab.
+export function chordToNotes(symbol: string): string[] {
+  const parsed = parseChordSymbol(symbol)
+  if (!parsed) return []
+  const { rootIdx, quality } = parsed
+  const intervals = CHORD_INTERVALS[quality] ?? [0, 4, 7]
+  return intervals.map((i) => CHROMATIC[(rootIdx + i) % 12])
 }
 
 // Parse chord symbol (e.g. "Cm7", "G7", "Bbmaj7", "F#dim") to rootIdx + quality

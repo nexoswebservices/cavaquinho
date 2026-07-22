@@ -1,6 +1,6 @@
 // Checkpoints de validação de acordes/tab, compartilhados entre as fontes de
 // geração (partitura via Vision e cifra via CifraClub) na rota /process.
-import { parseChordSymbol, chordToTab } from "./cavaquinho-tab"
+import { parseChordSymbol, chordToTab, chordToNotes } from "./cavaquinho-tab"
 import type { ChordWithLyric } from "./cifraclub-scraper"
 
 export interface AcordeMedida {
@@ -42,7 +42,7 @@ export function buildMedidasFromChordList(chords: ChordWithLyric[]): Medida[] | 
       return {
         numero: i + 1,
         letra: cwl.lyric || "",
-        acordes: [{ batida: 1, acorde: cwl.chord, duration: "w", notas: [], tab }],
+        acordes: [{ batida: 1, acorde: cwl.chord, duration: "w", notas: chordToNotes(cwl.chord), tab }],
       }
     })
     .filter((m): m is Medida => m !== null)
@@ -77,7 +77,7 @@ export function validateVisionMedidas(raw: unknown): Medida[] | null {
             batida: ac.batida ?? 1,
             acorde: ac.acorde,
             duration: ac.duration ?? "w",
-            notas: [],
+            notas: chordToNotes(ac.acorde),
             tab,
           }
         })
