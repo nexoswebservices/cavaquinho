@@ -273,6 +273,43 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
         <div ref={vfRef} className="w-full" style={{ minHeight: 110 }} />
       )}
 
+      {/* Nome da nota abaixo de cada nota — igual ao modelo de referência
+          (MuseScore), ajuda quem está aprendendo a ler a cabeça da nota. */}
+      {showPartitura && (
+        <svg
+          viewBox="0 0 800 16"
+          preserveAspectRatio="none"
+          className="w-full block"
+          style={{ height: 16 }}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {medidas.map((m, mi) => {
+            const mxStart = mi === 0 ? 0 : mi * (800 / n)
+            const mxEnd = (mi + 1) * (800 / n)
+            const mw = mxEnd - mxStart
+            const eventos = eventosDaMedida(m, tom)
+            const nc = eventos.length || 1
+            const isActive = mi === activeInRow
+
+            return eventos.map((e, ci) => {
+              const cx = mxStart + ((ci + 0.5) / nc) * mw
+              return (
+                <text
+                  key={`${mi}-${ci}`}
+                  x={cx} y={11}
+                  fontSize={8}
+                  fill={isActive ? "#a78bfa" : "#64748b"}
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                >
+                  {e.root}
+                </text>
+              )
+            })
+          })}
+        </svg>
+      )}
+
       {/* Melody TAB — single note per beat, correct string */}
       <svg
         viewBox={`0 0 800 ${TAB_H}`}
