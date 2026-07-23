@@ -140,6 +140,11 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
           const fmtW = mw - (i === 0 && isFirstRow ? 65 : 15)
           new VF.Formatter().joinVoices([voice]).format([voice], fmtW)
           voice.draw(ctx, stave)
+
+          // Agrupa colcheias/semicolcheias em feixes (sem isso cada nota rápida
+          // desenha uma bandeirola solta, ilegível — reportado pelo usuário).
+          const beams = VF.Beam.generateBeams(vexNotes)
+          beams.forEach((b) => b.setContext(ctx).draw())
         }
         x += mw
       }

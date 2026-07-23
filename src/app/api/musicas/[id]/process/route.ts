@@ -54,11 +54,18 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
         if (blocos) {
           const medidas = buildMedidasFromNumericTab(blocos)
           if (medidas) {
+            // A tablatura numérica só dá a sequência de notas, não o tom/bpm
+            // — tenta a cifra em paralelo só pra pegar esses metadados
+            // (melhor esforço: se falhar, fica no padrão "C"/90bpm).
+            const cifraMeta = await getCifraclubChords(artista, titulo).catch(() => null)
+
             await prisma.estudo.update({
               where: { id: estudo.id },
               data: {
                 status: "pronto",
                 fonte: "partitura",
+                tom: cifraMeta?.tom ?? "C",
+                bpm: cifraMeta?.bpm ?? 90,
                 compasso: "4/4",
                 tabData: { medidas, partituraUrl: indexMatch.postUrl } as unknown as Prisma.InputJsonValue,
               },
