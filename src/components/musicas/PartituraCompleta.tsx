@@ -7,8 +7,25 @@ import { chordToNotes } from "@/lib/cavaquinho-tab"
 
 const FLAT_MAP: Record<string, string> = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#" }
 const TO_SHARP: Record<string, string> = { ...FLAT_MAP }
+const SHARP_TO_FLAT: Record<string, string> = { "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb" }
 const SHARP_NOTES = new Set(["C#", "D#", "F#", "G#", "A#"])
+const FLAT_NOTES = new Set(["Db", "Eb", "Gb", "Ab", "Bb"])
 const CHROMATIC = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+// Tons que usam bemol na armadura de clave (ordem do círculo das quintas).
+// Fora daqui, assume sustenido (ou nenhum acidente, pra C/Am).
+const FLAT_KEYS = new Set([
+  "F", "Bb", "Eb", "Ab", "Db", "Gb", "Cb",
+  "Dm", "Gm", "Cm", "Fm", "Bbm", "Ebm", "Abm",
+])
+
+// Escolhe a grafia certa da nota (bemol ou sustenido) conforme o tom da
+// música — sem isso toda nota acidental saía como sustenido não importa o
+// tom, o que deixa a partitura ilegível pra quem lê (ex: Dm usa Bb, não A#).
+function spellForKey(note: string, tom: string): string {
+  if (!SHARP_NOTES.has(note)) return note
+  return FLAT_KEYS.has(tom) ? SHARP_TO_FLAT[note] ?? note : note
+}
 
 // Cavaquinho strings top→bottom in the TAB display: D5(0), B4(1), G4(2), D4(3)
 const OPEN_CHROMAS = [
@@ -33,11 +50,12 @@ function noteToMelodyTab(noteName: string): { stringIdx: number; fret: number } 
   return best
 }
 
+// Espera a nota já na grafia certa (ver spellForKey) — só monta a chave do
+// VexFlow e o acidente a desenhar, sem forçar pra sustenido.
 function noteToVexKey(note: string, octave: number) {
-  const n = FLAT_MAP[note] ?? note
-  const base = n.replace("#", "")
-  const hasSharp = SHARP_NOTES.has(n)
-  return { key: `${base.toLowerCase()}/${octave}`, accidental: hasSharp ? "#" as const : undefined }
+  const base = note.replace("#", "").replace("b", "")
+  const accidental: "#" | "b" | undefined = SHARP_NOTES.has(note) ? "#" : FLAT_NOTES.has(note) ? "b" : undefined
+  return { key: `${base.toLowerCase()}/${octave}`, accidental }
 }
 
 interface AcordeMedida { batida: number; acorde: string; duration: string; notas: string[]; tab: number[] }
@@ -49,7 +67,7 @@ type Medida =
   | { numero: number; letra: string; acordes: AcordeMedida[] }
   | { numero: number; letra: string; acordeReferencia?: string; eventos: NotaEvento[] }
 
-interface PartituraCompletaProps { medidas: Medida[]; activeMeasure: number; view: "both" | "tab"; compasso: string }
+interface PartituraCompletaProps { medidas: Medida[]; activeMeasure: number; view: "both" | "tab"; compasso: string; tom: string }
 
 // Normaliza as duas formas de medida numa lista única de "notas pra desenhar"
 // (1 nota de verdade por evento, na ordem em que devem tocar no compasso).
@@ -67,11 +85,11 @@ function acordesDaMedida(m: Medida): { acorde: string; notas: string[] }[] {
     .map((a) => ({ acorde: a.acorde, notas: a.notas }))
 }
 
-function eventosDaMedida(m: Medida): { duration: string; root: string; octave: number; string?: number; fret?: number }[] {
+function eventosDaMedida(m: Medida, tom: string): { duration: string; root: string; octave: number; string?: number; fret?: number }[] {
   if ("eventos" in m) {
-    return m.eventos.map((e) => ({ duration: e.duration, root: e.nota ?? "C", octave: e.octave ?? 4, string: e.string, fret: e.fret }))
+    return m.eventos.map((e) => ({ duration: e.duration, root: spellForKey(e.nota ?? "C", tom), octave: e.octave ?? 4, string: e.string, fret: e.fret }))
   }
-  return m.acordes.map((a) => ({ duration: a.duration, root: a.notas[0] ?? "C", octave: 4 }))
+  return m.acordes.map((a) => ({ duration: a.duration, root: spellForKey(a.notas[0] ?? "C", tom), octave: 4 }))
 }
 
 const MEASURES_PER_ROW = 4
@@ -87,9 +105,10 @@ interface RowProps {
   showPartitura: boolean
   isFirstRow: boolean
   compasso: string
+  tom: string
 }
 
-function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRow, compasso }: RowProps) {
+function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRow, compasso, tom }: RowProps) {
   const vfRef = useRef<HTMLDivElement>(null)
   const n = medidas.length
   const beatsPerMeasure = compasso === "3/4" ? 3 : 4
@@ -125,10 +144,14 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
       for (let i = 0; i < medidas.length; i++) {
         const mw = totalW / n
         const stave = new VF.Stave(x, 10, mw)
-        if (i === 0 && isFirstRow) { stave.addClef("treble"); stave.addTimeSignature(compasso) }
+        if (i === 0 && isFirstRow) {
+          stave.addClef("treble")
+          stave.addTimeSignature(compasso)
+          try { stave.addKeySignature(tom) } catch { /* tom em formato inesperado — sem armadura */ }
+        }
         stave.setContext(ctx).draw()
 
-        const vexNotes = eventosDaMedida(medidas[i]).map((e) => {
+        const vexNotes = eventosDaMedida(medidas[i], tom).map((e) => {
           const { key, accidental } = noteToVexKey(e.root, e.octave)
           const sn = new VF.StaveNote({ keys: [key], duration: e.duration || "q" })
           if (accidental) sn.addModifier(new VF.Accidental(accidental))
@@ -172,7 +195,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
     render()
     return () => { mounted = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [medidas, showPartitura, isFirstRow, compasso, n, beatsPerMeasure])
+  }, [medidas, showPartitura, isFirstRow, compasso, n, beatsPerMeasure, tom])
 
   async function handlePlayChord(notas: string[]) {
     await initSampler()
@@ -290,7 +313,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
           const mxStart = mi === 0 ? 22 : mi * (800 / n)
           const mxEnd = (mi + 1) * (800 / n)
           const mw = mxEnd - mxStart
-          const eventos = eventosDaMedida(m)
+          const eventos = eventosDaMedida(m, tom)
           const nc = eventos.length || 1
           const isActive = mi === activeInRow
 
@@ -340,7 +363,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
   )
 }
 
-export function PartituraCompleta({ medidas, activeMeasure, view, compasso }: PartituraCompletaProps) {
+export function PartituraCompleta({ medidas, activeMeasure, view, compasso, tom }: PartituraCompletaProps) {
   const rows = useMemo(() => {
     const result: Medida[][] = []
     for (let i = 0; i < medidas.length; i += MEASURES_PER_ROW) result.push(medidas.slice(i, i + MEASURES_PER_ROW))
@@ -373,6 +396,7 @@ export function PartituraCompleta({ medidas, activeMeasure, view, compasso }: Pa
               showPartitura={view === "both"}
               isFirstRow={ri === 0}
               compasso={compasso}
+              tom={tom}
             />
           </div>
         )

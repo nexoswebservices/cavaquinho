@@ -1,5 +1,5 @@
 "use client"
-import { useRef, useState, useCallback, useEffect } from "react"
+import { useRef, useState, useCallback, useEffect, useMemo } from "react"
 import { YoutubeEmbed } from "./YoutubeEmbed"
 import { PlayerControls } from "./PlayerControls"
 import { PartituraCompleta } from "./PartituraCompleta"
@@ -44,6 +44,17 @@ interface MusicaPlayerProps {
   estudo: Estudo
 }
 
+const DURATION_BEATS: Record<string, number> = { w: 4, h: 2, q: 1, "8": 0.5, "16": 0.25 }
+
+// Duração de uma medida em tempos (batidas), somando a duração real de cada
+// nota/acorde — as medidas não têm todas a mesma duração (a tablatura
+// numérica agrupa por linha impressa, não por compasso musical de verdade),
+// então não dá pra assumir "toda medida tem N tempos" na sincronização.
+function duracaoDaMedida(m: Medida): number {
+  const duracoes = "eventos" in m ? m.eventos.map((e) => e.duration) : m.acordes.map((a) => a.duration)
+  return duracoes.reduce((soma, d) => soma + (DURATION_BEATS[d] ?? 1), 0) || 1
+}
+
 export function MusicaPlayer({ estudo }: MusicaPlayerProps) {
   const ytPlayerRef = useRef<YT.Player | null>(null)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -56,7 +67,17 @@ export function MusicaPlayer({ estudo }: MusicaPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
 
   const medidas: Medida[] = estudo.tabData?.medidas ?? []
-  const beatsPerMeasure = estudo.compasso === "3/4" ? 3 : 4
+
+  // Tempo (em batidas) em que cada medida COMEÇA, acumulando a duração real
+  // de cada uma — em vez de assumir que toda medida dura o mesmo tanto.
+  const inicioDasMedidas = useMemo(() => {
+    let acumulado = 0
+    return medidas.map((m) => {
+      const inicio = acumulado
+      acumulado += duracaoDaMedida(m)
+      return inicio
+    })
+  }, [medidas])
 
   // Sync polling
   const startPolling = useCallback(() => {
@@ -66,10 +87,15 @@ export function MusicaPlayer({ estudo }: MusicaPlayerProps) {
       if (!player) return
       const t = player.getCurrentTime?.() ?? 0
       const beat = (t - introSecs) * (estudo.bpm / 60)
-      const measure = Math.max(0, Math.floor(beat / beatsPerMeasure))
-      setCurrentMeasure(measure)
+
+      let measure = -1
+      for (let i = 0; i < inicioDasMedidas.length; i++) {
+        if (beat >= inicioDasMedidas[i]) measure = i
+        else break
+      }
+      setCurrentMeasure(Math.max(0, measure))
     }, 100)
-  }, [introSecs, estudo.bpm, beatsPerMeasure])
+  }, [introSecs, estudo.bpm, inicioDasMedidas])
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
@@ -161,6 +187,7 @@ export function MusicaPlayer({ estudo }: MusicaPlayerProps) {
           activeMeasure={currentMeasure}
           view={view}
           compasso={estudo.compasso}
+          tom={estudo.tom}
         />
       </div>
 

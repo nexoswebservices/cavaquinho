@@ -95,6 +95,47 @@ export function buildMedidasFromNumericTab(blocos: MedidaTabNumerico[]): MedidaE
   return medidas.length >= 3 ? medidas : null
 }
 
+function palavrasSignificativas(s: string): string[] {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .split(/\s+/)
+    .map((w) => w.replace(/[^a-z0-9]/g, ""))
+    .filter((w) => w.length > 2)
+}
+
+// A tablatura numérica não tem cifra nenhuma (só corda+traste e letra) — pra
+// mostrar a cifra de referência acima de cada medida (crítico: sem isso o
+// aluno não tem nenhuma referência harmônica, exatamente o que o vídeo do
+// usuário mostrou como parte essencial da leitura), cruza a letra de cada
+// medida com a letra que o CifraClub associa a cada acorde, e usa o acorde
+// da linha de letra mais parecida. Medida sem letra (ex: intro instrumental)
+// fica sem cifra de referência mesmo — não inventa uma.
+export function preencherAcordeReferencia(
+  medidas: MedidaEventos[],
+  chords: ChordWithLyric[]
+): MedidaEventos[] {
+  const candidatos = chords
+    .filter((c) => c.lyric.trim().length > 0 && validarAcorde(c.chord))
+    .map((c) => ({ chord: c.chord, palavras: palavrasSignificativas(c.lyric) }))
+
+  if (candidatos.length === 0) return medidas
+
+  return medidas.map((m) => {
+    const palavrasMedida = palavrasSignificativas(m.letra)
+    if (palavrasMedida.length === 0) return m
+
+    let melhor: { chord: string; score: number } | null = null
+    for (const c of candidatos) {
+      const score = c.palavras.filter((w) => palavrasMedida.includes(w)).length
+      if (score > 0 && (!melhor || score > melhor.score)) melhor = { chord: c.chord, score: score }
+    }
+
+    return melhor ? { ...m, acordeReferencia: melhor.chord } : m
+  })
+}
+
 // Checkpoint: a nota existe e a oitava é plausível pra um cavaquinho (2–7)?
 function validarNota(nota: unknown, octave: unknown): nota is string {
   if (typeof nota !== "string" || typeof octave !== "number") return false

@@ -4,7 +4,12 @@ import { prisma } from "@/lib/db"
 import { searchPartituraIndex } from "@/lib/partitura-search"
 import { fetchPartituraImageUrls, extractTabFromPartituraImage } from "@/lib/partitura-vision"
 import { getCifraclubChords, cleanTitulo } from "@/lib/cifraclub-scraper"
-import { buildMedidasFromChordList, buildMedidasFromNumericTab, validateVisionMedidas } from "@/lib/tab-checkpoints"
+import {
+  buildMedidasFromChordList,
+  buildMedidasFromNumericTab,
+  preencherAcordeReferencia,
+  validateVisionMedidas,
+} from "@/lib/tab-checkpoints"
 import { parseNumericTabPost } from "@/lib/nandinho-numeric-tab"
 
 export const maxDuration = 60
@@ -54,10 +59,13 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
         if (blocos) {
           const medidas = buildMedidasFromNumericTab(blocos)
           if (medidas) {
-            // A tablatura numérica só dá a sequência de notas, não o tom/bpm
-            // — tenta a cifra em paralelo só pra pegar esses metadados
-            // (melhor esforço: se falhar, fica no padrão "C"/90bpm).
+            // A tablatura numérica só dá corda+traste e letra — não tem tom,
+            // bpm nem cifra nenhuma. Busca a cifra do CifraClub em paralelo
+            // só pra pegar esses metadados e preencher a cifra de referência
+            // por medida (cruzando pela letra) — sem isso o aluno não tem
+            // nenhuma referência harmônica acima do compasso.
             const cifraMeta = await getCifraclubChords(artista, titulo).catch(() => null)
+            const medidasComCifra = cifraMeta ? preencherAcordeReferencia(medidas, cifraMeta.chords) : medidas
 
             await prisma.estudo.update({
               where: { id: estudo.id },
@@ -66,8 +74,11 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
                 fonte: "partitura",
                 tom: cifraMeta?.tom ?? "C",
                 bpm: cifraMeta?.bpm ?? 90,
-                compasso: "4/4",
-                tabData: { medidas, partituraUrl: indexMatch.postUrl } as unknown as Prisma.InputJsonValue,
+                // Repertório de samba/choro pra cavaquinho (nandinhocavaco) é
+                // quase sempre em 2/4 — a fonte numérica não informa compasso
+                // nenhum, então usa esse padrão em vez de 4/4 genérico.
+                compasso: "2/4",
+                tabData: { medidas: medidasComCifra, partituraUrl: indexMatch.postUrl } as unknown as Prisma.InputJsonValue,
               },
             })
             return NextResponse.json({ status: "pronto", fonte: "partitura" })
