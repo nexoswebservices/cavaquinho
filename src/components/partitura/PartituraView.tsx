@@ -96,9 +96,9 @@ export function PartituraView({
         new VF.Formatter().joinVoices([voice]).format([voice], staveWidth - 80)
         voice.draw(context, stave)
 
-        // Agrupa colcheias/semicolcheias em feixes — sem isso cada nota rápida
-        // desenha com bandeirola solta em vez de beam, ficando ilegível.
-        const beams = VF.Beam.generateBeams(vexNotes)
+        // Agrupa colcheias/semicolcheias em feixes, quebrando por tempo (sem
+        // "groups" o VexFlow tenta beamar todas as notas numa barra só).
+        const beams = VF.Beam.generateBeams(vexNotes, { groups: [new VF.Fraction(1, 4)] })
         beams.forEach((b) => b.setContext(context).draw())
       }
     }

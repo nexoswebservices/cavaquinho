@@ -141,9 +141,11 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
           new VF.Formatter().joinVoices([voice]).format([voice], fmtW)
           voice.draw(ctx, stave)
 
-          // Agrupa colcheias/semicolcheias em feixes (sem isso cada nota rápida
-          // desenha uma bandeirola solta, ilegível — reportado pelo usuário).
-          const beams = VF.Beam.generateBeams(vexNotes)
+          // Agrupa colcheias/semicolcheias em feixes, quebrando por tempo
+          // (sem "groups" o VexFlow tenta beamar TODAS as notas do compasso
+          // numa barra só quando há muitas notas rápidas, distorcendo o
+          // desenho — reportado pelo usuário).
+          const beams = VF.Beam.generateBeams(vexNotes, { groups: [new VF.Fraction(1, 4)] })
           beams.forEach((b) => b.setContext(ctx).draw())
         }
         x += mw
