@@ -92,6 +92,16 @@ function eventosDaMedida(m: Medida, tom: string): { duration: string; root: stri
   return m.acordes.map((a) => ({ duration: a.duration, root: spellForKey(a.notas[0] ?? "C", tom), octave: 4 }))
 }
 
+// Reparte a largura disponível entre as medidas proporcionalmente à
+// quantidade de notas de cada uma — sem isso, uma medida com 2 notas e uma
+// com 9 recebiam a MESMA largura, e a de 9 ficava com notas/acidentes
+// colados/sobrepostos (reportado pelo usuário como "símbolos estranhos").
+function pesoProporcional(counts: number[], total: number, margemInicial: number, minPorMedida: number): number[] {
+  const soma = counts.reduce((a, b) => a + b, 0) || 1
+  const flexivel = Math.max(total - margemInicial - minPorMedida * counts.length, 0)
+  return counts.map((c) => minPorMedida + flexivel * (c / soma))
+}
+
 const MEASURES_PER_ROW = 4
 const STRING_GAP = 18
 const TAB_TOP = 10
@@ -114,6 +124,32 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
   const beatsPerMeasure = compasso === "3/4" ? 3 : 4
   // selectedChord: "mi-uniqueIdx" key, or null
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
+
+  // Quantidade de notas por medida — usado pra dar mais espaço horizontal
+  // às medidas com mais notas (ver pesoProporcional).
+  const eventCounts = useMemo(
+    () => medidas.map((m) => Math.max(eventosDaMedida(m, tom).length, 1)),
+    [medidas, tom]
+  )
+  // Larguras em unidades abstratas (0–800, mesmo viewBox do TAB/nomes de
+  // nota) e seus limites acumulados em %, usados tanto pra alinhar as
+  // colunas do TAB/nomes quanto pro destaque da medida ativa.
+  const largurasU = useMemo(() => pesoProporcional(eventCounts, 800, 0, 40), [eventCounts])
+  const limitesPct = useMemo(() => {
+    let acc = 0
+    const starts = largurasU.map((w) => { const s = acc; acc += w; return s })
+    return [...starts, 800].map((v) => (v / 800) * 100)
+  }, [largurasU])
+
+  // Mesma lógica pro TAB, que reserva 22 unidades à esquerda pros rótulos
+  // das cordas (D5, B4...) antes do início da 1ª medida.
+  const TAB_MARGIN = 22
+  const largurasTab = useMemo(() => pesoProporcional(eventCounts, 800 - TAB_MARGIN, 0, 40), [eventCounts])
+  const limitesTab = useMemo(() => {
+    let acc = TAB_MARGIN
+    const starts = largurasTab.map((w) => { const s = acc; acc += w; return s })
+    return [...starts, 800]
+  }, [largurasTab])
 
   // Close popup when clicking outside
   useEffect(() => {
@@ -140,9 +176,14 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
       renderer.resize(totalW, staveH)
       const ctx = renderer.getContext()
 
+      // Espaço fixo pra clave+fórmula+armadura na 1ª medida da 1ª linha, à
+      // parte da largura proporcional ao nº de notas de cada medida.
+      const CLEF_EXTRA = 65
+      const larguras = pesoProporcional(eventCounts, totalW, isFirstRow ? CLEF_EXTRA : 0, 45)
+
       let x = 0
       for (let i = 0; i < medidas.length; i++) {
-        const mw = totalW / n
+        const mw = larguras[i] + (i === 0 && isFirstRow ? CLEF_EXTRA : 0)
         const stave = new VF.Stave(x, 10, mw)
         if (i === 0 && isFirstRow) {
           stave.addClef("treble")
@@ -195,7 +236,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
     render()
     return () => { mounted = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [medidas, showPartitura, isFirstRow, compasso, n, beatsPerMeasure, tom])
+  }, [medidas, showPartitura, isFirstRow, compasso, n, beatsPerMeasure, tom, eventCounts])
 
   async function handlePlayChord(notas: string[]) {
     await initSampler()
@@ -208,8 +249,8 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
       {/* Active column highlight */}
       {activeInRow >= 0 && (
         <div className="absolute inset-0 pointer-events-none z-10" style={{
-          left: `${(activeInRow / n) * 100}%`,
-          width: `${(1 / n) * 100}%`,
+          left: `${limitesPct[activeInRow]}%`,
+          width: `${limitesPct[activeInRow + 1] - limitesPct[activeInRow]}%`,
           background: "rgba(109,40,217,0.10)",
           borderLeft: "2px solid rgba(139,92,246,0.45)",
           borderRight: "2px solid rgba(139,92,246,0.45)",
@@ -221,8 +262,11 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
         {medidas.map((m, mi) => {
           const uniqueAcordes = acordesDaMedida(m)
           return (
-            <div key={mi} className="flex-1 min-w-0 px-2 pt-1.5 pb-0.5"
-              style={{ borderRight: mi < n - 1 ? "1px solid rgba(255,255,255,0.05)" : undefined }}>
+            <div key={mi} className="min-w-0 px-2 pt-1.5 pb-0.5"
+              style={{
+                flex: `0 0 ${limitesPct[mi + 1] - limitesPct[mi]}%`,
+                borderRight: mi < n - 1 ? "1px solid rgba(255,255,255,0.05)" : undefined,
+              }}>
               <div className="flex items-center gap-1 flex-wrap">
                 <span className="text-[9px] text-slate-600 font-mono mr-0.5">M{rowStart + mi + 1}</span>
                 {uniqueAcordes.map((a, ui) => {
@@ -284,9 +328,8 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
           xmlns="http://www.w3.org/2000/svg"
         >
           {medidas.map((m, mi) => {
-            const mxStart = mi === 0 ? 0 : mi * (800 / n)
-            const mxEnd = (mi + 1) * (800 / n)
-            const mw = mxEnd - mxStart
+            const mxStart = (limitesPct[mi] / 100) * 800
+            const mw = largurasU[mi]
             const eventos = eventosDaMedida(m, tom)
             const nc = eventos.length || 1
             const isActive = mi === activeInRow
@@ -336,20 +379,16 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
         })}
 
         {/* Vertical bar lines */}
-        {Array.from({ length: n + 1 }, (_, bi) => {
-          const bx = bi === 0 ? 22 : bi * (800 / n)
-          return (
-            <line key={`b${bi}`} x1={bx} y1={TAB_TOP - 4} x2={bx}
-              y2={TAB_TOP + (NUM_STRINGS - 1) * STRING_GAP + 4}
-              stroke="#374151" strokeWidth={bi === 0 ? 2 : 0.8} />
-          )
-        })}
+        {limitesTab.map((bx, bi) => (
+          <line key={`b${bi}`} x1={bx} y1={TAB_TOP - 4} x2={bx}
+            y2={TAB_TOP + (NUM_STRINGS - 1) * STRING_GAP + 4}
+            stroke="#374151" strokeWidth={bi === 0 ? 2 : 0.8} />
+        ))}
 
         {/* Melody fret number per beat — one note na corda certa */}
         {medidas.map((m, mi) => {
-          const mxStart = mi === 0 ? 22 : mi * (800 / n)
-          const mxEnd = (mi + 1) * (800 / n)
-          const mw = mxEnd - mxStart
+          const mxStart = limitesTab[mi]
+          const mw = largurasTab[mi]
           const eventos = eventosDaMedida(m, tom)
           const nc = eventos.length || 1
           const isActive = mi === activeInRow
@@ -390,8 +429,11 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
       {/* Lyrics */}
       <div className="flex border-b border-white/5 mb-1">
         {medidas.map((m, i) => (
-          <div key={i} className="flex-1 min-w-0 px-2 pb-1.5"
-            style={{ borderRight: i < n - 1 ? "1px solid rgba(255,255,255,0.04)" : undefined }}>
+          <div key={i} className="min-w-0 px-2 pb-1.5"
+            style={{
+              flex: `0 0 ${limitesPct[i + 1] - limitesPct[i]}%`,
+              borderRight: i < n - 1 ? "1px solid rgba(255,255,255,0.04)" : undefined,
+            }}>
             {m.letra && <p className="text-[11px] text-slate-400 truncate italic leading-tight">{m.letra}</p>}
           </div>
         ))}
