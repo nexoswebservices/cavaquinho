@@ -103,6 +103,46 @@ const CHORD_INTERVALS: Record<string, number[]> = {
   sus2:    [0, 2, 7],
 }
 
+// Convenção de "corda" pra notas MELÓDICAS individuais (1=D5 mais aguda,
+// no topo do desenho da tablatura, até 4=D4 mais grave, embaixo) — mesma
+// ordem usada em STRING_LABELS/PartituraCompleta.tsx e em
+// nandinho-numeric-tab.ts. NÃO confundir com a convenção usada acima em
+// chordToTab/getFormulaFrets, que retorna um shape de acorde inteiro (as 4
+// cordas tocadas juntas) na ordem grave→aguda [D4,G4,B4,D5].
+const TUNING_MIDI_MELODIA = [74, 71, 67, 62] // corda 1(D5) .. corda 4(D4)
+
+// Acha a posição de traste mais tocável pra UMA nota melódica isolada (não
+// um acorde inteiro) — usado quando já sabemos a nota+oitava exatas (ex:
+// lidas via Vision de uma partitura de verdade) e precisamos de uma corda e
+// traste específicos pra desenhar/tocar. Prefere ficar perto da posição
+// anterior, pra gerar uma tablatura que faça sentido de mão (evita pular de
+// ponta a ponta do braço a cada nota).
+export function notaParaCordaTraste(
+  nota: string,
+  octave: number,
+  posicaoAnterior?: { string: number; fret: number }
+): { string: number; fret: number } | null {
+  const sharp = toSharp(nota)
+  const noteIdx = CHROMATIC.indexOf(sharp)
+  if (noteIdx === -1) return null
+  const targetMidi = (octave + 1) * 12 + noteIdx
+
+  const candidatos: { string: number; fret: number }[] = []
+  TUNING_MIDI_MELODIA.forEach((openMidi, i) => {
+    const fret = targetMidi - openMidi
+    if (fret >= 0 && fret <= MAX_FRET) candidatos.push({ string: i + 1, fret })
+  })
+  if (candidatos.length === 0) return null
+
+  if (!posicaoAnterior) return candidatos.sort((a, b) => a.fret - b.fret)[0]
+
+  return candidatos.sort((a, b) => {
+    const distA = Math.abs(a.fret - posicaoAnterior.fret) + (a.string !== posicaoAnterior.string ? 0.5 : 0)
+    const distB = Math.abs(b.fret - posicaoAnterior.fret) + (b.string !== posicaoAnterior.string ? 0.5 : 0)
+    return distA - distB
+  })[0]
+}
+
 // Nomes das notas que formam o acorde (ex: "Dm7" → ["D","F","A","C"]).
 // Usado pra alimentar o diagrama do braço (BracoCavaquinho), que precisa
 // das notas de verdade — não dá pra desenhar o shape a partir só do tab.

@@ -1,6 +1,6 @@
 // Checkpoints de validação de acordes/tab, compartilhados entre as fontes de
 // geração (partitura via Vision e cifra via CifraClub) na rota /process.
-import { parseChordSymbol, chordToTab, chordToNotes } from "./cavaquinho-tab"
+import { parseChordSymbol, chordToTab, chordToNotes, notaParaCordaTraste } from "./cavaquinho-tab"
 import type { ChordWithLyric } from "./cifraclub-scraper"
 import { duracaoParaQuantidade, type MedidaTabNumerico } from "./nandinho-numeric-tab"
 
@@ -95,43 +95,57 @@ export function buildMedidasFromNumericTab(blocos: MedidaTabNumerico[]): MedidaE
   return medidas.length >= 3 ? medidas : null
 }
 
-// Caminho da partitura (Vision): já vem agrupado em medidas com 1+ acordes cada.
-// Recalcula o tab de verdade (a Vision só manda placeholder) e descarta acordes
-// inválidos; medidas que ficarem sem nenhum acorde válido são removidas.
-export function validateVisionMedidas(raw: unknown): Medida[] | null {
-  if (!raw || typeof raw !== "object" || !Array.isArray((raw as { medidas?: unknown }).medidas)) {
-    return null
-  }
+// Checkpoint: a nota existe e a oitava é plausível pra um cavaquinho (2–7)?
+function validarNota(nota: unknown, octave: unknown): nota is string {
+  if (typeof nota !== "string" || typeof octave !== "number") return false
+  if (!/^[A-G][#b]?$/.test(nota)) return false
+  return octave >= 2 && octave <= 7
+}
+
+// Caminho da partitura via Vision lendo o pentagrama de verdade: cada medida
+// já vem como sequência de notas reais (não placeholders). Valida cada nota
+// e calcula a posição de corda/traste tocável (a Vision só lê pitch+duração,
+// não sabe de tablatura), preferindo ficar perto da nota anterior pra gerar
+// uma tab que faça sentido de mão. Descarta notas inválidas; medidas sem
+// nenhuma nota válida são removidas. A cifra de referência (se houver) só é
+// mantida se for um símbolo reconhecido — senão vira só uma medida sem rótulo,
+// não descarta as notas.
+export function validateVisionMedidas(raw: unknown): MedidaEventos[] | null {
+  if (!raw || typeof raw !== "object" || raw === null) return null
+  if ((raw as { temPartitura?: boolean }).temPartitura === false) return null
+  if (!Array.isArray((raw as { medidas?: unknown }).medidas)) return null
 
   const medidasRaw = (raw as { medidas: unknown[] }).medidas
+  let posicaoAnterior: { string: number; fret: number } | undefined
 
   const medidas = medidasRaw
-    .map((m, i) => {
+    .map((m, i): MedidaEventos | null => {
       if (!m || typeof m !== "object") return null
-      const medida = m as { letra?: string; acordes?: unknown[] }
-      const acordesRaw = Array.isArray(medida.acordes) ? medida.acordes : []
+      const medida = m as { letra?: string; acordeReferencia?: string; eventos?: unknown[] }
+      const eventosRaw = Array.isArray(medida.eventos) ? medida.eventos : []
 
-      const acordes = acordesRaw
-        .map((a): AcordeMedida | null => {
-          if (!a || typeof a !== "object") return null
-          const ac = a as { batida?: number; acorde?: string; duration?: string }
-          if (!ac.acorde) return null
-          const tab = acordeParaTab(ac.acorde)
-          if (!tab) return null
-          return {
-            batida: ac.batida ?? 1,
-            acorde: ac.acorde,
-            duration: ac.duration ?? "w",
-            notas: chordToNotes(ac.acorde),
-            tab,
-          }
+      const eventos = eventosRaw
+        .map((e): NotaEvento | null => {
+          if (!e || typeof e !== "object") return null
+          const ev = e as { nota?: string; octave?: number; duration?: string }
+          if (!validarNota(ev.nota, ev.octave)) return null
+          const pos = notaParaCordaTraste(ev.nota, ev.octave as number, posicaoAnterior)
+          if (!pos) return null
+          posicaoAnterior = pos
+          return { duration: ev.duration ?? "q", nota: ev.nota, octave: ev.octave, string: pos.string, fret: pos.fret }
         })
-        .filter((a): a is AcordeMedida => a !== null)
+        .filter((e): e is NotaEvento => e !== null)
 
-      if (acordes.length === 0) return null
-      return { numero: i + 1, letra: medida.letra ?? "", acordes } as Medida
+      if (eventos.length === 0) return null
+
+      const acordeReferencia =
+        typeof medida.acordeReferencia === "string" && validarAcorde(medida.acordeReferencia)
+          ? medida.acordeReferencia
+          : undefined
+
+      return { numero: i + 1, letra: medida.letra ?? "", acordeReferencia, eventos }
     })
-    .filter((m): m is Medida => m !== null)
+    .filter((m): m is MedidaEventos => m !== null)
 
   return medidas.length >= 4 ? medidas : null
 }
