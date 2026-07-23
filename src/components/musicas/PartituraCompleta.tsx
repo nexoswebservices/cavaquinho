@@ -314,7 +314,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
 
       {/* VexFlow partitura */}
       {showPartitura && (
-        <div ref={vfRef} className="w-full" style={{ minHeight: 110 }} />
+        <div ref={vfRef} className="w-full select-none" style={{ minHeight: 110, userSelect: "none" }} />
       )}
 
       {/* Nome da nota abaixo de cada nota — igual ao modelo de referência
@@ -323,8 +323,8 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
         <svg
           viewBox="0 0 800 16"
           preserveAspectRatio="none"
-          className="w-full block"
-          style={{ height: 16 }}
+          className="w-full block select-none"
+          style={{ height: 16, userSelect: "none" }}
           xmlns="http://www.w3.org/2000/svg"
         >
           {medidas.map((m, mi) => {
@@ -357,8 +357,8 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
       <svg
         viewBox={`0 0 800 ${TAB_H}`}
         preserveAspectRatio="none"
-        className="w-full block"
-        style={{ height: TAB_H * 1.1 }}
+        className="w-full block select-none"
+        style={{ height: TAB_H * 1.1, userSelect: "none" }}
         xmlns="http://www.w3.org/2000/svg"
       >
         {/* TAB label */}
