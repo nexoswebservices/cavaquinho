@@ -12,11 +12,21 @@ interface AcordeMedida {
   tab: number[]
 }
 
-interface Medida {
-  numero: number
-  letra: string
-  acordes: AcordeMedida[]
+interface NotaEvento {
+  duration: string
+  nota?: string
+  octave?: number
+  string?: number
+  fret?: number
 }
+
+// Medida "de cifra" (CifraClub/fallback): 1 shape de acorde batido por medida.
+// Medida "de partitura": sequência de notas reais (eventos), lidas de verdade
+// — nunca as duas coisas juntas na mesma música (uma música inteira é gerada
+// por UMA fonte só).
+type Medida =
+  | { numero: number; letra: string; acordes: AcordeMedida[] }
+  | { numero: number; letra: string; acordeReferencia?: string; eventos: NotaEvento[] }
 
 interface Estudo {
   id: string

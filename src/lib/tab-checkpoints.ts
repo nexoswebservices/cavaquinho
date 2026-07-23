@@ -2,6 +2,7 @@
 // geração (partitura via Vision e cifra via CifraClub) na rota /process.
 import { parseChordSymbol, chordToTab, chordToNotes } from "./cavaquinho-tab"
 import type { ChordWithLyric } from "./cifraclub-scraper"
+import { duracaoParaQuantidade, type MedidaTabNumerico } from "./nandinho-numeric-tab"
 
 export interface AcordeMedida {
   batida: number
@@ -11,10 +12,32 @@ export interface AcordeMedida {
   tab: number[]
 }
 
+// Medida "de cifra": um shape de acorde batido por medida — usado quando a
+// fonte é CifraClub/Cifras.com.br (nunca finge ler melodia de verdade).
 export interface Medida {
   numero: number
   letra: string
   acordes: AcordeMedida[]
+}
+
+// Nota individual de uma medida "de partitura" — leitura nota-a-nota de
+// verdade (via tablatura numérica de texto do nandinhocavaco, ou futuramente
+// via Vision lendo o pentagrama), não um shape de acorde inteiro.
+export interface NotaEvento {
+  duration: string
+  nota?: string
+  octave?: number
+  string?: number
+  fret?: number
+}
+
+// Medida "de partitura": sequência de notas reais + uma cifra de referência
+// opcional (rótulo harmônico, não uma instrução de "toque este shape aqui").
+export interface MedidaEventos {
+  numero: number
+  letra: string
+  acordeReferencia?: string
+  eventos: NotaEvento[]
 }
 
 // Checkpoint: o acorde existe no dicionário de fórmulas?
@@ -47,6 +70,28 @@ export function buildMedidasFromChordList(chords: ChordWithLyric[]): Medida[] | 
     })
     .filter((m): m is Medida => m !== null)
 
+  return medidas.length >= 3 ? medidas : null
+}
+
+// Caminho da partitura via tablatura numérica de texto (nandinhocavaco,
+// posts "solo"): já são notas de verdade, sem chance de alucinação — só
+// precisa virar o formato de Medida e escolher uma duração aproximada por
+// nota (a fonte numérica não informa ritmo, só a sequência de alturas).
+export function buildMedidasFromNumericTab(blocos: MedidaTabNumerico[]): MedidaEventos[] | null {
+  const medidas: MedidaEventos[] = blocos.map((bloco, i) => {
+    const duration = duracaoParaQuantidade(bloco.eventos.length)
+    return {
+      numero: i + 1,
+      letra: bloco.letra,
+      eventos: bloco.eventos.map((e) => ({
+        duration,
+        nota: e.nota,
+        octave: e.octave,
+        string: e.string,
+        fret: e.fret,
+      })),
+    }
+  })
   return medidas.length >= 3 ? medidas : null
 }
 

@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db"
 import { searchPartituraIndex } from "@/lib/partitura-search"
 import { fetchPartituraImageUrls, extractTabFromPartituraImage } from "@/lib/partitura-vision"
 import { getCifraclubChords, cleanTitulo } from "@/lib/cifraclub-scraper"
-import { buildMedidasFromChordList, validateVisionMedidas } from "@/lib/tab-checkpoints"
+import { buildMedidasFromChordList, buildMedidasFromNumericTab, validateVisionMedidas } from "@/lib/tab-checkpoints"
+import { parseNumericTabPost } from "@/lib/nandinho-numeric-tab"
 
 export const maxDuration = 60
 
@@ -38,6 +39,36 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
     const indexMatch = await searchPartituraIndex(tituloMusica, artista)
 
     if (indexMatch) {
+      // 1a) Alguns posts do nandinhocavaco (arranjos "solo") trazem a
+      // transcrição como tablatura numérica em texto puro — corda+traste
+      // por nota, sem imagem de pauta nenhuma. Isso é 100% determinístico
+      // (zero risco de a Vision inventar acordes numa foto que não é
+      // partitura, como aconteceu com "As Rosas Não Falam"), então tenta
+      // isso ANTES de qualquer chamada à Vision.
+      const postHtml = await fetch(indexMatch.postUrl, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; CavaquinhoBot/1.0)" },
+      }).then((r) => (r.ok ? r.text() : null)).catch(() => null)
+
+      if (postHtml) {
+        const blocos = parseNumericTabPost(postHtml)
+        if (blocos) {
+          const medidas = buildMedidasFromNumericTab(blocos)
+          if (medidas) {
+            await prisma.estudo.update({
+              where: { id: estudo.id },
+              data: {
+                status: "pronto",
+                fonte: "partitura",
+                compasso: "4/4",
+                tabData: { medidas, partituraUrl: indexMatch.postUrl } as unknown as Prisma.InputJsonValue,
+              },
+            })
+            return NextResponse.json({ status: "pronto", fonte: "partitura" })
+          }
+        }
+      }
+
+      // 1b) Sem tablatura numérica em texto: tenta ler a imagem via Vision.
       const imageUrls = await fetchPartituraImageUrls(indexMatch.postUrl)
       const candidatos = imageUrls.slice(0, 4)
 

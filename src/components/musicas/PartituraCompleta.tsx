@@ -3,6 +3,7 @@
 import { useEffect, useRef, useMemo, useState } from "react"
 import { BracoCavaquinho } from "@/components/progressoes/BracoCavaquinho"
 import { initSampler, playChord } from "@/lib/sampler"
+import { chordToNotes } from "@/lib/cavaquinho-tab"
 
 const FLAT_MAP: Record<string, string> = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#" }
 const TO_SHARP: Record<string, string> = { ...FLAT_MAP }
@@ -40,8 +41,38 @@ function noteToVexKey(note: string, octave: number) {
 }
 
 interface AcordeMedida { batida: number; acorde: string; duration: string; notas: string[]; tab: number[] }
-interface Medida { numero: number; letra: string; acordes: AcordeMedida[] }
+interface NotaEvento { duration: string; nota?: string; octave?: number; string?: number; fret?: number }
+
+// Medida "de cifra": 1 shape de acorde batido por medida (fallback CifraClub).
+// Medida "de partitura": sequência de notas reais lidas de verdade.
+type Medida =
+  | { numero: number; letra: string; acordes: AcordeMedida[] }
+  | { numero: number; letra: string; acordeReferencia?: string; eventos: NotaEvento[] }
+
 interface PartituraCompletaProps { medidas: Medida[]; activeMeasure: number; view: "both" | "tab"; compasso: string }
+
+// Normaliza as duas formas de medida numa lista única de "notas pra desenhar"
+// (1 nota de verdade por evento, na ordem em que devem tocar no compasso).
+// Pra medida de cifra, usa a fundamental do acorde como substituta (não há
+// melodia de verdade nesse caminho — é só uma referência visual do shape).
+// Rótulo(s) de cifra clicáveis (abre BracoCavaquinho) pra mostrar acima da
+// medida. Cifra: cada acorde da medida. Partitura: só a cifra de referência,
+// se houver — é uma anotação, não a fonte da nota desenhada no pentagrama.
+function acordesDaMedida(m: Medida): { acorde: string; notas: string[] }[] {
+  if ("eventos" in m) {
+    return m.acordeReferencia ? [{ acorde: m.acordeReferencia, notas: chordToNotes(m.acordeReferencia) }] : []
+  }
+  return m.acordes
+    .filter((a, ci) => ci === 0 || a.acorde !== m.acordes[ci - 1].acorde)
+    .map((a) => ({ acorde: a.acorde, notas: a.notas }))
+}
+
+function eventosDaMedida(m: Medida): { duration: string; root: string; octave: number; string?: number; fret?: number }[] {
+  if ("eventos" in m) {
+    return m.eventos.map((e) => ({ duration: e.duration, root: e.nota ?? "C", octave: e.octave ?? 4, string: e.string, fret: e.fret }))
+  }
+  return m.acordes.map((a) => ({ duration: a.duration, root: a.notas[0] ?? "C", octave: 4 }))
+}
 
 const MEASURES_PER_ROW = 4
 const STRING_GAP = 18
@@ -97,10 +128,9 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
         if (i === 0 && isFirstRow) { stave.addClef("treble"); stave.addTimeSignature(compasso) }
         stave.setContext(ctx).draw()
 
-        const vexNotes = medidas[i].acordes.map((a) => {
-          const root = a.notas[0] ?? "C"
-          const { key, accidental } = noteToVexKey(root, 4)
-          const sn = new VF.StaveNote({ keys: [key], duration: a.duration || "q" })
+        const vexNotes = eventosDaMedida(medidas[i]).map((e) => {
+          const { key, accidental } = noteToVexKey(e.root, e.octave)
+          const sn = new VF.StaveNote({ keys: [key], duration: e.duration || "q" })
           if (accidental) sn.addModifier(new VF.Accidental(accidental))
           return sn
         })
@@ -159,9 +189,7 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
       {/* Chord names — deduplicated consecutive repeats */}
       <div className="flex border-t border-white/5">
         {medidas.map((m, mi) => {
-          const uniqueAcordes = m.acordes.filter(
-            (a, ci) => ci === 0 || a.acorde !== m.acordes[ci - 1].acorde
-          )
+          const uniqueAcordes = acordesDaMedida(m)
           return (
             <div key={mi} className="flex-1 min-w-0 px-2 pt-1.5 pb-0.5"
               style={{ borderRight: mi < n - 1 ? "1px solid rgba(255,255,255,0.05)" : undefined }}>
@@ -250,18 +278,23 @@ function PartituraRow({ medidas, rowStart, activeInRow, showPartitura, isFirstRo
           )
         })}
 
-        {/* Melody fret number per chord beat — one note on the right string */}
+        {/* Melody fret number per beat — one note na corda certa */}
         {medidas.map((m, mi) => {
           const mxStart = mi === 0 ? 22 : mi * (800 / n)
           const mxEnd = (mi + 1) * (800 / n)
           const mw = mxEnd - mxStart
-          const nc = m.acordes.length || 1
+          const eventos = eventosDaMedida(m)
+          const nc = eventos.length || 1
           const isActive = mi === activeInRow
 
-          return m.acordes.map((a, ci) => {
+          return eventos.map((e, ci) => {
             const cx = mxStart + ((ci + 0.5) / nc) * mw
-            const root = a.notas[0] ?? "C"
-            const pos = noteToMelodyTab(root)
+            // Usa a corda/traste de verdade quando já veio da fonte (tablatura
+            // numérica); senão calcula a posição mais tocável a partir da nota.
+            const pos =
+              e.string && e.fret !== undefined
+                ? { stringIdx: e.string - 1, fret: e.fret }
+                : noteToMelodyTab(e.root)
             if (!pos) return null
 
             const y = TAB_TOP + pos.stringIdx * STRING_GAP
