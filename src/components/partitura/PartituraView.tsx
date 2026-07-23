@@ -96,9 +96,11 @@ export function PartituraView({
         new VF.Formatter().joinVoices([voice]).format([voice], staveWidth - 80)
         voice.draw(context, stave)
 
-        // Agrupa colcheias/semicolcheias em feixes, quebrando por tempo (sem
-        // "groups" o VexFlow tenta beamar todas as notas numa barra só).
-        const beams = VF.Beam.generateBeams(vexNotes, { groups: [new VF.Fraction(1, 4)] })
+        // Agrupa colcheias/semicolcheias em feixes. Esse componente é usado
+        // pra frases curtas (não compassos reais — a "voice" tem numBeats =
+        // qtd de notas, não um compasso de verdade), então deixa o VexFlow
+        // decidir os grupos em vez de forçar por tempo como em Músicas.
+        const beams = VF.Beam.generateBeams(vexNotes)
         beams.forEach((b) => b.setContext(context).draw())
       }
     }
